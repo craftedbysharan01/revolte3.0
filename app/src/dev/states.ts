@@ -1,19 +1,32 @@
 import { Route, Prototype } from '../store'
 import { DEFAULT_PROMPT } from '../screens/Website'
+import { CHAT_PRESETS } from '../chat/presets'
+import { getState } from '../store'
 
 export type StateDef = {
   id: string
   label: string
   route: Route
-  patch?: Partial<Prototype>
+  patch?: Partial<Prototype> | (() => Partial<Prototype>)
 }
 
 export type Group = { title: string; states: StateDef[] }
 
-const S = (id: string, label: string, route: Route, patch?: Partial<Prototype>): StateDef => ({ id, label, route, patch })
+const S = (id: string, label: string, route: Route, patch?: StateDef['patch']): StateDef => ({ id, label, route, patch })
 
 /** A previewable workspace/app session so those screens render when jumped to directly. */
 const withSession = { session: { email: 'james@acmecorp.com' } }
+
+const withPrompt = { ...withSession, savedPrompt: DEFAULT_PROMPT }
+
+function chatState(p: (typeof CHAT_PRESETS)[number]): StateDef {
+  return S(p.id, p.label, p.route ?? 'chat', () => {
+    const c = p.build()
+    // Each state sets the plan limits it needs, so jumping between states never inherits a limit.
+    const net = { ...getState().net, noCredits: !!p.net?.noCredits, noHours: !!p.net?.noHours }
+    return { ...withSession, chats: [c], activeChat: p.route === 'app' ? null : c.id, net, appDialog: false, ...p.extra }
+  })
+}
 
 /** Every onboarding state in the Figma file (page 01 Onboarding), grouped as in the file. */
 export const GROUPS: Group[] = [
@@ -95,8 +108,8 @@ export const GROUPS: Group[] = [
       S('W09', 'Free plan member limit', 'workspace', withSession),
       S('W10', 'Creating workspace', 'workspace', withSession),
       S('W11', 'Workspace not created', 'workspace', withSession),
-      S('W12', 'Creating your workspace', 'workspace', withSession),
-      S('W13', 'Workspace ready', 'workspace', withSession),
+      S('W12', 'Creating your workspace', 'workspace', withPrompt),
+      S('W13', 'Workspace ready', 'workspace', withPrompt),
     ],
   },
   {
@@ -112,5 +125,13 @@ export const GROUPS: Group[] = [
       S('GS-F08', 'All steps done', 'app', withSession),
       S('GS-F09', 'After setup: gone from sidebar', 'app', withSession),
     ],
+  },
+  {
+    title: '09–10 · Chat, sandbox, code and files',
+    states: CHAT_PRESETS.filter((p) => !p.id.startsWith('EC') && !p.id.startsWith('MS')).map(chatState),
+  },
+  {
+    title: '24 · Edge cases: chat',
+    states: CHAT_PRESETS.filter((p) => p.id.startsWith('EC') || p.id.startsWith('MS')).map(chatState),
   },
 ]

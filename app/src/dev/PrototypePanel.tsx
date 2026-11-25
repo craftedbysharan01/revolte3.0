@@ -36,7 +36,23 @@ export function PrototypePanel() {
             </label>
             <label className="toggle">
               <input type="checkbox" checked={net.failGithub} onChange={() => flip('failGithub')} />
-              GitHub connect fails (Get started)
+              GitHub connect fails (Get started, chat)
+            </label>
+<label className="toggle">
+              <input type="checkbox" checked={net.failTests} onChange={() => flip('failTests')} />
+              Tests keep failing (3 attempts, then you choose)
+            </label>
+            <label className="toggle">
+              <input type="checkbox" checked={net.failSandbox} onChange={() => flip('failSandbox')} />
+              Sandbox does not start
+            </label>
+            <label className="toggle">
+              <input type="checkbox" checked={net.noCredits} onChange={() => flip('noCredits')} />
+              Out of credits mid-run
+            </label>
+            <label className="toggle">
+              <input type="checkbox" checked={!!net.noHours} onChange={() => flip('noHours')} />
+              Sandbox hours used up
             </label>
           </section>
 
@@ -95,7 +111,7 @@ export function PrototypePanel() {
                     className="state"
                     onClick={() => {
                       // route guard bypass: presets render design states directly
-                      go(st.route, { preset: st.id, patch: st.patch })
+                      go(st.route, { preset: st.id, patch: typeof st.patch === 'function' ? st.patch() : st.patch })
                     }}
                   >
                     <code>{st.id}</code>

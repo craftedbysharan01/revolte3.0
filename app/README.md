@@ -36,7 +36,36 @@ Click **Prototype** (bottom right) to:
 - `src/dev/*` the prototype panel and the state table
 - `public/assets` logo, submark, spinner, auth grid (exported from Figma)
 
+## Chat flow (Figma page 02 · Chat and sandbox)
+
+A request from the website lands **directly in the chat** after workspace setup (Figma C01); starting from the home screen (N01) opens the same chat.
+The chat is two panes: the conversation on the left, the session pane on the right (Overview, Sandbox, Code changes, Files, Workflow).
+
+1. **Grill**: Revolte reads the request, starts the sandbox, then asks 3 questions (recommended answers pre-selected, Skip, own answer).
+2. **Plan**: approve, or request changes (the plan is revised). **View plan** opens Plan.md.
+3. **Tasks / Build**: live task list and edits. Stop, Resume, and queue a message while it runs.
+4. **Verify**: lint, tests, Prettier. A failing test retries automatically (retry 2 of 3); after 3 failures you choose how to continue.
+5. **Sandbox ready**: preview in the Sandbox tab (draggable divider, 35%–70%), Code changes, Files.
+6. **GitHub and PR**: Connect GitHub (dialog, token option) → Commit and push → Create PR → draft PR opened + Workflow studio card.
+
+Prototype panel: switches for **tests keep failing**, **sandbox does not start**, **out of credits**, **network offline**, **GitHub connect fails**, and the Figma states
+C01–C21, C27, R01–R14 (section 09–10) as jumpable ids. Chats persist in localStorage; a run that was mid-flight on reload comes back as Stopped.
+
+Code: `src/chat/engine.ts` (mock agent), `src/chat/ChatView.tsx` (conversation), `src/chat/RightPane.tsx` (session pane, GitHub dialog, PR),
+`src/chat/Home.tsx` (new chat), `src/chat/presets.ts` (Figma states).
+
+## Edge cases (Figma section 24)
+
+Built: Manual mode review queue (EC01-EC04, Allow / Deny, switching to Auto releases the queue), background tasks (EC05, EC06, EC08), sandbox hours used up
+(EC09-EC11b, switch in the Prototype panel), Choose application (EC12-EC16, also from Create application in the sidebar), sidebar status marks and collapsed
+project summary (EC18-EC20), model switched mid-chat (MS01-MS02). A request from the website opens its chat however you arrive (sign up, GitHub, sign in).
+
+## UI stack
+
+New screens use **shadcn/ui** (`src/components/ui`, Radix + Tailwind v4) and **Solar** icons (`src/components/solar.tsx`: Linear by default, Bold when active),
+as the Revolte Design System 3.0 specifies. Tailwind runs without preflight so the onboarding screens (plain CSS) are unchanged; the `rv` class scopes the few resets shadcn needs.
+
 ## Not in this prototype
 
-Website sections below the hero, the real Chat / Sandbox modules (the shell behind Get started is
-a placeholder), upgrade flow, and Create application / Jira / Run workflow steps (they mark done).
+Website sections below the hero, upgrade / buy credits flow, Create application dialogs (C15d–n), the existing-user plan-to-workflow
+screens (H01–H13), Plan.md side panel (OV01–02), EC07 / EC13 states that need an open menu, and the New chat pickers N05–N25 beyond a basic Agent / mode / model menu.

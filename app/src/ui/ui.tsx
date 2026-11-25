@@ -288,7 +288,9 @@ export function OtpInput({
       {digits.map((d, i) => (
         <input
           key={i}
-          ref={(el) => (refs.current[i] = el)}
+          ref={(el) => {
+            refs.current[i] = el
+          }}
           className={`otp-box ${state}`}
           inputMode="numeric"
           autoComplete={i === 0 ? 'one-time-code' : 'off'}

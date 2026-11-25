@@ -1,0 +1,138 @@
+/* Tailwind for the shadcn/ui screens. Preflight is intentionally left out so the
+   onboarding screens (plain CSS) are untouched; `.rv` scopes the few resets shadcn expects. */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* shadcn semantic tokens -> Revolte Design System 3.0 variables (defined in styles.css) */
+@theme inline {
+  --font-sans: 'Host Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-disabled-foreground: var(--disabled-foreground);
+  --color-accent: var(--selected);
+  --color-accent-foreground: var(--foreground);
+  --color-selected: var(--selected);
+  --color-destructive: var(--danger-solid);
+  --color-destructive-foreground: #ffffff;
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-sm: 13px;
+  --text-sm--line-height: 18px;
+  --text-base: 14px;
+  --text-base--line-height: 22px;
+}
+
+@layer base {
+  .rv *,
+  .rv *::before,
+  .rv *::after {
+    border-color: var(--border-subtle);
+    border-style: solid;
+    border-width: 0;
+  }
+  .rv {
+    font-family: var(--font-sans);
+  }
+  .rv :where(h1, h2, h3, h4, h5, h6, p, ul, ol, dl, dd, figure, pre, blockquote) {
+    margin: 0;
+  }
+  .rv :where(ul, ol) {
+    list-style: none;
+    padding: 0;
+  }
+  .rv :where(table) {
+    border-collapse: collapse;
+    text-indent: 0;
+  }
+  .rv :where(h1, h2, h3, h4, h5, h6) {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+  .rv :where(th) {
+    font-weight: inherit;
+  }
+  .rv :where(small) {
+    font-size: inherit;
+  }
+  .rv :where(input, textarea, select) {
+    margin: 0;
+  }
+  .rv button {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+  .rv textarea,
+  .rv input {
+    font: inherit;
+    color: inherit;
+  }
+  .rv button:disabled {
+    cursor: default;
+  }
+  .rv svg {
+    flex: none;
+  }
+
+}
+
+@keyframes pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes rvfade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* A light that drifts across live text, left to right. Quiet enough that you only notice it if you look. */
+.shimmer {
+  --sh-base: #8e8e95;
+  --sh-hi: #f1f0ed;
+  color: transparent;
+  background-image: linear-gradient(100deg, var(--sh-base) 38%, var(--sh-hi) 50%, var(--sh-base) 62%);
+  background-size: 320% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer 3.2s linear infinite;
+}
+.shimmer-strong { --sh-base: #cfcfd3; --sh-hi: #ffffff; }
+@keyframes shimmer { to { background-position: 0% 0; } }
+@media (prefers-reduced-motion: reduce) { .shimmer { animation: none; color: var(--sh-base); background: none; } }
+
+@keyframes grow { from { width: 0; } }

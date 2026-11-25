@@ -151,6 +151,17 @@ const P: Record<string, ReactNode> = {
     </>
   ),
   shield: <path d="M12 3 5 6v5.5c0 4.3 2.8 7.5 7 9.5 4.2-2 7-5.2 7-9.5V6l-7-3Z" />,
+  stop: <rect x="7" y="7" width="10" height="10" rx="2.2" fill="currentColor" />,
+  play: <path d="M8 5.5v13l10-6.5-10-6.5Z" />,
+  external: <path d="M14 5h5v5M19 5l-8 8M17 14v3.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 5 17.5v-9A1.5 1.5 0 0 1 6.5 7H10" />,
+  branch: (
+    <>
+      <circle cx="7" cy="5.5" r="2" />
+      <circle cx="7" cy="18.5" r="2" />
+      <circle cx="17" cy="9" r="2" />
+      <path d="M7 7.5v9M17 11c0 3-3 3.5-10 5.5" />
+    </>
+  ),
 }
 
 export type IconName = keyof typeof P

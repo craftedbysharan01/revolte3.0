@@ -1,28 +1,23 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { connectGithub } from '../api'
-import { GetStartedStep, StepStatus, freshGetStarted, setState, useStore } from '../store'
-import { Icon, IconName } from '../ui/Icon'
-import { Button, Logo, Toast } from '../ui/ui'
+import { ChatView } from '@/chat/ChatView'
+import { Home } from '@/chat/Home'
+import { AppDialog } from '@/chat/AppDialog'
+import { BackgroundTasks, RightPane } from '@/chat/RightPane'
+import { Sidebar } from '@/chat/Sidebar'
+import { createChat, getChat, setTab } from '@/chat/engine'
+import { Icon } from '@/components/solar'
+import { Button } from '@/components/ui/button'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { cn } from '@/lib/utils'
+import { GetStartedStep, StepStatus, freshGetStarted, go, setState, useStore } from '../store'
+import { Spinner, Toast } from '../ui/ui'
 
 const STEPS: { id: GetStartedStep; title: string; desc: string; act: string; skippable: boolean; needs?: [GetStartedStep, string] }[] = [
   { id: 'github', title: 'Connect GitHub', desc: 'Let Revolte read and push to your repositories.', act: 'Connect', skippable: true },
-  {
-    id: 'app',
-    title: 'Create an application',
-    desc: 'Build and deploy a repo with Revolte.',
-    act: 'Create',
-    skippable: true,
-    needs: ['github', 'Connect GitHub first. An application needs a repository.'],
-  },
+  { id: 'app', title: 'Create an application', desc: 'Build and deploy a repo with Revolte.', act: 'Create', skippable: true, needs: ['github', 'Connect GitHub first. An application needs a repository.'] },
   { id: 'jira', title: 'Link a Jira project', desc: 'Add Jira context to every chat.', act: 'Link', skippable: true },
-  {
-    id: 'workflow',
-    title: 'Run a workflow',
-    desc: 'Plan, build and review changes with agents.',
-    act: 'Run',
-    skippable: false,
-    needs: ['app', 'Create an application first.'],
-  },
+  { id: 'workflow', title: 'Run a workflow', desc: 'Plan, build and review changes with agents.', act: 'Run', skippable: false, needs: ['app', 'Create an application first.'] },
 ]
 
 /** Preset states for GS-F01…F09, applied once on mount. */
@@ -32,25 +27,13 @@ function applyPreset(preset: string | null): { failed: GetStartedStep | null } {
   const st = g.status
   let failed: GetStartedStep | null = null
   switch (preset) {
-    case 'GS-F02':
-      g.open = false
-      break
-    case 'GS-F03':
-      st.github = 'done'
-      break
+    case 'GS-F02': g.open = false; break
+    case 'GS-F03': st.github = 'done'; break
     case 'GS-F04':
-    case 'GS-F05':
-      st.github = 'skipped'
-      break
-    case 'GS-F06':
-      failed = 'github'
-      break
-    case 'GS-F07':
-      st.github = st.app = st.jira = 'done'
-      break
-    case 'GS-F08':
-      st.github = st.app = st.jira = st.workflow = 'done'
-      break
+    case 'GS-F05': st.github = 'skipped'; break
+    case 'GS-F06': failed = 'github'; break
+    case 'GS-F07': st.github = st.app = st.jira = 'done'; break
+    case 'GS-F08': st.github = st.app = st.jira = st.workflow = 'done'; break
     case 'GS-F09':
       st.github = st.app = st.jira = st.workflow = 'done'
       g.open = false
@@ -61,38 +44,87 @@ function applyPreset(preset: string | null): { failed: GetStartedStep | null } {
   return { failed }
 }
 
-const NAV: [IconName, string][] = [
-  ['edit', 'New chat'],
-  ['cube', 'Create application'],
-  ['folder', 'Projects'],
-  ['doc', 'Context'],
-  ['plug', 'Integrations'],
-  ['model', 'Models'],
-  ['bot', 'Agents'],
-  ['server', 'Environments'],
-]
+/** Toggle that sits in a pane header, so it never floats over the title. */
+function PaneToggle({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button aria-label={label} title={label} className="grid size-8 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-selected hover:text-foreground" onClick={onClick}>
+      <Icon name="sidebar" size={16} />
+    </button>
+  )
+}
 
-const CHIPS: [IconName, string, string][] = [
-  ['shield', 'Build an auth feature', 'Build an auth feature with email and OAuth sign in, sessions, and password reset.'],
-  ['code', 'Fix an API 500 error', 'Find and fix the cause of the intermittent 500 on POST /api/orders.'],
-  ['refresh', 'Migrate a .NET service', 'Migrate our .NET Framework 4.8 billing service to .NET 8 and prove nothing broke.'],
-  ['database', 'Speed up slow queries', 'Find the slowest queries in production and speed them up without changing behavior.'],
-]
+/**
+ * Design System "Resize handle" (shadcn ResizableHandle withHandle): a 1px line that thickens on hover and shows a
+ * small grip; drag to resize, double-click to reset. Min widths: chat 360px, Preview 40%, Code changes 50%.
+ */
+function ChatScreen({ id, onNote, sidebarShut, openSidebar }: { id: string; onNote: (s: string) => void; sidebarShut: boolean; openSidebar: () => void }) {
+  const c = useStore((s) => s.chats.find((x) => x.id === id))
+  const box = useRef<HTMLDivElement>(null)
+  const [pct, setPct] = useState(0.5)
+  const [px, setPx] = useState(380)
+  const [drag, setDrag] = useState(false)
+  if (!c) return null
+  const wide = c.tab === 'sandbox' || c.tab === 'code'
+  const minPct = c.tab === 'code' ? 0.5 : 0.4
+  const onMove = (e: PointerEvent) => {
+    if (!drag || !box.current) return
+    const r = box.current.getBoundingClientRect()
+    const w = r.right - e.clientX
+    const maxW = r.width - 360
+    if (wide) setPct(Math.min(maxW / r.width, Math.max(minPct, w / r.width)))
+    else setPx(Math.min(maxW, Math.max(320, w)))
+  }
+  const reset = () => (wide ? setPct(0.5) : setPx(380))
+  const lead = sidebarShut ? <PaneToggle label="Show sidebar" onClick={openSidebar} /> : null
+  return (
+    <div ref={box} className={cn('flex min-h-0 flex-1', drag && 'cursor-col-resize select-none')} onPointerMove={onMove} onPointerUp={() => setDrag(false)}>
+      <div className="flex min-w-[360px] flex-1">
+        <ChatView c={c} lead={lead} onNote={onNote} onDeploy={() => (getChat(c.id)?.github.connected ? onNote('Deploys come in a later module.') : setTab(c.id, 'overview'))} onWorkflow={() => (setPct(0.5), setTab(c.id, 'sandbox'))} />
+      </div>
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize panes. Double-click to reset."
+        tabIndex={0}
+        onDoubleClick={reset}
+        onKeyDown={(e) => {
+          if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+          const d = e.key === 'ArrowLeft' ? 1 : -1
+          if (wide) setPct((p) => Math.min(0.75, Math.max(minPct, p + d * 0.02)))
+          else setPx((w) => Math.max(320, w + d * 16))
+        }}
+        onPointerDown={(e) => {
+          ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+          setDrag(true)
+        }}
+        className="group/rh relative z-10 -mx-1 w-[9px] shrink-0 cursor-col-resize outline-none"
+      >
+        <span className={cn('absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-border-subtle transition-[width,background-color] duration-150 group-hover/rh:w-[2px] group-hover/rh:bg-input group-focus-visible/rh:w-[2px] group-focus-visible/rh:bg-input', drag && '!w-[2px] !bg-ring/20')} />
+        <span className={cn('absolute top-1/2 left-1/2 h-7 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-[3px] bg-subtle-foreground opacity-0 transition-opacity duration-150 group-hover/rh:opacity-100 group-focus-visible/rh:opacity-100', drag && 'opacity-100')} />
+      </div>
+      <div className="flex min-h-0 shrink-0 flex-col" style={{ width: wide ? `${pct * 100}%` : px }}>
+        {c.bgOpen ? <BackgroundTasks c={c} /> : <RightPane c={c} onNote={onNote} />}
+      </div>
+    </div>
+  )
+}
 
 export function AppShell({ preset }: { preset: string | null }) {
   const boot = useRef(applyPreset(preset)).current
   const gs = useStore((s) => s.getStarted)
-  const session = useStore((s) => s.session)
-  const accounts = useStore((s) => s.accounts)
   const saved = useStore((s) => s.savedPrompt)
-  // The website request stays editable here and keeps its call to action until it is sent.
-  const [text, setText] = useState(saved)
+  const route = useStore((s) => s.route)
+  const activeChat = useStore((s) => s.activeChat)
+  const inChat = route === 'chat' && !!activeChat
+  const [collapsed, setCollapsed] = useState(false)
   const [failed, setFailed] = useState<GetStartedStep | null>(boot.failed)
   const [busy, setBusy] = useState<GetStartedStep | null>(null)
   const [note, setNote] = useState('')
-  const acct = accounts.find((a) => a.email === session?.email)
-  const displayName = acct ? acct.username.split(/[-_]/).map((w) => w[0]?.toUpperCase() + w.slice(1)).join(' ') : 'James Hall'
-  const initials = displayName.split(' ').map((w) => w[0]).join('').slice(0, 2)
+  // Radix portals (dialogs, menus, tooltips) mount on <body>, so the scoped resets must live there too.
+  useEffect(() => {
+    document.body.classList.add('rv')
+    return () => document.body.classList.remove('rv')
+  }, [])
 
   const status = gs.status
   const doneCount = STEPS.filter((s) => status[s.id] === 'done').length
@@ -102,18 +134,15 @@ export function AppShell({ preset }: { preset: string | null }) {
     return !!n && status[n[0]] !== 'done'
   }
   const activeId = STEPS.find((s) => status[s.id] === 'todo' && !locked(s.id))?.id ?? null
-  const closeRef = useRef<HTMLButtonElement>(null)
-
   const set = (patch: Partial<typeof gs>) => setState((s) => ({ getStarted: { ...s.getStarted, ...patch } }))
-  const mark = (id: GetStartedStep, v: StepStatus) =>
-    setState((s) => ({ getStarted: { ...s.getStarted, status: { ...s.getStarted.status, [id]: v } } }))
+  const mark = (id: GetStartedStep, v: StepStatus) => setState((s) => ({ getStarted: { ...s.getStarted, status: { ...s.getStarted.status, [id]: v } } }))
 
   const act = async (id: GetStartedStep) => {
     setFailed(null)
     setBusy(id)
     try {
       if (id === 'github') await connectGithub()
-      else await new Promise((r) => setTimeout(r, 700)) // other steps open their own modules (built next)
+      else await new Promise((r) => setTimeout(r, 700))
       mark(id, 'done')
     } catch {
       setFailed(id)
@@ -121,249 +150,106 @@ export function AppShell({ preset }: { preset: string | null }) {
       setBusy(null)
     }
   }
-
-  // Escape closes the card; focus moves into it when opened.
+  const close = () => (allDone ? set({ open: false, dismissed: true }) : set({ open: false }))
   useEffect(() => {
-    if (!gs.open) return
+    if (inChat || !gs.open) return
     const k = (e: KeyboardEvent) => e.key === 'Escape' && close()
     window.addEventListener('keydown', k)
     return () => window.removeEventListener('keydown', k)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gs.open, allDone])
+  }, [gs.open, allDone, inChat])
 
-  const close = () => {
-    if (allDone) set({ open: false, dismissed: true }) // "Get started leaves the sidebar when you close this"
-    else set({ open: false })
+  const startChat = (body: string, p?: { mode: string; model: string }) => {
+    if (!body.trim()) return
+    const id = createChat(body, { editMode: p?.mode === 'Ask before edits' ? 'manual' : 'auto', model: p?.model })
+    go('chat', { patch: { activeChat: id } })
   }
-
-  const showRow = !gs.dismissed
+  const showRow = !gs.dismissed && !inChat
   const pct = (doneCount / STEPS.length) * 100
+  const notify = (s: string) => setNote(s)
+  const [title, body] = note.split('|')
 
   return (
-    <div className="app">
-      <aside className="side" aria-label="Sidebar">
-        <div className="side-top">
-          <Logo />
-          <span className="ics">
-            <Icon name="inbox" size={16} />
-            <Icon name="panel" size={16} />
-            <Icon name="search" size={16} />
-          </span>
-        </div>
-        <div className="seg" role="tablist">
-          <button className="on" role="tab" aria-selected="true">
-            Chat
-          </button>
-          <button role="tab" aria-selected="false">
-            Workflows
-          </button>
-        </div>
-        <nav className="nav">
-          {NAV.map(([ic, label], i) => (
-            <button key={label} className={i === 0 ? 'on' : ''} onClick={() => i !== 0 && setNote(`${label} comes in a later module.`)}>
-              <Icon name={ic} size={16} />
-              {label}
-              {label === 'Context' && <span className="new">New</span>}
-            </button>
-          ))}
-          <div className="proj-h">
-            PROJECTS <Icon name="chevronDown" size={12} />
-          </div>
-          <button>
-            <Icon name="folder" size={16} />
-            PAMS
-          </button>
-          <button className="sub">Add Google sign-in to admin</button>
-          <button className="sub">Upgrade to Next.js 15</button>
-          <button>
-            <Icon name="folder" size={16} />
-            Unassigned
-          </button>
-          <button className="sub">Add Google sign-in to admin</button>
-          <button className="sub">Upgrade to Next.js 15</button>
-        </nav>
-        <div className="side-bottom">
-          {showRow && (
-            <button className={`gs-row ${gs.open ? 'on' : ''}`} aria-expanded={gs.open} onClick={() => set({ open: !gs.open })}>
-              <Icon name="bulb" size={16} />
-              Get started
-              <span className="ring" style={{ ['--p' as string]: pct }} role="img" aria-label={`${doneCount} of 4 steps done`} />
-            </button>
-          )}
-          <button className="gs-row">
-            <Icon name="download" size={16} />
-            Download CLI
-          </button>
-          <div className="me">
-            <span className="avatar">{initials}</span>
-            <span>
-              {displayName} <small>Free plan</small>
-            </span>
-          </div>
-        </div>
-      </aside>
-
-      <main className="panel">
-        <h2>{saved ? `You're in, ${displayName.split(' ')[0]}. Ready when you are.` : 'What should Revolte work on?'}</h2>
-        {saved && (
-          <div className="ready" role="status">
-            <span className="toast-ic">
-              <Icon name="check" size={12} />
-            </span>
-            <span>Your request from the website is ready to go. Review it, then start building.</span>
-            <Button
-              onClick={() => {
-                setState({ savedPrompt: '' })
-                setNote('Starting your build. The chat itself is the next module in this prototype.')
-              }}
-            >
-              Start building
-            </Button>
-          </div>
-        )}
-        <div className="composer">
-          <textarea
-            aria-label="Describe what to build or fix"
-            placeholder="Describe what to build or fix. Revolte plans it, builds it and tests it."
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-          <div className="composer-bar">
-            <button className="plus" aria-label="Add">
-              <Icon name="plus" size={14} />
-            </button>
-            <span>Agent</span>
-            <span>
-              Credits : <span style={{ color: 'var(--subtle-foreground)' }}>100</span>
-            </span>
-            <span className="grow" />
-            <span>Auto</span>
-            <span>
-              Sonnet 5 <span style={{ color: 'var(--subtle-foreground)' }}>Medium</span>
-            </span>
-            <button
-              className="send"
-              aria-label="Send"
-              disabled={!text.trim()}
-              onClick={() => setNote('Chat is the next module in this prototype.')}
-            >
-              <Icon name="send" size={14} />
-            </button>
-          </div>
-          <div className="composer-sub">
-            <span>
-              <Icon name="cube" size={14} /> Start from scratch
-            </span>
-            <span>
-              <Icon name="server" size={14} /> 2 vCPU · 4 GB (Standard)
-            </span>
-          </div>
-        </div>
-        <div className="qchips">
-          {CHIPS.map(([ic, label, full]) => (
-            <button key={label} onClick={() => setText(full)}>
-              <Icon name={ic} size={14} />
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className="wf">
-          <div className="wf-h">
-            Recommended workflows <span>View all ›</span>
-          </div>
-          <div className="wf-grid">
-            {[
-              ['code', 'On-demand development', 'Turns a ticket or prompt into tested code and a draft pull request.', '11 steps · 7 agents'],
-              ['edit', 'QA and validation', 'Checks finished work, runs QA and flags issues before release.', '11 steps · 7 agents'],
-              ['refresh', 'Legacy migration', 'Upgrades a legacy service, moves the code and proves nothing broke.', '14 steps · 6 agents'],
-            ].map(([ic, t, d, m]) => (
-              <div className="wf-card" key={t}>
-                <span className="ic">
-                  <Icon name={ic as IconName} size={16} />
-                </span>
-                <h4>{t}</h4>
-                <p>{d}</p>
-                <small>{m}</small>
-              </div>
-            ))}
-          </div>
-        </div>
-      </main>
-
-      {showRow && gs.open && (
-        <section className="gs" role="dialog" aria-label="Get started">
-          <header className="gs-head">
-            <Icon name="bulb" size={16} />
-            Get Started
-            <button ref={closeRef} className="icon-btn" aria-label="Close Get started" onClick={close}>
-              <Icon name="x" size={16} />
-            </button>
-          </header>
-          <ul className="gs-list">
-            {STEPS.map((s) => {
-              const st = status[s.id]
-              const isLocked = st === 'todo' && locked(s.id)
-              const isActive = s.id === activeId
-              const isFailed = failed === s.id && isActive
-              const cls = `gs-item ${st === 'done' ? 'done' : ''} ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''} ${st === 'skipped' ? 'skipped' : ''}`
-              return (
-                <li
-                  key={s.id}
-                  className={cls}
-                  aria-current={isActive ? 'step' : undefined}
-                  onClick={() => st === 'skipped' && mark(s.id, 'todo')}
-                  style={st === 'skipped' ? { cursor: 'pointer' } : undefined}
+    <TooltipProvider delayDuration={150}>
+      <div className="rv flex h-screen overflow-hidden bg-background text-foreground">
+        {!collapsed && (
+          <Sidebar
+            onNote={notify}
+            onToggle={() => setCollapsed(true)}
+            bottom={
+              showRow ? (
+                <button
+                  className={cn('flex h-8 w-full items-center gap-2 rounded-md pr-1.5 pl-2 text-[13px] text-muted-foreground transition-colors hover:bg-selected hover:text-foreground', gs.open && 'bg-selected text-foreground')}
+                  aria-expanded={gs.open}
+                  onClick={() => set({ open: !gs.open })}
                 >
-                  <span className={`mark ${st === 'done' ? 'done' : isFailed ? 'failed' : isActive ? 'active' : 'todo'}`}>
-                    {st === 'done' && <Icon name="check" size={12} />}
-                  </span>
-                  <div>
-                    <h4>{s.title}</h4>
-                    {st !== 'done' && (
-                      <p className={isFailed ? 'err' : ''}>
-                        {isFailed
-                          ? 'GitHub did not connect. Check that the Revolte app is installed, then try again.'
-                          : st === 'skipped'
-                            ? 'Skipped. Open it here when you are ready.'
-                            : isLocked
-                              ? s.needs![1]
-                              : s.desc}
-                      </p>
-                    )}
-                    {isActive && (
-                      <div className="gs-act">
-                        <Button loading={busy === s.id} onClick={() => act(s.id)}>
-                          {isFailed ? 'Try again' : s.act}
-                        </Button>
-                        {s.skippable && (
-                          <Button
-                            className="ghost"
-                            variant="secondary"
-                            disabled={busy === s.id}
-                            onClick={() => {
-                              setFailed(null)
-                              mark(s.id, 'skipped')
-                            }}
-                          >
-                            Skip
-                          </Button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
-          {allDone && (
-            <footer className="gs-foot">
-              <b>You are all set</b>
-              <span>Get started leaves the sidebar when you close this.</span>
-            </footer>
+                  <Icon name="bulb" size={16} bold={gs.open} /> Get started
+                  <span className="ring ml-auto" style={{ ['--p' as string]: pct }} role="img" aria-label={`${doneCount} of 4 steps done`} />
+                </button>
+              ) : null
+            }
+          />
+        )}
+        <main className={cn('relative my-5 mr-5 flex min-w-0 flex-1 overflow-hidden rounded-[20px] border border-border-subtle', collapsed && 'ml-5')}>
+          {collapsed && !inChat && (
+            <button aria-label="Show sidebar" title="Show sidebar" className="absolute top-3.5 left-4 z-10 grid size-8 place-items-center rounded-md text-muted-foreground hover:bg-selected hover:text-foreground" onClick={() => setCollapsed(false)}>
+              <Icon name="sidebar" size={16} />
+            </button>
           )}
-        </section>
-      )}
-      {note && <Toast title={note} onClose={() => setNote('')} ms={3200} />}
-    </div>
+          {inChat ? <ChatScreen key={activeChat} id={activeChat!} onNote={notify} sidebarShut={collapsed} openSidebar={() => setCollapsed(false)} /> : <Home key={saved} initial={saved} saved={!!saved} onStart={startChat} onNote={notify} />}
+        </main>
+
+        {showRow && gs.open && (
+          <section className="gs" role="dialog" aria-label="Get started">
+            <header className="gs-head">
+              <Icon name="bulb" size={16} />
+              Get Started
+              <button className="icon-btn" aria-label="Close Get started" onClick={close}>
+                <Icon name="close" size={16} />
+              </button>
+            </header>
+            <ul className="gs-list">
+              {STEPS.map((s) => {
+                const st = status[s.id]
+                const isLocked = st === 'todo' && locked(s.id)
+                const isActive = s.id === activeId
+                const isFailed = failed === s.id && isActive
+                const cls = `gs-item ${st === 'done' ? 'done' : ''} ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''} ${st === 'skipped' ? 'skipped' : ''}`
+                return (
+                  <li key={s.id} className={cls} aria-current={isActive ? 'step' : undefined} onClick={() => st === 'skipped' && mark(s.id, 'todo')} style={st === 'skipped' ? { cursor: 'pointer' } : undefined}>
+                    <span className={`mark ${st === 'done' ? 'done' : isFailed ? 'failed' : isActive ? 'active' : 'todo'}`}>{st === 'done' && <Icon name="check" size={12} />}</span>
+                    <div>
+                      <h4>{s.title}</h4>
+                      {st !== 'done' && <p className={isFailed ? 'err' : ''}>{isFailed ? 'GitHub did not connect. Check that the Revolte app is installed, then try again.' : st === 'skipped' ? 'Skipped. Open it here when you are ready.' : isLocked ? s.needs![1] : s.desc}</p>}
+                      {isActive && (
+                        <div className="gs-act">
+                          <Button size="sm" className="h-6 rounded-md px-2.5 text-[13px]" disabled={busy === s.id} onClick={() => act(s.id)}>
+                            {busy === s.id && <Spinner />}
+                            {isFailed ? 'Try again' : s.act}
+                          </Button>
+                          {s.skippable && (
+                            <Button variant="ghost" size="sm" className="h-6 px-1 text-[13px] hover:bg-transparent hover:underline" disabled={busy === s.id} onClick={() => (setFailed(null), mark(s.id, 'skipped'))}>
+                              Skip
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+            {allDone && (
+              <footer className="gs-foot">
+                <b>You are all set</b>
+                <span>Get started leaves the sidebar when you close this.</span>
+              </footer>
+            )}
+          </section>
+        )}
+        {inChat && <AppDialog onNote={notify} />}
+        {note && <Toast title={title} body={body} onClose={() => setNote('')} ms={4200} />}
+      </div>
+    </TooltipProvider>
   )
 }
