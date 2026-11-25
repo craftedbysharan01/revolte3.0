@@ -116,3 +116,6 @@ export const CHAT_PRESETS: PresetDef[] = [
   { id: 'MS01', label: 'Model switched mid-chat: notice above the prompt', build: () => mk(() => finished({ model: 'Claude Opus 5.5', modelNote: 'Switched to Opus 5. It applies to your next message.' })) },
   { id: 'MS02', label: 'Next message sent: model change marked in the conversation', build: () => mk(() => finished({ model: 'Claude Opus 5.5', followUps: ['Refactor the retry scheduler so each endpoint can have its own backoff.'], marks: [{ index: 0, model: 'Sonnet 5', at: '10:42' }] })) },
 ]
+
+/** Section 11 Deploy: a verified, GitHub-connected chat with the sandbox open (D00). */
+export const deployBase = (): Chat => mk((c) => ({ ...finished({ tab: 'sandbox' }), github: { ...c.github, connected: true } }))

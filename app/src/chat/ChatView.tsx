@@ -6,7 +6,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { RadioGroup } from '@/components/ui/radio-group'
 import { cn } from '@/lib/utils'
 import { useStore } from '@/store'
+import { APP_URL } from '@/deploy/model'
 import { Composer } from './ChatComposer'
+import { openApp } from './openApp'
+import { DeployChat } from '@/deploy/ChatCards'
 import { Spin, fmtSecs, useNow } from './bits'
 import { dismissWorkflow, answer, clearQueued, continueAfterFailure, allowEdit, approvePlan, denyEdit, queueMessage, setBgOpen, reconnect, requestChanges, resume, retrySandbox, sendFollowUp, sendQueuedNow, setQuestion, skipQuestions, stopRun, upgradeAndResume } from './engine'
 import { PLAN_STEPS, QUESTIONS, type Chat, type LogItem, type Review } from './types'
@@ -548,6 +551,8 @@ function WorkflowCard({ c, onShown }: { c: Chat; onShown: () => void }) {
 /* ---------- the conversation ---------- */
 
 export function ChatView({ c, onNote, onDeploy, onWorkflow, lead }: { c: Chat; onNote: (s: string) => void; onDeploy: () => void; onWorkflow: () => void; lead?: ReactNode }) {
+  const depLive = useStore((s) => s.dep.launch === 'live')
+  const depStarted = useStore((s) => s.dep.chat !== 'none')
   const credits = useStore((s) => s.credits)
   const net = useStore((s) => s.net)
   // EC11a-b: a finished chat cannot take a new message while credits or sandbox hours are used up.
@@ -631,6 +636,8 @@ export function ChatView({ c, onNote, onDeploy, onWorkflow, lead }: { c: Chat; o
           {c.phase === 'done' && c.worked && (
             <>
               <Worked secs={c.worked.secs} steps={c.worked.steps} earlier />
+              {!depStarted && (
+                <>
               <Agent text={`Built and verified in the sandbox. 24 tests pass, lint and Prettier are clean. ${c.tab === 'sandbox' ? 'The sandbox is open on the right.' : 'Your sandbox preview is ready.'}`} />
               <div className="-mt-1 flex gap-3.5 text-muted-foreground">
                 {(['copy', 'refresh', 'share', 'dots'] as const).map((n) => (
@@ -644,17 +651,26 @@ export function ChatView({ c, onNote, onDeploy, onWorkflow, lead }: { c: Chat; o
                   <Icon name="monitor" size={18} />
                 </span>
                 <div className="min-w-0 flex-1 basis-40">
-                  <p className="text-[14px] leading-5 font-medium">Sandbox preview ready</p>
-                  <p className="truncate text-[12px] text-muted-foreground">webhook-monitor.sandbox.revolte.app · temporary</p>
+                  <p className="text-[14px] leading-5 font-medium">{depLive ? 'Deployed to cloud' : 'Sandbox preview ready'}</p>
+                  <p className="truncate text-[12px] text-muted-foreground">{depLive ? `${APP_URL} · live` : 'webhook-monitor.sandbox.revolte.app · temporary'}</p>
                 </div>
-                <Button variant="outline" size="sm" className="h-7 gap-1.5 border-input bg-transparent text-[13px]" onClick={onDeploy}>
-                  <Icon name="rocket" size={14} /> Deploy to cloud
-                </Button>
+                {depLive ? (
+                  <Button size="sm" className="h-7 gap-1.5 text-[13px]" onClick={openApp}>
+                    Open app <Icon name="out" size={12} />
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" className="h-7 gap-1.5 border-input bg-transparent text-[13px]" onClick={onDeploy}>
+                    <Icon name="rocket" size={14} /> Deploy to cloud
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" className="h-7 border-input bg-transparent text-[13px]" onClick={() => onWorkflow()}>
                   Open sandbox
                 </Button>
               </section>
-              {!c.workflowDismissed && <WorkflowCard c={c} onShown={() => scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: 'smooth' })} />}
+                </>
+              )}
+              <DeployChat onNote={onNote} />
+              {!depStarted && !c.workflowDismissed && <WorkflowCard c={c} onShown={() => scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: 'smooth' })} />}
             </>
           )}
 

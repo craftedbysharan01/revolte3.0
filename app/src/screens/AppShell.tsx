@@ -3,6 +3,9 @@ import { connectGithub } from '../api'
 import { ChatView } from '@/chat/ChatView'
 import { Home } from '@/chat/Home'
 import { AppDialog } from '@/chat/AppDialog'
+import { Wizard } from '@/deploy/Wizard'
+import { AppPage } from '@/deploy/AppPage'
+import { openWizard } from '@/deploy/state'
 import { BackgroundTasks, RightPane } from '@/chat/RightPane'
 import { Sidebar } from '@/chat/Sidebar'
 import { createChat, getChat, setTab } from '@/chat/engine'
@@ -79,7 +82,7 @@ function ChatScreen({ id, onNote, sidebarShut, openSidebar }: { id: string; onNo
   return (
     <div ref={box} className={cn('flex min-h-0 flex-1', drag && 'cursor-col-resize select-none')} onPointerMove={onMove} onPointerUp={() => setDrag(false)}>
       <div className="flex min-w-[360px] flex-1">
-        <ChatView c={c} lead={lead} onNote={onNote} onDeploy={() => (getChat(c.id)?.github.connected ? onNote('Deploys come in a later module.') : setTab(c.id, 'overview'))} onWorkflow={() => (setPct(0.5), setTab(c.id, 'sandbox'))} />
+        <ChatView c={c} lead={lead} onNote={onNote} onDeploy={() => (getChat(c.id)?.github.connected ? openWizard() : setTab(c.id, 'overview'))} onWorkflow={() => (setPct(0.5), setTab(c.id, 'sandbox'))} />
       </div>
       <div
         role="separator"
@@ -115,6 +118,7 @@ export function AppShell({ preset }: { preset: string | null }) {
   const saved = useStore((s) => s.savedPrompt)
   const route = useStore((s) => s.route)
   const activeChat = useStore((s) => s.activeChat)
+  const dep = useStore((s) => s.dep)
   const inChat = route === 'chat' && !!activeChat
   const [collapsed, setCollapsed] = useState(false)
   const [failed, setFailed] = useState<GetStartedStep | null>(boot.failed)
@@ -196,7 +200,7 @@ export function AppShell({ preset }: { preset: string | null }) {
               <Icon name="sidebar" size={16} />
             </button>
           )}
-          {inChat ? <ChatScreen key={activeChat} id={activeChat!} onNote={notify} sidebarShut={collapsed} openSidebar={() => setCollapsed(false)} /> : <Home key={saved} initial={saved} saved={!!saved} onStart={startChat} onNote={notify} />}
+          {inChat && dep.page ? <AppPage onNote={notify} /> : inChat ? <ChatScreen key={activeChat} id={activeChat!} onNote={notify} sidebarShut={collapsed} openSidebar={() => setCollapsed(false)} /> : <Home key={saved} initial={saved} saved={!!saved} onStart={startChat} onNote={notify} />}
         </main>
 
         {showRow && gs.open && (
@@ -248,6 +252,7 @@ export function AppShell({ preset }: { preset: string | null }) {
           </section>
         )}
         {inChat && <AppDialog onNote={notify} />}
+        {inChat && <Wizard onNote={notify} />}
         {note && <Toast title={title} body={body} onClose={() => setNote('')} ms={4200} />}
       </div>
     </TooltipProvider>

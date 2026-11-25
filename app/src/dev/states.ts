@@ -2,6 +2,7 @@ import { Route, Prototype } from '../store'
 import { DEFAULT_PROMPT } from '../screens/Website'
 import { CHAT_PRESETS } from '../chat/presets'
 import { getState } from '../store'
+import { DEPLOY_STATES } from './deployStates'
 
 export type StateDef = {
   id: string
@@ -133,5 +134,9 @@ export const GROUPS: Group[] = [
   {
     title: '24 · Edge cases: chat',
     states: CHAT_PRESETS.filter((p) => p.id.startsWith('EC') || p.id.startsWith('MS')).map(chatState),
+  },
+  {
+    title: '11 · Deploy',
+    states: DEPLOY_STATES,
   },
 ]

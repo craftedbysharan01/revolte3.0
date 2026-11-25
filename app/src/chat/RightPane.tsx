@@ -8,8 +8,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import { getState, setState, useStore } from '@/store'
+import { APP_URL } from '@/deploy/model'
 import { GithubMark } from '@/ui/Icon'
 import { Overline, Spin } from './bits'
+import { openApp } from './openApp'
+import { openWizard } from '@/deploy/state'
 import { commitAndPush, createPr, githubConnected, retrySandbox, setBgOpen, setTab } from './engine'
 import { fmtSecs, useNow } from './bits'
 import { SANDBOX_APP } from './sandboxApp'
@@ -465,7 +468,27 @@ function PullRequest({ c, onConnect, onNote }: { c: Chat; onConnect: () => void;
 
 function SandboxSection({ c, onNote }: { c: Chat; onNote: (s: string) => void }) {
   if (!verified(c)) return null
+  const live = useStore((s) => s.dep.launch === 'live')
   return (
+    <>
+    {live && (
+      <section aria-label="Deployment" className="px-1">
+        <h3 className="mb-2.5 text-[12px] text-muted-foreground">Deployed</h3>
+        <div className="rounded-xl border border-border-subtle bg-surface p-3.5">
+          <p className="flex items-center gap-2 text-[13px]">
+            <span className="size-1.5 rounded-full bg-success" />
+            <span className="min-w-0 flex-1 truncate">{APP_URL}</span>
+            <button aria-label="Copy link" className="text-muted-foreground hover:text-foreground" onClick={() => onNote('Link copied.')}>
+              <Icon name="copy" size={14} />
+            </button>
+          </p>
+          <Button size="sm" className="mt-3 h-8 gap-1.5 text-[13px]" onClick={openApp}>
+            Open app <Icon name="out" size={12} />
+          </Button>
+        </div>
+      </section>
+    )}
+
     <section aria-label="Sandbox" className="px-1">
       <h3 className="mb-2.5 text-[12px] text-muted-foreground">Sandbox</h3>
       <div className="rounded-xl border border-border-subtle bg-surface p-3.5">
@@ -484,6 +507,7 @@ function SandboxSection({ c, onNote }: { c: Chat; onNote: (s: string) => void })
         </p>
       </div>
     </section>
+    </>
   )
 }
 
@@ -740,7 +764,7 @@ export function RightPane({ c, onNote, lead }: { c: Chat; onNote: (s: string) =>
                     aria-label="Deploy"
                     aria-disabled={!ready}
                     className={cn('size-8 border-input bg-transparent text-muted-foreground', !ready && 'opacity-50')}
-                    onClick={() => ready && (c.github.connected ? onNote('Deploys come in a later module.') : setDeploy(true))}
+                    onClick={() => ready && (c.github.connected ? openWizard() : setDeploy(true))}
                   >
                     <Icon name="rocket" size={16} />
                   </Button>
