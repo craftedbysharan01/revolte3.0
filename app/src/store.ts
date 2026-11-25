@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { freshDep } from './deploy/model'
 
 export type Route =
   | 'website'
@@ -14,6 +15,7 @@ export type Route =
   | 'chat'
 
 import type { Chat } from './chat/types'
+import type { Dep } from './deploy/model'
 
 export type Mail =
   | { id: number; kind: 'code'; to: string; code: string; at: number }
@@ -73,6 +75,7 @@ export type Prototype = {
   signinFails: Record<string, { count: number; lockUntil: number }>
   panelOpen: boolean
   appDialog: boolean
+  dep: Dep
 }
 
 const KEY = 'revolte.proto.v1'
@@ -137,6 +140,7 @@ const initial = (): Prototype => ({
   signinFails: {},
   panelOpen: false,
   appDialog: false,
+  dep: freshDep(),
 })
 
 const PERSIST: (keyof Prototype)[] = [

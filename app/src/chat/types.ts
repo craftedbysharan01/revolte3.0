@@ -107,3 +107,4 @@ export const FINISHED_SEED = ['npm install', 'npx prisma generate', 'npm run lin
 
 export const DEMO_REPO = 'acme/webhook-monitor'
 export const DEMO_BRANCH = 'revolte/webhook-dashboard'
+
