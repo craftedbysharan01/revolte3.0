@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { EMAIL_RE, NetworkError, SLUG_RE, checkSlug, createWorkspace } from '../api'
+import { createChat } from '../chat/engine'
 import { go, getState } from '../store'
 import { DangerDot, Icon, WarnTriangle } from '../ui/Icon'
 import { Banner, Button, Field, SavedRequest, Spinner } from '../ui/ui'
@@ -161,7 +162,12 @@ export function Workspace({ preset }: { preset: string | null }) {
       return () => clearTimeout(t)
     }
     if (stage === 'ready') {
-      const t = setTimeout(() => go('app'), 1700)
+      const t = setTimeout(() => {
+        // A request from the website opens straight in its chat; otherwise the person starts from the home screen.
+        const prompt = getState().savedPrompt.trim()
+        if (prompt) go('chat', { patch: { activeChat: createChat(prompt) } })
+        else go('app')
+      }, 1700)
       return () => clearTimeout(t)
     }
   }, [stage])

@@ -11,6 +11,9 @@ export type Route =
   | 'reset'
   | 'workspace'
   | 'app'
+  | 'chat'
+
+import type { Chat } from './chat/types'
 
 export type Mail =
   | { id: number; kind: 'code'; to: string; code: string; at: number }
@@ -62,10 +65,14 @@ export type Prototype = {
   mailbox: Mail[]
   accounts: Account[]
   getStarted: GetStarted
-  net: { offline: boolean; failWorkspace: boolean; failGithub: boolean }
+  chats: Chat[]
+  activeChat: string | null
+  credits: number
+  net: { offline: boolean; failWorkspace: boolean; failGithub: boolean; failTests: boolean; failSandbox: boolean; noCredits: boolean; noHours: boolean }
   /** sign-in lockouts by email */
   signinFails: Record<string, { count: number; lockUntil: number }>
   panelOpen: boolean
+  appDialog: boolean
 }
 
 const KEY = 'revolte.proto.v1'
@@ -81,7 +88,10 @@ const ROUTES: Route[] = [
   'reset',
   'workspace',
   'app',
+  'chat',
 ]
+
+export const START_CREDITS = 100
 
 export const seedAccounts = (): Account[] => [
   {
@@ -120,15 +130,22 @@ const initial = (): Prototype => ({
   mailbox: [],
   accounts: seedAccounts(),
   getStarted: freshGetStarted(),
-  net: { offline: false, failWorkspace: false, failGithub: false },
+  chats: [],
+  activeChat: null,
+  credits: START_CREDITS,
+  net: { offline: false, failWorkspace: false, failGithub: false, failTests: false, failSandbox: false, noCredits: false, noHours: false },
   signinFails: {},
   panelOpen: false,
+  appDialog: false,
 })
 
 const PERSIST: (keyof Prototype)[] = [
   'accounts',
   'session',
   'getStarted',
+  'chats',
+  'activeChat',
+  'credits',
   'mailbox',
   'pending',
   'savedPrompt',
