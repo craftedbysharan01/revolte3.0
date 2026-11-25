@@ -5,7 +5,8 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import { cn } from '@/lib/utils'
 import { useStore } from '@/store'
 import { Spin } from '@/chat/bits'
-import { WHERE_LABEL, VALID_NAME, deployNow, saveVars, setDep, type Dep } from './state'
+import { APP_URL, WHERE_LABEL, VALID_NAME, deployNow, saveVars, setDep, fillSandboxValues, type Dep } from './state'
+import { openApp } from '@/chat/openApp'
 import { YAML } from './yaml'
 
 const summary = (d: Dep) => `Deploy · ${d.name} → ${d.where === 'cloud' ? 'Revolte Cloud' : d.where === 'aws' ? 'AWS' : 'Google Cloud'} · ${d.region} · ${d.preset}`
@@ -49,10 +50,17 @@ export function DeployChat({ onNote }: { onNote: (s: string) => void }) {
         <section aria-label="Variables" className="rounded-xl border border-border-subtle bg-surface p-4">
           <h3 className="text-[14px] font-medium">Variables</h3>
           <p className="mt-1 text-[13px] text-muted-foreground">deployment.yml reads these values at start-up. Enter a name and key for each one.</p>
-          <div className="mt-3 inline-flex gap-0.5 rounded-lg bg-background p-0.5" role="tablist">
+          <div className="mt-3 flex items-center justify-between gap-3">
+          <div className="inline-flex gap-0.5 rounded-lg bg-background p-0.5" role="tablist">
             {(['secrets', 'variables'] as const).map((t) => (
               <button key={t} role="tab" aria-selected={d.varTab === t} className={cn('rounded-md px-2.5 py-1 text-[13px] capitalize', d.varTab === t ? 'bg-selected text-foreground' : 'text-muted-foreground')} onClick={() => setDep({ varTab: t })}>{t}</button>
             ))}
+          </div>
+          {!filled && (
+            <Button variant="outline" size="sm" className="h-7 gap-1.5 border-input bg-transparent text-[12px]" onClick={fillSandboxValues}>
+              <Icon name="stars" size={13} /> Use the sandbox values
+            </Button>
+          )}
           </div>
           <div className="mt-3 grid grid-cols-[1fr_1fr_auto] items-center gap-x-2 gap-y-2">
             <span className="text-[12px] text-muted-foreground">Variable name</span><span className="text-[12px] text-muted-foreground">Variable key</span><span />
@@ -96,10 +104,17 @@ export function DeployChat({ onNote }: { onNote: (s: string) => void }) {
             <span>deployment.yml <span className="text-muted-foreground">· 42 lines</span></span>
             <button className="underline underline-offset-2" onClick={() => setDep({ yamlOpen: true })}>View YAML</button>
           </div>
-          <div className="mt-3 flex items-center justify-between gap-3">
-            <p className="text-[12px] text-muted-foreground">Deploy now opens the application, where you review the config and launch.</p>
-            <Button size="sm" className="h-8 gap-1.5 text-[13px]" onClick={deployNow}><Icon name="rocket" size={14} /> Deploy now</Button>
-          </div>
+          {d.launch === 'live' ? (
+            <div className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-success/30 bg-[#12201a] px-3 py-2.5">
+              <p className="flex min-w-0 items-center gap-2 text-[13px]"><span className="size-1.5 shrink-0 rounded-full bg-success" /> <span className="truncate">Live at {APP_URL}</span></p>
+              <Button size="sm" className="h-8 gap-1.5 text-[13px]" onClick={() => openApp()}>Open app <Icon name="out" size={12} /></Button>
+            </div>
+          ) : (
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <p className="text-[12px] text-muted-foreground">Deploy now opens the application, where you review the config and launch.</p>
+              <Button size="sm" className="h-8 gap-1.5 text-[13px] motion-safe:animate-[nudge_2.4s_ease-out_0.6s_2]" onClick={deployNow}><Icon name="rocket" size={14} /> Deploy now</Button>
+            </div>
+          )}
         </section>
       )}
 

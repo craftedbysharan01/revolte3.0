@@ -13,6 +13,7 @@ import { GithubMark } from '@/ui/Icon'
 import { Overline, Spin } from './bits'
 import { openApp } from './openApp'
 import { openWizard } from '@/deploy/state'
+import { WorkflowPane } from '@/workflow/Run'
 import { commitAndPush, createPr, githubConnected, retrySandbox, setBgOpen, setTab } from './engine'
 import { fmtSecs, useNow } from './bits'
 import { SANDBOX_APP } from './sandboxApp'
@@ -688,20 +689,6 @@ function FilesTab({ c, onNote }: { c: Chat; onNote: (s: string) => void }) {
   )
 }
 
-function WorkflowTab({ onNote }: { onNote: (s: string) => void }) {
-  return (
-    <div className="m-4 mt-3 rounded-xl border border-border-subtle bg-surface p-4">
-      <h3 className="flex items-center gap-2 text-[14px] font-medium">
-        <Icon name="routing" size={16} /> Chat to pull request
-      </h3>
-      <p className="mt-1.5 text-[13px] leading-[18px] text-muted-foreground">Runs the steps from a chat on its own: build, test, then a draft pull request for you to review.</p>
-      <Button size="sm" className="mt-3 h-8 text-[13px]" onClick={() => onNote('Workflows come in a later module.')}>
-        Try workflow
-      </Button>
-    </div>
-  )
-}
-
 function Empty({ icon, title, text, action, onAction }: { icon: IconName; title: string; text: string; action?: string; onAction?: () => void }) {
   return (
     <div className="grid flex-1 place-items-center px-8 text-center">
@@ -730,7 +717,7 @@ export function RightPane({ c, onNote, lead }: { c: Chat; onNote: (s: string) =>
   const tab = c.tab
   const connect = () => {
     setDeploy(false)
-    setGh(true)
+    setState({ ghFor: 'deploy' })
   }
   return (
     <aside className="flex min-h-0 min-w-0 flex-1 flex-col" aria-label="Session">
@@ -763,7 +750,7 @@ export function RightPane({ c, onNote, lead }: { c: Chat; onNote: (s: string) =>
                     size="icon"
                     aria-label="Deploy"
                     aria-disabled={!ready}
-                    className={cn('size-8 border-input bg-transparent text-muted-foreground', !ready && 'opacity-50')}
+                    className={cn('relative size-8 border-input bg-transparent text-muted-foreground', !ready && 'opacity-50', ready && !c.wf && 'text-foreground motion-safe:animate-[nudge_2.4s_ease-out_0.6s_3]')}
                     onClick={() => ready && (c.github.connected ? openWizard() : setDeploy(true))}
                   >
                     <Icon name="rocket" size={16} />
@@ -771,7 +758,7 @@ export function RightPane({ c, onNote, lead }: { c: Chat; onNote: (s: string) =>
                 </span>
               </TooltipTrigger>
             </PopoverAnchor>
-            {!ready && <TooltipContent side="bottom">Deploy opens after the build is verified</TooltipContent>}
+            <TooltipContent side="bottom">{ready ? 'Deploy' : 'Deploy opens after the build is verified'}</TooltipContent>
           </Tooltip>
           <PopoverContent align="end" className="w-[256px] border-border-subtle bg-card p-3.5">
             <h4 className="text-[13px] font-medium">Connect GitHub to deploy</h4>
@@ -803,7 +790,7 @@ export function RightPane({ c, onNote, lead }: { c: Chat; onNote: (s: string) =>
       {tab === 'sandbox' && <SandboxTab c={c} />}
       {tab === 'code' && <CodeTab c={c} onConnect={() => setGh(true)} />}
       {tab === 'files' && <FilesTab c={c} onNote={onNote} />}
-      {tab === 'workflow' && <WorkflowTab onNote={onNote} />}
+      {tab === 'workflow' && <WorkflowPane c={c} onNote={onNote} />}
 
       <GithubDialog id={c.id} open={gh} onOpenChange={setGh} onDone={onNote} />
     </aside>

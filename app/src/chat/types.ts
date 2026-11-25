@@ -8,6 +8,7 @@ export type Phase =
   | 'verifying' //  C12, C14 Verify: tests, lint, Prettier
   | 'failed' //     C13      still failing after 3 attempts
   | 'done' //       C15+     built and verified
+  | 'workflow' //   H09-H13  plan handed to a workflow run
   | 'stopped' //    C17
   | 'credits' //    C21
   | 'sandbox-failed' // C19
@@ -72,6 +73,8 @@ export type Chat = {
   bgOpen?: boolean
   /** EC12-EC16: the application this chat belongs to */
   app?: string | null
+  /** H09-H13: a workflow run started from this chat */
+  wf?: { stage: 'ready' | 'running' | 'done' | 'failed'; step: number; startedAt: number; endedAt?: number; template: string; from: 'plan' | 'done' } | null
   /** MS01-MS02 */
   model?: string
   modelNote?: string | null

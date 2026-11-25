@@ -7,7 +7,9 @@ import { useStore } from '@/store'
 import { openApp } from '@/chat/openApp'
 import { Spin } from '@/chat/bits'
 import { Pick, Switch } from './bits'
-import { APP_URL, BRANCHES, launch, openChat, saveAndLaunch, setDep } from './state'
+import { APP_URL, BRANCHES, launch, openChat, openLiveApp, saveAndLaunch, setDep } from './state'
+import { getState } from '@/store'
+import { fillWorkflow } from '@/workflow/state'
 import { YAML } from './yaml'
 
 const TABS = ['Overview', 'YML config', 'Workflow runs', 'Logs', 'Pipelines', 'Environments', 'Pull requests', 'Storage', 'Database', 'Secrets', 'Settings']
@@ -105,7 +107,7 @@ export function AppPage({ onNote }: { onNote: (s: string) => void }) {
             <p className="flex items-center gap-2 text-[13px]"><span className="grid size-4 place-items-center rounded-full bg-success text-background"><Icon name="check" size={10} /></span><b className="font-medium">Webhook monitor is live.</b> <span className="text-muted-foreground">{APP_URL} · version 1 · health check passed</span></p>
             <span className="flex gap-2">
               <Button variant="outline" size="sm" className="h-9 border-input bg-transparent" onClick={() => onNote('Logs come in a later module.')}>View logs</Button>
-              <Button size="sm" className="h-9 gap-1.5" onClick={openApp}><Icon name="out" size={13} /> Open app</Button>
+              <Button size="sm" className="h-9 gap-1.5 motion-safe:animate-[nudge_2.4s_ease-out_0.3s_2]" onClick={() => openLiveApp(openApp)}><Icon name="out" size={13} /> Open app</Button>
             </span>
           </>
         ) : (
@@ -125,7 +127,14 @@ export function AppPage({ onNote }: { onNote: (s: string) => void }) {
           {(['STRIPE_SECRET_KEY', 'SENTRY_DSN'] as const).map((n, i) => (
             <div key={n} className="mt-4"><p className="mb-1.5 text-[13px] font-medium">{n}</p><input className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-[14px] outline-none placeholder:text-subtle-foreground focus:border-foreground/60" type="password" placeholder="Enter value" value={d.secrets[i]} onChange={(e) => { const s: [string, string] = [...d.secrets]; s[i] = e.target.value; setDep({ secrets: s }) }} /></div>
           ))}
-          <button className="mt-4 flex items-center gap-1.5 text-[13px]" onClick={() => onNote('Extra variables are added from Secrets in the real product.')}><Icon name="plus" size={13} /> Add another variable</button>
+          <div className="mt-4 flex items-center justify-between">
+            <button className="flex items-center gap-1.5 text-[13px]" onClick={() => onNote('Extra variables are added from Secrets in the real product.')}><Icon name="plus" size={13} /> Add another variable</button>
+            {(!d.secrets[0] || !d.secrets[1]) && (
+              <Button variant="outline" size="sm" className="h-7 gap-1.5 border-input bg-transparent text-[12px]" onClick={() => setDep({ secrets: [d.secrets[0] || 'sk_test_sbx_51Hq2', d.secrets[1] || 'https://sbx@o42.ingest.sentry.io/7'] })}>
+                <Icon name="stars" size={13} /> Use the sandbox values
+              </Button>
+            )}
+          </div>
           <p className="mt-4 flex items-center gap-2 text-[12px] text-muted-foreground"><Icon name="lock" size={13} /> Saved encrypted to Webhook monitor Secrets. Never written to the repository.</p>
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="outline" size="sm" className="h-9 border-input bg-transparent" onClick={() => setDep({ launch: 'idle' })}>Cancel</Button>
@@ -153,8 +162,8 @@ export function AppPage({ onNote }: { onNote: (s: string) => void }) {
           <div className="flex items-center justify-between border-t border-border-subtle px-6 py-4">
             <button className="text-[13px]" onClick={() => setDep({ sugg: false })}>Not now</button>
             <span className="flex gap-2">
-              <Button variant="outline" size="sm" className="h-9 gap-1.5 border-input bg-transparent" onClick={openApp}>Open app <Icon name="out" size={12} /></Button>
-              <Button size="sm" className="h-9 gap-1.5" onClick={() => (setDep({ sugg: false }), onNote('Workflow saved|Next time this runs from one prompt.'))}><Icon name="star" size={13} bold /> Turn this into a workflow</Button>
+              <Button variant="outline" size="sm" className="h-9 gap-1.5 border-input bg-transparent" onClick={() => openApp()}>Open app <Icon name="out" size={12} /></Button>
+              <Button size="sm" className="h-9 gap-1.5" onClick={() => { setDep({ sugg: false, page: false }); const id = getState().activeChat; if (id) fillWorkflow(id, 'pr'); onNote('Workflow ready|Chat to pull request is filled with this chat. Run it when you are ready.') }}><Icon name="star" size={13} bold /> Turn this into a workflow</Button>
             </span>
           </div>
         </DialogContent>

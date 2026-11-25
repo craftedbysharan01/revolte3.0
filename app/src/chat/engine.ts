@@ -298,6 +298,7 @@ function finish(id: string) {
     tasks: x.tasks.map(() => 'done' as const),
     verify: { ...x.verify, lint: 'done', tests: 'done', prettier: 'done', passed: 24 },
     sandbox: 'ready',
+    tab: 'sandbox',
     worked: { secs: (x.worked?.secs ?? 20) + secsSince(c), steps: 24 },
     github: { ...x.github, connected: x.github.connected || gh },
     followUps: x.queued ? [...x.followUps, x.queued] : x.followUps,

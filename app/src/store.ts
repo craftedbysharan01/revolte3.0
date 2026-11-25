@@ -76,6 +76,10 @@ export type Prototype = {
   panelOpen: boolean
   appDialog: boolean
   dep: Dep
+  /** H05-H08: the workflow template picker */
+  wfPicker: boolean
+  /** chat to open GitHub for, then continue into deploy (C25) */
+  ghFor: 'deploy' | null
 }
 
 const KEY = 'revolte.proto.v1'
@@ -141,6 +145,8 @@ const initial = (): Prototype => ({
   panelOpen: false,
   appDialog: false,
   dep: freshDep(),
+  wfPicker: false,
+  ghFor: null,
 })
 
 const PERSIST: (keyof Prototype)[] = [

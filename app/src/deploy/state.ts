@@ -10,7 +10,11 @@ const timers: number[] = []
 const later = (fn: () => void, ms: number) => void timers.push(window.setTimeout(fn, ms))
 export const clearDepTimers = () => timers.splice(0).forEach(clearTimeout)
 
-export const openWizard = () => setDep({ ...freshDep(), wizard: true, connected: getDep().connected })
+export const openWizard = () => {
+  const s = getState()
+  const c = s.chats.find((x) => x.id === s.activeChat)
+  setDep({ ...freshDep(), wizard: true, connected: getDep().connected, repo: c?.github.connected ? c.github.repo : '' })
+}
 export const askDiscard = () => setDep({ discard: true })
 export const keepEditing = () => setDep({ discard: false })
 export const discardSetup = () => (clearDepTimers(), setDep({ ...freshDep(), connected: getDep().connected }))
@@ -46,6 +50,9 @@ export function generateYaml() {
   later(() => setDep({ chat: 'vars' }), 2200)
 }
 export const VALID_NAME = VALID_NAME_RE
+/** The sandbox already ran with these values: reuse them instead of typing them again. */
+export const fillSandboxValues = () => setDep((d) => ({ vars: d.vars.map((v, i) => ({ ...v, key: v.key || ['sbx_r3d1s_7f2a9c', 'sbx_enc_4b8e1d0a', 'sbx_pd_93c1e7'][i] || 'sbx_value' })), varBad: false }))
+
 export function saveVars() {
   const d = getDep()
   if (d.vars.some((v) => !VALID_NAME.test(v.name))) return setDep({ varBad: true })
@@ -56,6 +63,18 @@ export function saveVars() {
 /** Deploy now -> Application page (D13). */
 export const deployNow = () => setDep({ page: true, launch: 'idle', pct: 0, toast: false, sugg: false })
 export const openChat = () => setDep({ page: false })
+
+/** Open the live app; the workflow nudge waits until you come back to Revolte (D16a). */
+export function openLiveApp(open: () => boolean) {
+  const ok = open()
+  setDep({ opened: true })
+  if (!ok) return
+  const back = () => {
+    window.removeEventListener('focus', back)
+    if (getDep().launch === 'live') setTimeout(() => setDep({ sugg: true }), 500)
+  }
+  window.addEventListener('focus', back)
+}
 
 export function launch() {
   const d = getDep()
@@ -69,7 +88,7 @@ export function saveAndLaunch() {
     if (p >= 100) {
       setDep({ launch: 'live', toast: true })
       later(() => setDep({ toast: false }), 5000)
-      later(() => setDep({ sugg: true }), 1600)
+      later(() => getDep().launch === 'live' && !getDep().opened && setDep({ sugg: true }), 7000)
       return
     }
     setDep({ pct: Math.min(100, p + (p < 70 ? 12 : 8)) })
