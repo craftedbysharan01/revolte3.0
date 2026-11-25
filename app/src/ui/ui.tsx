@@ -15,12 +15,12 @@ import { Rules, strength } from '../api'
 import { useStore } from '../store'
 
 export const Spinner = ({ size = 16 }: { size?: number }) => (
-  <img src="/assets/spinner.svg" alt="" width={size} height={size} className="spin" />
+  <img src={`${import.meta.env.BASE_URL}assets/spinner.svg`} alt="" width={size} height={size} className="spin" />
 )
 
 export const Logo = ({ className = '' }: { className?: string }) => (
   <span className={`logo ${className}`} role="img" aria-label="Revolte">
-    <img src="/assets/logo.svg" alt="" width={83.165} height={14.0614} />
+    <img src={`${import.meta.env.BASE_URL}assets/logo.svg`} alt="" width={83.165} height={14.0614} />
   </span>
 )
 

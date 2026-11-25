@@ -229,7 +229,7 @@ export function Workspace({ preset }: { preset: string | null }) {
         <Backdrop />
         <div className="setup bare" role="status" aria-live="polite">
           <span className="tile round" style={{ width: 48, height: 48 }}>
-            <img src="/assets/submark.svg" alt="" width={21.1738} height={14.2337} />
+            <img src={`${import.meta.env.BASE_URL}assets/submark.svg`} alt="" width={21.1738} height={14.2337} />
           </span>
           <h1>{ready ? 'Your workspace is ready' : 'Creating your workspace'}</h1>
           <span className="url-chip">
