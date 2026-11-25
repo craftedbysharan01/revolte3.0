@@ -6,7 +6,8 @@ import { AppDialog } from '@/chat/AppDialog'
 import { Wizard } from '@/deploy/Wizard'
 import { AppPage } from '@/deploy/AppPage'
 import { openWizard } from '@/deploy/state'
-import { BackgroundTasks, RightPane } from '@/chat/RightPane'
+import { BackgroundTasks, GithubDialog, RightPane } from '@/chat/RightPane'
+import { Picker } from '@/workflow/Picker'
 import { Sidebar } from '@/chat/Sidebar'
 import { createChat, getChat, setTab } from '@/chat/engine'
 import { Icon } from '@/components/solar'
@@ -82,7 +83,7 @@ function ChatScreen({ id, onNote, sidebarShut, openSidebar }: { id: string; onNo
   return (
     <div ref={box} className={cn('flex min-h-0 flex-1', drag && 'cursor-col-resize select-none')} onPointerMove={onMove} onPointerUp={() => setDrag(false)}>
       <div className="flex min-w-[360px] flex-1">
-        <ChatView c={c} lead={lead} onNote={onNote} onDeploy={() => (getChat(c.id)?.github.connected ? openWizard() : setTab(c.id, 'overview'))} onWorkflow={() => (setPct(0.5), setTab(c.id, 'sandbox'))} />
+        <ChatView c={c} lead={lead} onNote={onNote} onDeploy={() => (getChat(c.id)?.github.connected ? openWizard() : setState({ ghFor: 'deploy' }))} onWorkflow={() => (setPct(0.5), setTab(c.id, 'sandbox'))} />
       </div>
       <div
         role="separator"
@@ -119,6 +120,7 @@ export function AppShell({ preset }: { preset: string | null }) {
   const route = useStore((s) => s.route)
   const activeChat = useStore((s) => s.activeChat)
   const dep = useStore((s) => s.dep)
+  const ghFor = useStore((s) => s.ghFor)
   const inChat = route === 'chat' && !!activeChat
   const [collapsed, setCollapsed] = useState(false)
   const [failed, setFailed] = useState<GetStartedStep | null>(boot.failed)
@@ -253,6 +255,19 @@ export function AppShell({ preset }: { preset: string | null }) {
         )}
         {inChat && <AppDialog onNote={notify} />}
         {inChat && <Wizard onNote={notify} />}
+        {inChat && <Picker />}
+        {inChat && (
+          <GithubDialog
+            id={activeChat!}
+            open={ghFor === 'deploy'}
+            onOpenChange={(o) => !o && setState({ ghFor: null })}
+            onDone={(m) => {
+              setState({ ghFor: null })
+              notify(m.replace('is created and ready to commit.', 'is connected. Next: where it runs.'))
+              setTimeout(openWizard, 450)
+            }}
+          />
+        )}
         {note && <Toast title={title} body={body} onClose={() => setNote('')} ms={4200} />}
       </div>
     </TooltipProvider>

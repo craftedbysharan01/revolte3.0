@@ -3,6 +3,7 @@ import { DEFAULT_PROMPT } from '../screens/Website'
 import { CHAT_PRESETS } from '../chat/presets'
 import { getState } from '../store'
 import { DEPLOY_STATES } from './deployStates'
+import { WORKFLOW_STATES } from './workflowStates'
 
 export type StateDef = {
   id: string
@@ -134,6 +135,10 @@ export const GROUPS: Group[] = [
   {
     title: '24 · Edge cases: chat',
     states: CHAT_PRESETS.filter((p) => p.id.startsWith('EC') || p.id.startsWith('MS')).map(chatState),
+  },
+  {
+    title: '14 · Workflow from chat',
+    states: WORKFLOW_STATES,
   },
   {
     title: '11 · Deploy',

@@ -10,6 +10,8 @@ import { APP_URL } from '@/deploy/model'
 import { Composer } from './ChatComposer'
 import { openApp } from './openApp'
 import { DeployChat } from '@/deploy/ChatCards'
+import { WorkflowChat } from '@/workflow/Run'
+import { fillWorkflow, openPicker } from '@/workflow/state'
 import { Spin, fmtSecs, useNow } from './bits'
 import { dismissWorkflow, answer, clearQueued, continueAfterFailure, allowEdit, approvePlan, denyEdit, queueMessage, setBgOpen, reconnect, requestChanges, resume, retrySandbox, sendFollowUp, sendQueuedNow, setQuestion, skipQuestions, stopRun, upgradeAndResume } from './engine'
 import { PLAN_STEPS, QUESTIONS, type Chat, type LogItem, type Review } from './types'
@@ -223,6 +225,50 @@ function PlanDialog({ c, open, onOpenChange }: { c: Chat; open: boolean; onOpenC
   )
 }
 
+/** H01-H04: how should Revolte proceed with this plan. A first build stays in chat so you see it live. */
+function PlanChoice({ c }: { c: Chat }) {
+  const veteran = useStore((s) => s.chats.some((x) => x.id !== c.id && x.phase === 'done'))
+  const [pick, setPick] = useState<'workflow' | 'chat' | 'reject'>(veteran ? 'workflow' : 'chat')
+  const opts: { id: 'workflow' | 'chat' | 'reject'; label: string; hint: string; rec?: boolean }[] = [
+    { id: 'chat', label: 'Approve and build in chat', hint: 'Watch it build, then try it live in the sandbox.', rec: !veteran },
+    { id: 'workflow', label: 'Approve and run as a workflow', hint: 'Runs on its own and opens a draft PR for review.', rec: veteran },
+    { id: 'reject', label: 'Reject plan', hint: 'Tell Revolte what to change.' },
+  ]
+  const ordered = veteran ? [opts[1], opts[0], opts[2]] : opts
+  const box = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const t = setTimeout(() => box.current?.scrollIntoView({ block: 'end', behavior: 'smooth' }), 120)
+    return () => clearTimeout(t)
+  }, [])
+  const go = () => {
+    if (pick === 'chat') approvePlan(c.id)
+    else if (pick === 'workflow') openPicker()
+    else document.querySelector<HTMLTextAreaElement>('textarea[aria-label="Message Revolte"]')?.focus()
+  }
+  return (
+    <section ref={box} className="scroll-mb-4 rounded-2xl border border-border-subtle bg-surface p-4 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300" aria-label="Approve the plan">
+      <p className="text-[13px] text-muted-foreground">Plan ready · {PLAN_STEPS.length} steps</p>
+      <h3 className="mt-1 text-[16px] font-medium">How should Revolte proceed with this plan?</h3>
+      <div className="mt-3 flex flex-col gap-2" role="radiogroup" aria-label="How to proceed">
+        {ordered.map((o) => {
+          const on = pick === o.id
+          return (
+            <button key={o.id} role="radio" aria-checked={on} onClick={() => setPick(o.id)} onDoubleClick={() => (setPick(o.id), setTimeout(go))} className={cn('flex items-center gap-3 rounded-lg border px-3.5 py-2.5 text-left', on ? 'border-input bg-selected' : 'border-border-subtle hover:bg-background/40')}>
+              <span className={cn('grid size-4 shrink-0 place-items-center rounded-full border', on ? 'border-foreground' : 'border-input')}>{on && <span className="size-2 rounded-full bg-foreground motion-safe:animate-[pop_250ms_ease-out]" />}</span>
+              <span className="min-w-0 flex-1"><span className="block text-[14px]">{o.label}</span>{on && <span className="block text-[12px] text-muted-foreground motion-safe:animate-in motion-safe:fade-in-0">{o.hint}</span>}</span>
+              {o.rec && <span className="flex items-center gap-1 text-[12px]"><Icon name="star" size={12} bold /> Recommended</span>}
+            </button>
+          )
+        })}
+      </div>
+      <div className="mt-3 flex items-center gap-3">
+        <p className="mr-auto text-[12px] text-muted-foreground">{pick === 'workflow' ? 'Workflows run on their own and open a draft PR for review.' : pick === 'chat' ? 'You can turn this into a workflow after it is built.' : 'Your feedback goes in the message box below.'}</p>
+        <Button size="sm" className="h-8 text-[13px]" onClick={go}>{pick === 'workflow' ? 'Choose a workflow' : pick === 'chat' ? 'Approve and build' : 'Write feedback'}</Button>
+      </div>
+    </section>
+  )
+}
+
 function PlanCard({ c, approved }: { c: Chat; approved: boolean }) {
   const [view, setView] = useState(false)
   if (approved)
@@ -261,18 +307,13 @@ function PlanCard({ c, approved }: { c: Chat; approved: boolean }) {
             </li>
           ))}
         </ol>
-        <div className="mt-4 flex items-center gap-2">
-          <Button size="sm" className="h-8 text-[13px]" onClick={() => approvePlan(c.id)}>
-            Approve plan
-          </Button>
-          <Button variant="outline" size="sm" className="h-8 border-input bg-transparent text-[13px]" onClick={() => document.querySelector<HTMLTextAreaElement>('textarea[aria-label="Message Revolte"]')?.focus()}>
-            Request changes
-          </Button>
-          <Button variant="ghost" size="sm" className="ml-auto h-8 gap-1.5 text-[13px]" onClick={() => setView(true)}>
+        <div className="mt-4 flex justify-end">
+          <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-[13px]" onClick={() => setView(true)}>
             <Icon name="doc" size={14} /> View plan
           </Button>
         </div>
       </section>
+      <PlanChoice c={c} />
       <PlanDialog c={c} open={view} onOpenChange={setView} />
     </>
   )
@@ -488,7 +529,7 @@ function FailedChoice({ c }: { c: Chat }) {
 }
 
 
-function WorkflowCard({ c, onShown }: { c: Chat; onShown: () => void }) {
+function WorkflowCard({ c, onShown, after }: { c: Chat; onShown: () => void; after?: boolean }) {
   // Arrives a moment after the preview card, so the preview is the first thing you see.
   const [shown, setShown] = useState(false)
   useEffect(() => {
@@ -510,8 +551,8 @@ function WorkflowCard({ c, onShown }: { c: Chat; onShown: () => void }) {
     <section className="animate-in fade-in-0 slide-in-from-bottom-3 rounded-xl border border-border-subtle bg-surface p-4 duration-700 ease-out" aria-label="Workflow suggestion">
       <div className="relative overflow-hidden rounded-lg border border-border-subtle bg-[#0c0c0d] px-4 pt-3 pb-4 [background-image:radial-gradient(#202023_1px,transparent_1px)] [background-size:12px_12px]">
         <div className="mb-3 flex items-center justify-between text-[12px] text-muted-foreground">
-          Workflow studio
-          <Icon name="close" size={12} />
+          Chat to pull request · 4 steps
+          <button aria-label="Not now" className="hover:text-foreground" onClick={() => dismissWorkflow(c.id)}><Icon name="close" size={12} /></button>
         </div>
         <div className="flex items-stretch gap-2.5">
           {nodes.map(([k, t, d, ic], i) => (
@@ -533,14 +574,17 @@ function WorkflowCard({ c, onShown }: { c: Chat; onShown: () => void }) {
         <h3 className="text-[14px] font-medium">Chat to pull request</h3>
         <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">Built from this chat</span>
       </div>
-      <p className="mt-1 text-[13px] leading-[18px] text-muted-foreground">Runs the steps from this chat on its own: build, test, then a draft pull request for you to review.</p>
+      <p className="mt-1 text-[13px] leading-[18px] text-muted-foreground">{after ? 'You just planned, built, tested and shipped this by hand. Next time, a workflow does it from one prompt: build, test, then a draft pull request for you to review.' : 'Runs the steps from this chat on its own: build, test, then a draft pull request for you to review.'}</p>
       <div className="mt-4 flex items-center gap-2 text-[12px] text-muted-foreground">
         <Icon name="checkCircle" size={14} bold className="text-success" /> Ready to run. Nothing to connect.
         <span className="grow" />
         <Button variant="ghost" size="sm" className="h-8 text-[13px] text-foreground" onClick={() => dismissWorkflow(c.id)}>
           Not now
         </Button>
-        <Button size="sm" className="h-8 gap-1.5 text-[13px]">
+        <Button variant="ghost" size="sm" className="h-8 text-[13px] text-foreground" onClick={openPicker}>
+          Other templates
+        </Button>
+        <Button size="sm" className="h-8 gap-1.5 text-[13px] motion-safe:animate-[nudge_2.4s_ease-out_0.8s_2]" onClick={() => fillWorkflow(c.id, 'pr')}>
           <Icon name="star" size={13} bold className="text-info" /> Try workflow
         </Button>
       </div>
@@ -614,6 +658,7 @@ export function ChatView({ c, onNote, onDeploy, onWorkflow, lead }: { c: Chat; o
           {c.phase === 'plan' && c.worked && <Worked secs={c.worked.secs} steps={c.worked.steps} />}
           {c.phase === 'plan' && <PlanCard c={c} approved={false} />}
           {approvedOrLater && <PlanCard c={c} approved />}
+          {c.phase === 'workflow' && <WorkflowChat c={c} onNote={onNote} />}
 
           {live && <Segment c={c} />}
           {!!c.review?.length && <ReviewCard c={c} />}
@@ -638,7 +683,7 @@ export function ChatView({ c, onNote, onDeploy, onWorkflow, lead }: { c: Chat; o
               <Worked secs={c.worked.secs} steps={c.worked.steps} earlier />
               {!depStarted && (
                 <>
-              <Agent text={`Built and verified in the sandbox. 24 tests pass, lint and Prettier are clean. ${c.tab === 'sandbox' ? 'The sandbox is open on the right.' : 'Your sandbox preview is ready.'}`} />
+              <Agent text={`Your webhook dashboard is live in the sandbox. 24 tests pass, lint and Prettier are clean. ${c.tab === 'sandbox' ? 'Try it on the right: filter by status, or press Retry now on a failed delivery.' : 'Open the sandbox to try it.'} When it looks right, deploy it to get a permanent link.`} />
               <div className="-mt-1 flex gap-3.5 text-muted-foreground">
                 {(['copy', 'refresh', 'share', 'dots'] as const).map((n) => (
                   <button key={n} aria-label={n} className="hover:text-foreground" onClick={() => n !== 'dots' && onNote(n === 'copy' ? 'Copied.' : 'Not available in the prototype.')}>
@@ -647,30 +692,34 @@ export function ChatView({ c, onNote, onDeploy, onWorkflow, lead }: { c: Chat; o
                 ))}
               </div>
               <section className="motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-3 motion-safe:duration-500 flex flex-wrap items-center gap-3 rounded-xl border border-border-subtle bg-surface px-3.5 py-3" aria-label="Sandbox preview">
-                <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#17301f] text-success">
-                  <Icon name="monitor" size={18} />
+                <span className="relative grid size-9 shrink-0 place-items-center rounded-lg bg-[#17301f] text-success">
+                  <span className="absolute inset-0 rounded-lg border border-success/60 motion-safe:animate-[ring_1.2s_ease-out_2]" aria-hidden="true" />
+                  <Icon name="monitor" size={18} className="motion-safe:animate-[celebrate_500ms_ease-out]" />
                 </span>
                 <div className="min-w-0 flex-1 basis-40">
                   <p className="text-[14px] leading-5 font-medium">{depLive ? 'Deployed to cloud' : 'Sandbox preview ready'}</p>
                   <p className="truncate text-[12px] text-muted-foreground">{depLive ? `${APP_URL} · live` : 'webhook-monitor.sandbox.revolte.app · temporary'}</p>
                 </div>
                 {depLive ? (
-                  <Button size="sm" className="h-7 gap-1.5 text-[13px]" onClick={openApp}>
+                  <Button size="sm" className="h-7 gap-1.5 text-[13px]" onClick={() => openApp()}>
                     Open app <Icon name="out" size={12} />
                   </Button>
                 ) : (
-                  <Button variant="outline" size="sm" className="h-7 gap-1.5 border-input bg-transparent text-[13px]" onClick={onDeploy}>
+                  <Button size="sm" className="h-7 gap-1.5 text-[13px]" onClick={onDeploy}>
                     <Icon name="rocket" size={14} /> Deploy to cloud
                   </Button>
                 )}
-                <Button variant="outline" size="sm" className="h-7 border-input bg-transparent text-[13px]" onClick={() => onWorkflow()}>
-                  Open sandbox
-                </Button>
+                {c.tab !== 'sandbox' && (
+                  <Button variant="outline" size="sm" className="h-7 border-input bg-transparent text-[13px]" onClick={() => onWorkflow()}>
+                    Open sandbox
+                  </Button>
+                )}
               </section>
                 </>
               )}
               <DeployChat onNote={onNote} />
-              {!depStarted && !c.workflowDismissed && <WorkflowCard c={c} onShown={() => scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: 'smooth' })} />}
+              {!c.wf && !c.workflowDismissed && (!depStarted || depLive) && <WorkflowCard c={c} after={depLive} onShown={() => scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: 'smooth' })} />}
+              {c.wf && <WorkflowChat c={c} onNote={onNote} />}
             </>
           )}
 

@@ -43,6 +43,7 @@ export type Dep = {
   secrets: [string, string]
   toast: boolean
   sugg: boolean
+  opened: boolean
 }
 
 export const REPOS = [
@@ -111,6 +112,7 @@ export const freshDep = (): Dep => ({
   secrets: ['', ''],
   toast: false,
   sugg: false,
+  opened: false,
 })
 
 
