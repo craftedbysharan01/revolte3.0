@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Revolte · Chat prototype</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@300..800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="shell" id="shell" data-view="home" data-sidebar="open" data-pane="closed">
+      <!-- ================= Sidebar ================= -->
+      <nav class="sidebar" aria-label="Workspace">
+        <div class="sidebar-inner">
+          <div class="sb-head">
+            <img src="assets/logo.svg" alt="Revolte" class="logo" />
+            <button class="icon-btn" id="sbClose" aria-label="Close sidebar"><i data-i="sidebar"></i></button>
+          </div>
+          <div class="sb-tabs" role="tablist">
+            <button class="sb-tab on" role="tab" aria-selected="true">Chat</button>
+            <button class="sb-tab" role="tab" aria-selected="false" data-soon="Workflows">Workflows <span class="try">Try</span></button>
+          </div>
+          <div class="sb-group">
+            <button class="nav" id="newChat"><i data-i="newchat"></i><span>New chat</span></button>
+            <button class="nav" data-soon="Search"><i data-i="search"></i><span>Search</span><kbd>⌘K</kbd></button>
+            <button class="nav" data-soon="Projects"><i data-i="folder"></i><span>Projects</span></button>
+          </div>
+          <div class="sb-label">Workspace <i data-i="down" data-s="10"></i></div>
+          <div class="sb-group">
+            <button class="nav" data-soon="Context"><i data-i="context"></i><span>Context</span></button>
+            <button class="nav" data-soon="Integrations"><i data-i="gear"></i><span>Integrations</span></button>
+            <button class="nav" data-soon="Models"><i data-i="chip"></i><span>Models</span></button>
+            <button class="nav" data-soon="Agents"><i data-i="bot"></i><span>Agents</span></button>
+            <button class="nav" id="navEnv"><i data-i="cloud"></i><span>Environments</span></button>
+          </div>
+          <div class="sb-label">Recents <i data-i="down" data-s="10"></i></div>
+          <div class="sb-group" id="recents">
+            <button class="nav recent" data-soon="This chat">Portfolio for a designer</button>
+            <button class="nav recent" data-soon="This chat">Fix flaky checkout tests</button>
+            <button class="nav recent" data-soon="This chat">Billing emails in Slack</button>
+          </div>
+          <div class="sb-foot">
+            <span class="avatar">JH</span>
+            <span class="sb-name">James Hall</span>
+            <span class="sb-plan">Free</span>
+            <button class="icon-btn push" aria-label="Download CLI" data-soon="Download CLI"><i data-i="download"></i></button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- ================= Main ================= -->
+      <div class="main">
+        <header class="topbar">
+          <button class="icon-btn" id="sbOpen" aria-label="Open sidebar"><i data-i="sidebar"></i></button>
+          <button class="title" id="chatTitle"><span></span><i data-i="down" data-s="12"></i></button>
+          <div class="speed" id="speed" role="group" aria-label="Prototype speed">
+            <span class="speed-tag">Prototype speed</span>
+            <button data-speed="1" class="on">1×</button>
+            <button data-speed="4">4×</button>
+            <button data-speed="10">10×</button>
+          </div>
+          <button class="icon-btn" id="paneToggle" aria-label="Toggle session pane"><i data-i="sidebar" class="flip"></i></button>
+        </header>
+
+        <div class="body">
+          <!-- ---------- Home ---------- -->
+          <section class="home" id="home">
+            <div class="home-stack">
+              <h1 class="home-title">What should Revolte work on?</h1>
+              <form class="composer" id="homeComposer">
+                <textarea
+                  id="homeInput"
+                  rows="1"
+                  placeholder="Describe what to build or fix. Revolte plans it, builds it and tests it."
+                  aria-label="Describe what to build or fix"
+                ></textarea>
+                <div class="composer-bar">
+                  <button type="button" class="icon-btn" aria-label="Add files" data-soon="Attachments"><i data-i="add"></i></button>
+                  <button type="button" class="icon-btn" aria-label="Agent" data-soon="Agents"><i data-i="bot"></i></button>
+                  <button type="button" class="chip" data-soon="Applications"><i data-i="box" data-s="14"></i>Application</button>
+                  <span class="grow"></span>
+                  <button type="button" class="chip quiet" data-soon="Modes"><i data-i="forward" data-s="14"></i>Auto</button>
+                  <button type="button" class="chip quiet" data-soon="Models"><span class="spark"></span>Sonnet 5 <em>Medium</em></button>
+                  <button type="button" class="icon-btn" aria-label="Dictate" data-soon="Dictation"><i data-i="mic"></i></button>
+                  <button type="submit" class="send" id="homeSend" aria-label="Start chat" disabled><i data-i="arrowUp"></i></button>
+                </div>
+              </form>
+
+              <!-- Curate workflows promo. Motion follows the Figma timeline (11s loop). -->
+              <div class="promo-wrap" id="promoWrap">
+                <div class="promo" id="promo">
+                  <div class="glow glow-blue"></div>
+                  <div class="glow glow-warm"></div>
+                  <div class="promo-copy">
+                    <p class="promo-title">Curate workflows</p>
+                    <button class="promo-link" data-soon="Workflows">Check it out →</button>
+                  </div>
+                  <div class="promo-visual" aria-hidden="true">
+                    <div class="flow">
+                      <div class="wnode n1">
+                        <div class="wcat"><span class="wcat-ic blue"><i data-i="play" data-s="12"></i></span>Trigger<i data-i="dots" data-s="14" class="wdots"></i></div>
+                        <div class="wcard">
+                          <div class="wtitle"><span class="wtile"><i data-i="play" data-s="16"></i></span><div><b>Manual trigger</b><small>Runs when you start it</small></div></div>
+                          <hr />
+                          <div class="wrow"><span>Starts from</span><b>Chat</b></div>
+                          <div class="wrow"><span>CLI</span><b>Allowed</b></div>
+                        </div>
+                      </div>
+                      <div class="wnode n2">
+                        <div class="wcat"><span class="wcat-ic"><i data-i="bot" data-s="12"></i></span>Agent<i data-i="dots" data-s="14" class="wdots"></i></div>
+                        <div class="wcard">
+                          <div class="wtitle"><span class="wtile"><i data-i="code" data-s="16"></i></span><div><b>Developer</b><small>Builds the change</small></div></div>
+                          <hr />
+                          <div class="wrow"><span>Model</span><b><span class="spark sm"></span>Sonnet 5</b></div>
+                          <div class="wrow"><span>Effort</span><b>Medium</b></div>
+                        </div>
+                      </div>
+                      <div class="wnode n3">
+                        <div class="wcat"><span class="wcat-ic"><i data-i="bot" data-s="12"></i></span>Agent<i data-i="dots" data-s="14" class="wdots"></i></div>
+                        <div class="wcard">
+                          <div class="wtitle"><span class="wtile"><i data-i="tube" data-s="16"></i></span><div><b>QA</b><small>Tests, lint and security scan</small></div></div>
+                          <hr />
+                          <div class="wrow"><span>Model</span><b><span class="spark sm"></span>Sonnet 5</b></div>
+                          <div class="wrow"><span>Effort</span><b>High</b></div>
+                          <div class="wrow"><span>Output</span><b>Structured</b></div>
+                        </div>
+                      </div>
+                      <div class="wnode n4">
+                        <div class="wcat"><span class="wcat-ic green"><i data-i="plug" data-s="12"></i></span>Action<i data-i="dots" data-s="14" class="wdots"></i></div>
+                        <div class="wcard">
+                          <div class="wtitle"><span class="wtile"><i data-i="branch" data-s="16"></i></span><div><b>Create draft PR</b><small>Opens a draft pull request</small></div></div>
+                          <hr />
+                          <div class="wrow"><span>Repository</span><b>webhook-monitor</b></div>
+                          <div class="wrow"><span>Base branch</span><b>main</b></div>
+                        </div>
+                      </div>
+                      <span class="wedge e1"></span><span class="wport p1a"></span><span class="wport p1b"></span>
+                      <span class="wedge e2"></span><span class="wport p2a"></span><span class="wport p2b"></span>
+                      <span class="wedge e3"></span><span class="wport p3a"></span><span class="wport p3b"></span>
+                      <svg class="wcursor blue" width="33" height="34" viewBox="0 0 33 34"><path d="M29 4 4 13.5l10.5 4.2L18.7 29z" fill="#8f8cff" stroke="#fff" stroke-width="2" stroke-linejoin="round" /></svg>
+                      <div class="wmenu">
+                        <div class="on"><i data-i="refresh" data-s="11"></i>Change node</div>
+                        <div class="red"><i data-i="trash" data-s="11"></i>Delete node</div>
+                      </div>
+                      <svg class="wcursor red" width="33" height="34" viewBox="0 0 33 34"><path d="M4 4 29 13.5l-10.5 4.2L14.3 29z" fill="#ff5a4d" stroke="#fff" stroke-width="2" stroke-linejoin="round" /></svg>
+                    </div>
+                  </div>
+                  <button class="icon-btn promo-x" id="promoClose" aria-label="Dismiss"><i data-i="close" data-s="14"></i></button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ---------- Chat ---------- -->
+          <section class="chat" id="chat">
+            <div class="thread" id="thread"><div class="thread-inner" id="threadInner"></div></div>
+            <div class="chat-foot">
+              <div class="waiting" id="waiting"><span class="waiting-dot"></span>Waiting for you</div>
+              <form class="reply" id="reply">
+                <button type="button" class="icon-btn" aria-label="Add files" data-soon="Attachments"><i data-i="add"></i></button>
+                <input id="replyInput" placeholder="Reply to Revolte" aria-label="Reply to Revolte" autocomplete="off" />
+                <button type="submit" class="icon-btn" aria-label="Send"><i data-i="enter"></i></button>
+              </form>
+              <div class="reply-meta">
+                <button class="chip quiet" data-soon="Modes"><i data-i="forward" data-s="14"></i>Auto</button>
+                <button class="chip quiet" data-soon="Models"><span class="spark"></span>Sonnet 5.5 <em>Medium</em></button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ---------- Right pane ---------- -->
+          <aside class="pane" id="pane" aria-label="Session">
+            <div class="pane-inner">
+              <div class="pane-head">
+                <div class="ptabs" role="tablist" id="ptabs">
+                  <button class="ptab on" data-tab="overview" role="tab"><i data-i="overview"></i><span>Overview</span></button>
+                  <button class="ptab" data-tab="sandbox" role="tab"><i data-i="monitor"></i><span>Sandbox</span></button>
+                  <button class="ptab" data-tab="code" role="tab"><i data-i="code"></i><span>Code</span></button>
+                  <button class="ptab" data-tab="files" role="tab"><i data-i="files"></i><span>Files</span></button>
+                  <button class="ptab" data-tab="workflow" role="tab"><i data-i="routing"></i><span>Workflow</span></button>
+                </div>
+                <div class="coach" id="coach">
+                  <b>Revolte is writing code</b>
+                  <span>Open Code to watch it live.</span>
+                </div>
+                <button class="icon-btn boxed push" aria-label="Deploy" data-soon="Deploy"><i data-i="rocket"></i></button>
+              </div>
+
+              <div class="pane-body" id="paneBody">
+                <!-- Overview -->
+                <section class="pview on" data-view="overview">
+                  <div class="env-line">
+                    <i data-i="cloud"></i>
+                    <span class="env-name" id="envName">Default</span>
+                    <span class="env-state" id="envState">Not started</span>
+                    <button class="icon-btn push" id="envOpen" aria-label="Environment settings"><i data-i="gear"></i></button>
+                  </div>
+                  <p class="plabel">Progress</p>
+                  <ol class="progress" id="progress"></ol>
+                  <div class="pr">
+                    <p class="pr-title"><i data-i="branch"></i>Pull request</p>
+                    <p class="pr-text">Opens when the build is verified. Connect GitHub to push it to a repository.</p>
+                  </div>
+                </section>
+
+                <!-- Sandbox -->
+                <section class="pview" data-view="sandbox">
+                  <div class="browser" id="browser">
+                    <div class="browser-bar">
+                      <span class="lights"><i></i><i></i><i></i></span>
+                      <i data-i="left" data-s="14"></i><i data-i="right" data-s="14"></i>
+                      <button class="icon-btn sm" id="pvReload" aria-label="Reload"><i data-i="refresh" data-s="14"></i></button>
+                      <div class="url"><i data-i="lock" data-s="12"></i><span id="pvUrl">https://webhook-monitor.sandbox.revolte.app/deliveries</span><span class="url-load" id="urlLoad"></span></div>
+                      <i data-i="copy" data-s="14"></i><i data-i="out" data-s="14"></i><i data-i="bookmark" data-s="14"></i>
+                    </div>
+                    <div class="browser-page" id="pvPage"></div>
+                  </div>
+                </section>
+
+                <!-- Code -->
+                <section class="pview" data-view="code">
+                  <div class="code-top">
+                    <span class="code-branch"><i data-i="branch" data-s="14"></i>revolte/webhook-dashboard → main</span>
+                    <span class="code-status" id="codeStatus"></span>
+                    <button class="follow" id="follow">Follow Revolte</button>
+                    <span class="code-total" id="codeTotal"></span>
+                  </div>
+                  <div class="code-view">
+                    <div class="tree" id="tree"></div>
+                    <div class="editor">
+                      <div class="etabs" id="etabs"></div>
+                      <div class="ecode" id="ecode"></div>
+                      <div class="term">
+                        <div class="term-head"><i data-i="terminal" data-s="12"></i>Terminal</div>
+                        <pre class="term-body" id="term"></pre>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="pview" data-view="files">
+                  <div class="empty"><i data-i="files" data-s="20"></i><p>Files Revolte creates for you, like reports and exports, show up here.</p></div>
+                </section>
+                <section class="pview" data-view="workflow">
+                  <div class="empty"><i data-i="routing" data-s="20"></i><p>Turn this chat into a workflow once the build is verified.</p></div>
+                </section>
+
+                <!-- Plan document -->
+                <section class="pview plan-doc" data-view="plan" id="planDoc"></section>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= Environment modal ================= -->
+    <div class="modal-root" id="envModal" aria-hidden="true">
+      <div class="backdrop" data-close></div>
+      <form class="modal" role="dialog" aria-modal="true" aria-labelledby="envTitle" id="envForm">
+        <header class="modal-head">
+          <div>
+            <h2 id="envTitle">Environment</h2>
+            <p>What the cloud sandbox runs, knows and can reach.</p>
+          </div>
+          <button type="button" class="icon-btn" data-close aria-label="Close"><i data-i="close"></i></button>
+        </header>
+        <div class="modal-body">
+          <label class="field">
+            <span class="flabel">Name</span>
+            <div class="name-row">
+              <input class="input" id="envNameInput" />
+              <span class="tag"><i data-i="cloud" data-s="12"></i>Cloud · 2 vCPU · 4 GB</span>
+            </div>
+          </label>
+
+          <label class="field">
+            <span class="flabel">Start script <em>Runs each time the sandbox starts, before Revolte begins.</em></span>
+            <textarea class="input mono" id="envScript" rows="3" spellcheck="false"></textarea>
+          </label>
+
+          <div class="field">
+            <span class="flabel">Environment variables <em>Plain text. Visible to anyone with access to this environment.</em></span>
+            <div class="kv" id="envVars"></div>
+            <button type="button" class="add-row" data-add="vars"><i data-i="add" data-s="14"></i>Add variable</button>
+          </div>
+
+          <div class="field">
+            <span class="flabel">Secrets <em>Encrypted. Revolte can use them but never shows the value.</em></span>
+            <div class="kv" id="envSecrets"></div>
+            <button type="button" class="add-row" data-add="secrets"><i data-i="add" data-s="14"></i>Add secret</button>
+          </div>
+
+          <div class="field">
+            <span class="flabel">Network access</span>
+            <div class="seg" id="envNet" role="radiogroup">
+              <button type="button" role="radio" data-net="limited">Allowed domains</button>
+              <button type="button" role="radio" data-net="open">Unrestricted</button>
+              <button type="button" role="radio" data-net="none">No network</button>
+            </div>
+            <div class="net-limited" id="netLimited">
+              <div class="domains" id="envDomains"><input id="domainInput" placeholder="Add a domain, then press Enter" aria-label="Add a domain" /></div>
+              <label class="check"><input type="checkbox" id="envRegistries" /><span>Also allow package registries (npm, PyPI, crates.io)</span></label>
+            </div>
+            <p class="net-note" id="netNote"></p>
+          </div>
+        </div>
+        <footer class="modal-foot">
+          <span>Changes apply the next time the sandbox starts.</span>
+          <button type="button" class="btn ghost" data-close>Cancel</button>
+          <button type="submit" class="btn primary">Save</button>
+        </footer>
+      </form>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script src="icons.js"></script>
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
