@@ -46,6 +46,7 @@
 
   // ---------- State ----------
   const shell = $('#shell')
+  const small = () => matchMedia('(max-width: 760px)').matches
   const S = {
     run: null,
     tab: 'overview',
@@ -115,7 +116,7 @@
     clock.tickers.clear()
     shell.dataset.view = 'home'
     shell.dataset.pane = 'closed'
-    shell.dataset.sidebar = 'open'
+    shell.dataset.sidebar = small() ? 'closed' : 'open'
     $$('#recents .on').forEach((b) => b.classList.remove('on'))
     homeInput.value = ''
     homeInput.style.height = 'auto'
@@ -892,7 +893,8 @@
     $('#coach').classList.remove('on')
     shell.dataset.view = 'chat'
     showTab('overview')
-    shell.dataset.pane = 'narrow'
+    shell.dataset.pane = small() ? 'closed' : 'narrow'
+    if (small()) shell.dataset.sidebar = 'closed'
     renderPreview()
     bubble(prompt)
     replyInput.focus()
@@ -1029,6 +1031,7 @@
 
   // ---------- Boot ----------
   hydrate(document)
+  if (small()) shell.dataset.sidebar = 'closed'
   renderProgress()
   homeInput.focus()
   // Review helpers: ?prompt=... starts a chat, ?speed=10 sets the speed.

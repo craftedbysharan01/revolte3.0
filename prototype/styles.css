@@ -2315,6 +2315,43 @@ textarea.input {
   .chat { min-width: 300px; }
 }
 
+/* ============ Phones: sidebar and pane become overlays ============ */
+@media (max-width: 760px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 30;
+    width: var(--sb);
+    transition: width 420ms var(--ease-drawer);
+  }
+  .chat { min-width: 0; }
+  .thread, .chat-foot { padding-left: 16px; padding-right: 16px; }
+  .home { padding: 0 16px; }
+  .composer-bar { flex-wrap: wrap; }
+  .title { max-width: 40vw; }
+  .pane {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    width: 100% !important;
+    border: 0;
+    background: var(--background);
+    transition: none;
+  }
+  [data-pane='closed'] .pane { display: none; }
+  .pane-inner { min-width: 0; }
+  .code-view { grid-template-columns: minmax(0, 1fr); }
+  .tree, .code-branch { display: none; }
+  .stats { grid-template-columns: 1fr; }
+  .browser-page { padding: 20px 14px; }
+  .kv-row, .kv-row:not(.secret) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 28px; }
+  .kv-row.secret [data-eye] { display: none; }
+  .modal-root { padding: 12px; }
+  .modal-foot span { display: none; }
+  .modal-foot .ghost { margin-left: auto; }
+}
+
 /* ============ Reduced motion: keep fades, drop movement ============ */
 @media (prefers-reduced-motion: reduce) {
   .shell, .pane, .sidebar-inner { transition-duration: 0ms; }
