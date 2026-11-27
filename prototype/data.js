@@ -317,8 +317,8 @@ export function RetryButton({ id }: { id: string }) {
         ' ▲ Next.js 15.1.0',
         ' - Local: http://localhost:3000',
         ' ✓ Ready in 2.1s',
-        ' ✓ Compiled /deliveries in 640ms',
-        ' Preview: https://webhook-monitor.sandbox.revolte.app/deliveries',
+        ' ✓ Compiled / in 640ms',
+        ' Preview: https://webhook-monitor.sandbox.revolte.app',
       ],
     },
   ]

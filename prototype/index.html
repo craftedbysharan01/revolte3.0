@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@300..800&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@300..800&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
@@ -64,6 +64,14 @@
             <button data-speed="4">4×</button>
             <button data-speed="10">10×</button>
           </div>
+          <div class="ptabs" role="tablist" id="ptabs">
+            <button class="ptab on" data-tab="overview" role="tab" aria-label="Overview" title="Overview"><i data-i="overview"></i></button>
+            <button class="ptab" data-tab="sandbox" role="tab" aria-label="Sandbox preview" title="Sandbox preview"><i data-i="monitor"></i></button>
+            <button class="ptab" data-tab="code" role="tab" aria-label="Code" title="Code"><i data-i="code"></i></button>
+            <button class="ptab" data-tab="files" role="tab" aria-label="Files" title="Files"><i data-i="files"></i></button>
+            <button class="ptab" data-tab="workflow" role="tab" aria-label="Workflow" title="Workflow"><i data-i="routing"></i></button>
+          </div>
+          <button class="icon-btn boxed" id="deploy" aria-label="Deploy" data-soon="Deploy"><i data-i="rocket"></i></button>
           <button class="icon-btn" id="paneToggle" aria-label="Toggle session pane"><i data-i="sidebar" class="flip"></i></button>
         </header>
 
@@ -176,21 +184,6 @@
           <!-- ---------- Right pane ---------- -->
           <aside class="pane" id="pane" aria-label="Session">
             <div class="pane-inner">
-              <div class="pane-head">
-                <div class="ptabs" role="tablist" id="ptabs">
-                  <button class="ptab on" data-tab="overview" role="tab"><i data-i="overview"></i><span>Overview</span></button>
-                  <button class="ptab" data-tab="sandbox" role="tab"><i data-i="monitor"></i><span>Sandbox</span></button>
-                  <button class="ptab" data-tab="code" role="tab"><i data-i="code"></i><span>Code</span></button>
-                  <button class="ptab" data-tab="files" role="tab"><i data-i="files"></i><span>Files</span></button>
-                  <button class="ptab" data-tab="workflow" role="tab"><i data-i="routing"></i><span>Workflow</span></button>
-                </div>
-                <div class="coach" id="coach">
-                  <b>Revolte is writing code</b>
-                  <span>Open Code to watch it live.</span>
-                </div>
-                <button class="icon-btn boxed push" aria-label="Deploy" data-soon="Deploy"><i data-i="rocket"></i></button>
-              </div>
-
               <div class="pane-body" id="paneBody">
                 <!-- Overview -->
                 <section class="pview on" data-view="overview">
@@ -200,11 +193,12 @@
                     <span class="env-state" id="envState">Not started</span>
                     <button class="icon-btn push" id="envOpen" aria-label="Environment settings"><i data-i="gear"></i></button>
                   </div>
+                  <div class="repo" id="repo"></div>
                   <p class="plabel">Progress</p>
                   <ol class="progress" id="progress"></ol>
                   <div class="pr">
                     <p class="pr-title"><i data-i="branch"></i>Pull request</p>
-                    <p class="pr-text">Opens when the build is verified. Connect GitHub to push it to a repository.</p>
+                    <p class="pr-text" id="prText">Opens when the build is verified. Connect GitHub to push it to a repository.</p>
                   </div>
                 </section>
 
@@ -215,7 +209,7 @@
                       <span class="lights"><i></i><i></i><i></i></span>
                       <i data-i="left" data-s="14"></i><i data-i="right" data-s="14"></i>
                       <button class="icon-btn sm" id="pvReload" aria-label="Reload"><i data-i="refresh" data-s="14"></i></button>
-                      <div class="url"><i data-i="lock" data-s="12"></i><span id="pvUrl">https://webhook-monitor.sandbox.revolte.app/deliveries</span><span class="url-load" id="urlLoad"></span></div>
+                      <div class="url"><i data-i="lock" data-s="12"></i><span id="pvUrl">https://webhook-monitor.sandbox.revolte.app</span><span class="url-load" id="urlLoad"></span></div>
                       <i data-i="copy" data-s="14"></i><i data-i="out" data-s="14"></i><i data-i="bookmark" data-s="14"></i>
                     </div>
                     <div class="browser-page" id="pvPage"></div>

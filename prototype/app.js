@@ -411,6 +411,30 @@
     el.textContent = text
   }
 
+  const REPOS = ['acme/webhook-monitor', 'acme/payments-api', 'acme/storefront']
+  function renderRepo(open) {
+    const el = $('#repo')
+    el.classList.toggle('open', !!open)
+    el.innerHTML = S.repo
+      ? `<div class="repo-line">${ic('branch')}<span class="repo-name">${S.repo}</span><span class="repo-branch">main</span><button class="linkish push" data-repo-toggle>Change</button></div>`
+      : `<button class="repo-line" data-repo-toggle>${ic('branch')}<span class="repo-name muted">Connect repository</span>${ic(open ? 'up' : 'down', 12, 'push')}</button>`
+    if (open)
+      el.insertAdjacentHTML(
+        'beforeend',
+        `<div class="repo-list">${REPOS.map((r) => `<button data-repo="${r}">${ic('folder', 14)}${r}${r === S.repo ? ic('check', 14, 'push') : ''}</button>`).join('')}</div>`
+      )
+  }
+  $('#repo').addEventListener('click', (e) => {
+    const pick = e.target.closest('[data-repo]')
+    if (pick) {
+      S.repo = pick.dataset.repo
+      renderRepo(false)
+      $('#prText').textContent = `Opens against ${S.repo} when the build is verified.`
+      return toast('Repository connected')
+    }
+    if (e.target.closest('[data-repo-toggle]')) renderRepo(!$('#repo').classList.contains('open'))
+  })
+
   const paneWidth = () => (S.planOpen ? (S.immersive ? 'wide' : 'split') : S.tab === 'sandbox' || S.tab === 'code' ? (S.immersive ? 'wide' : 'split') : 'narrow')
   function applyPane() {
     if (shell.dataset.pane !== 'closed' || S.planOpen) shell.dataset.pane = paneWidth()
@@ -436,7 +460,6 @@
       S.immersive = true
       S.sidebarBefore = shell.dataset.sidebar
       shell.dataset.sidebar = 'closed'
-      $('#coach').classList.remove('on')
     } else if (S.building && leavingCode && S.immersive) {
       S.immersive = false
       shell.dataset.sidebar = S.sidebarBefore
@@ -451,7 +474,6 @@
     if (S.planOpen) closePlan()
     showTab(b.dataset.tab)
   })
-  $('#coach').addEventListener('click', () => showTab('code'))
   $('#paneToggle').addEventListener('click', () => {
     shell.dataset.pane = shell.dataset.pane === 'closed' ? paneWidth() : 'closed'
   })
@@ -653,26 +675,52 @@
       page.innerHTML = `<div class="pv-wait">${S.run ? '<span class="spinner"></span>' : ''}<p>The preview opens here once the build is verified.</p></div>`
       return
     }
-    const rows = S.deliveries
+    const rows = S.deliveries.slice(0, 4)
     const stat = { delivered: 1284, retrying: 12, failed: 3 }
     rows.forEach((r) => r.retried && (stat.retrying++, stat.failed--))
+    const [, retryPolicy, alertPolicy] = S.answers || []
+    const policy = (retryPolicy || '8 attempts over 6 hours').toLowerCase()
+    const alert = (alertPolicy || 'Email on-call').toLowerCase()
+    const keep = page.scrollTop
     page.innerHTML = `
-      <div class="pv-head"><h1>Webhook deliveries</h1><span>Last 24 hours</span></div>
-      <div class="stats">
-        <div class="stat" style="--i:1"><span>Delivered</span><b>${stat.delivered.toLocaleString('en-US')}</b></div>
-        <div class="stat" style="--i:2"><span>Retrying</span><b>${stat.retrying}</b></div>
-        <div class="stat" style="--i:3"><span>Failed</span><b>${stat.failed}</b></div>
-      </div>
-      <table class="dtable">
-        <thead style="--i:4"><tr><th>Endpoint</th><th>Event</th><th>Attempts</th><th>Status</th><th></th></tr></thead>
-        <tbody>${rows
-          .map(
-            (r, i) => `<tr style="--i:${5 + i}"><td>${r.endpoint}</td><td>${r.event}</td><td>${r.attempts}${r.attempts > 1 || r.status !== 'delivered' ? ' of 8' : ''}</td>
-            <td><span class="badge ${r.status}">${r.status[0].toUpperCase() + r.status.slice(1)}</span></td>
-            <td>${r.status === 'failed' ? `<button class="retry-btn" data-row="${i}">Retry</button>` : ''}</td></tr>`
-          )
-          .join('')}</tbody>
-      </table>`
+      <div class="site">
+        <header class="s-nav" style="--i:0">
+          <span class="s-logo"><i></i>Hookwatch</span>
+          <nav><a>Deliveries</a><a>Alerts</a><a>Retry policy</a><a>Docs</a></nav>
+          <a class="s-btn dark sm">Open dashboard</a>
+        </header>
+        <section class="s-hero">
+          <span class="s-pill" style="--i:1"><b></b>99.7% delivered in the last 24 hours</span>
+          <h1 style="--i:2">Every webhook lands. <em>Or you hear about it.</em></h1>
+          <p style="--i:3">Hookwatch tracks each delivery, retries the failures with exponential backoff and tells on-call when the last attempt fails.</p>
+          <div class="s-cta" style="--i:4"><a class="s-btn dark">View deliveries</a><a class="s-btn">Read the retry policy</a></div>
+        </section>
+        <section class="s-panel" style="--i:5">
+          <div class="s-panel-head"><b>Deliveries</b><span>Last 24 hours</span><span class="s-live"><i></i>Live</span></div>
+          <div class="s-stats">
+            <div><span>Delivered</span><b>${stat.delivered.toLocaleString('en-US')}</b></div>
+            <div><span>Retrying</span><b>${stat.retrying}</b></div>
+            <div><span>Failed</span><b>${stat.failed}</b></div>
+          </div>
+          <table class="s-table">
+            <thead><tr><th>Endpoint</th><th class="s-ev">Event</th><th>Attempts</th><th>Status</th><th></th></tr></thead>
+            <tbody>${rows
+              .map(
+                (r, i) => `<tr><td>${r.endpoint}</td><td class="s-ev">${r.event}</td><td>${r.attempts}${r.attempts > 1 || r.status !== 'delivered' ? ' of 8' : ''}</td>
+                <td><span class="badge ${r.status}">${r.status[0].toUpperCase() + r.status.slice(1)}</span></td>
+                <td>${r.status === 'failed' ? `<button class="retry-btn" data-row="${i}">Retry</button>` : ''}</td></tr>`
+              )
+              .join('')}</tbody>
+          </table>
+        </section>
+        <section class="s-features">
+          <div style="--i:7"><span class="s-ic">${svg('refresh', 18)}</span><b>Retries that back off</b><p>Failed deliveries retry on their own: ${esc(policy)}, with jitter so they never land together.</p></div>
+          <div style="--i:8"><span class="s-ic">${svg('danger', 18)}</span><b>On-call hears first</b><p>When the last attempt fails, Hookwatch will ${esc(alert)} with the event and the last response.</p></div>
+          <div style="--i:9"><span class="s-ic">${svg('clock', 18)}</span><b>A full delivery log</b><p>Every endpoint, event and attempt from the last 24 hours, with one-click retry.</p></div>
+        </section>
+        <footer class="s-foot"><span class="s-logo"><i></i>Hookwatch</span><span>Internal tool · Acme Corp</span></footer>
+      </div>`
+    page.scrollTop = keep
   }
   function freshen() {
     const b = $('#browser')
@@ -763,6 +811,7 @@
     msg('Three details change what gets built. The recommended answers are selected, so you can skip straight through.')
     const { answers, skipped } = await askQuestions()
     if (run.cancelled) throw CANCEL
+    S.answers = answers
     stage('grill', 'done', skipped ? 'Skipped' : 'Answered', skipped ? 'Used recommended answers' : 'Answered 3 questions')
 
     // -- Plan, with a change loop
@@ -795,7 +844,6 @@
     S.code.follow = true
     g = group(BUILD[0].label)
     const rows = BUILD.map((s) => g.step(stepHtml(s, 'pending'), 'pending'))
-    let coached = false
     for (let i = 0; i < BUILD.length; i++) {
       const s = BUILD[i]
       g.setLabel(s.label)
@@ -814,11 +862,6 @@
         else renderTree(), renderEditor()
         $('#codeStatus').textContent = `${LIVE[s.verb]} ${s.file}`
         $('.ptab[data-tab="code"]').classList.toggle('live', S.tab !== 'code')
-        if (!coached && S.tab !== 'code') {
-          coached = true
-          $('#coach').classList.add('on')
-          sleep(12000, run).then(() => $('#coach').classList.remove('on'), () => {})
-        }
         tick = () => {
           // Type a little unevenly: quick bursts, short pauses.
           const x = Math.min(1, (clock.t - t0) / (s.dur * 1000 * 0.94))
@@ -856,7 +899,6 @@
     stage('verify', 'done', '', '24 tests pass, lint clean')
     $('#codeStatus').textContent = ''
     $('.ptab[data-tab="code"]').classList.remove('live')
-    $('#coach').classList.remove('on')
     S.code.follow = true
     renderEditor()
     $('.act-time', g.el).textContent = `${fmt(worked)} · ${steps} steps`
@@ -890,7 +932,6 @@
     $('#planDoc').classList.remove('on')
     $('#codeTotal').innerHTML = ''
     $('#codeStatus').textContent = ''
-    $('#coach').classList.remove('on')
     shell.dataset.view = 'chat'
     showTab('overview')
     shell.dataset.pane = small() ? 'closed' : 'narrow'
@@ -1031,6 +1072,7 @@
 
   // ---------- Boot ----------
   hydrate(document)
+  renderRepo(false)
   if (small()) shell.dataset.sidebar = 'closed'
   renderProgress()
   homeInput.focus()
