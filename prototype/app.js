@@ -386,24 +386,41 @@
   // ======================================================================
   // Right pane
   // ======================================================================
+  // Brand marks for GitHub and pull requests (Solar has none).
+  Object.assign(ICONS, {
+    github: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>',
+    pr: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"/></svg>',
+    merged: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M5.45 5.154A4.25 4.25 0 0 0 9.25 7.5h1.378a2.251 2.251 0 1 1 0 1.5H9.25A5.734 5.734 0 0 1 5 7.123v3.505a2.25 2.25 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.95-.218ZM4.25 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm8.5-4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-8.5-6.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Z"/></svg>',
+  })
+
+  // Progress: five plain steps, one line each.
   const STAGES = [
-    ['grill', 'Grill', 'Questions that change the build'],
-    ['plan', 'Plan', 'Decisions and tasks'],
-    ['tasks', 'Tasks', 'Split from your request'],
-    ['build', 'Build', 'Retry scheduler with backoff'],
-    ['verify', 'Verify', 'Tests, lint, Prettier'],
+    ['grill', 'Ask questions'],
+    ['plan', 'Make a plan'],
+    ['tasks', 'Split into tasks'],
+    ['build', 'Write the code'],
+    ['verify', 'Test and preview'],
   ]
   function renderProgress() {
     $('#progress').innerHTML = STAGES.map(
-      ([k, n, sub]) => `<li data-stage="${k}"><span class="pg-ic">${ic('check', 14)}</span><span class="pg-name">${n}</span><span class="pg-state"></span><span class="pg-sub">${sub}</span></li>`
+      ([k, n]) => `<li data-stage="${k}"><span class="pg-ic">${ic('check', 12)}</span><span class="pg-name">${n}</span><span class="pg-note"></span></li>`
     ).join('')
+    syncProgress()
+  }
+  function syncProgress() {
+    const lis = $$('#progress li')
+    const done = lis.filter((l) => l.classList.contains('done')).length
+    $('#pgCount').textContent = `${done} of ${lis.length}`
+    $$('#pgBar i').forEach((b, i) => (b.className = lis[i].className))
   }
   function stage(key, state, label, sub) {
     const li = $(`#progress [data-stage="${key}"]`)
     if (!li) return
     li.className = state
-    $('.pg-state', li).textContent = label ?? (state === 'now' ? 'In progress' : '')
-    if (sub) $('.pg-sub', li).textContent = sub
+    const note = state === 'now' ? 'Now' : sub && sub.length <= 16 ? sub : label || ''
+    $('.pg-note', li).textContent = note
+    syncProgress()
+    renderChanges()
   }
   function envState(cls, text) {
     const el = $('#envState')
@@ -411,28 +428,64 @@
     el.textContent = text
   }
 
+  // GitHub: one row in the group, then a Changes list once a repository is connected.
   const REPOS = ['acme/webhook-monitor', 'acme/payments-api', 'acme/storefront']
+  const PAST_PRS = [
+    { t: 'Verify Stripe signatures on incoming webhooks', n: 408 },
+    { t: 'Move the delivery queue to BullMQ', n: 401 },
+    { t: 'fix(deliveries): paginate the delivery log', n: 397 },
+    { t: 'Seed sample deliveries for local dev', n: 389 },
+    { t: 'Add Postgres indexes for delivery lookups', n: 382 },
+  ]
+  let showAllChanges = false
   function renderRepo(open) {
     const el = $('#repo')
     el.classList.toggle('open', !!open)
     el.innerHTML = S.repo
-      ? `<div class="repo-line">${ic('branch')}<span class="repo-name">${S.repo}</span><span class="repo-branch">main</span><button class="linkish push" data-repo-toggle>Change</button></div>`
-      : `<button class="repo-line" data-repo-toggle>${ic('branch')}<span class="repo-name muted">Connect repository</span>${ic(open ? 'up' : 'down', 12, 'push')}</button>`
+      ? `<div class="ov-row">${ic('github')}<span class="ov-name">${S.repo}</span><span class="repo-branch">main</span><button class="icon-btn sm push" data-repo-toggle aria-label="Change repository">${ic(open ? 'up' : 'down', 12)}</button></div>`
+      : `<button class="ov-row" data-repo-toggle>${ic('github')}<span class="ov-name muted">Connect repository</span><span class="push">${ic(open ? 'up' : 'down', 12)}</span></button>`
     if (open)
       el.insertAdjacentHTML(
         'beforeend',
-        `<div class="repo-list">${REPOS.map((r) => `<button data-repo="${r}">${ic('folder', 14)}${r}${r === S.repo ? ic('check', 14, 'push') : ''}</button>`).join('')}</div>`
+        `<div class="repo-list">${REPOS.map((r) => `<button data-repo="${r}">${r}${r === S.repo ? ic('check', 14, 'push') : ''}</button>`).join('')}</div>`
       )
   }
   $('#repo').addEventListener('click', (e) => {
     const pick = e.target.closest('[data-repo]')
     if (pick) {
+      const first = !S.repo
       S.repo = pick.dataset.repo
       renderRepo(false)
-      $('#prText').textContent = `Opens against ${S.repo} when the build is verified.`
+      renderChanges(first)
       return toast('Repository connected')
     }
     if (e.target.closest('[data-repo-toggle]')) renderRepo(!$('#repo').classList.contains('open'))
+  })
+
+  function renderChanges(enter) {
+    const el = $('#changes')
+    if (!S.repo) return (el.hidden = true)
+    el.hidden = false
+    const name = S.repo.split('/')[1]
+    const files = Object.values(S.files || {}).filter((f) => f.lines && f.done)
+    const add = files.reduce((n, f) => n + fileStat(f, f.done)[0], 0)
+    const del = files.reduce((n, f) => n + fileStat(f, f.done)[1], 0)
+    const rows = []
+    if (S.previewReady)
+      rows.push(`<div class="chg mine">${ic('pr', 16, 'chg-ic open')}<span class="chg-text"><b>Add retry scheduler and deliveries dashboard</b><span>${name} #412 · <span class="add">+${add}</span> <span class="del">−${del}</span></span></span><button class="icon-btn sm" data-soon="Pull request actions" aria-label="More">${ic('dots', 14)}</button></div>`)
+    else if (S.building)
+      rows.push(`<div class="chg mine">${ic('pr', 16, 'chg-ic draft')}<span class="chg-text"><b>Add retry scheduler and deliveries dashboard</b><span>${name} · <span class="shimmer">Draft, opens after the tests pass</span></span></span></div>`)
+    const past = PAST_PRS.slice(0, showAllChanges ? PAST_PRS.length : 3)
+    past.forEach((p) =>
+      rows.push(`<div class="chg">${ic('merged', 16, 'chg-ic merged')}<span class="chg-text"><b>${esc(p.t)}</b><span>${name} #${p.n}</span></span><button class="icon-btn sm" data-soon="Pull request actions" aria-label="More">${ic('dots', 14)}</button></div>`)
+    )
+    el.classList.toggle('enter', !!enter)
+    el.innerHTML = `<p class="pg-head"><span>Changes</span></p>${rows.join('')}${
+      showAllChanges ? '' : '<button class="show-more" id="showMore">Show more</button>'
+    }`
+  }
+  $('#changes').addEventListener('click', (e) => {
+    if (e.target.id === 'showMore') (showAllChanges = true), renderChanges()
   })
 
   const paneWidth = () => (S.planOpen ? (S.immersive ? 'wide' : 'split') : S.tab === 'sandbox' || S.tab === 'code' ? (S.immersive ? 'wide' : 'split') : 'narrow')
@@ -744,6 +797,7 @@
   // The build is verified: the preview lands where the user is looking.
   function revealPreview() {
     S.previewReady = true
+    renderChanges()
     if (S.planOpen) closePlan()
     renderPreview()
     const land = () => {
@@ -896,7 +950,7 @@
     steps += g.count
     worked += g.finish('Worked for')
     S.building = false
-    stage('verify', 'done', '', '24 tests pass, lint clean')
+    stage('verify', 'done', '', '24 tests pass')
     $('#codeStatus').textContent = ''
     $('.ptab[data-tab="code"]').classList.remove('live')
     S.code.follow = true

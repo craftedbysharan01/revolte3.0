@@ -187,19 +187,21 @@
               <div class="pane-body" id="paneBody">
                 <!-- Overview -->
                 <section class="pview on" data-view="overview">
-                  <div class="env-line">
-                    <i data-i="cloud"></i>
-                    <span class="env-name" id="envName">Default</span>
-                    <span class="env-state" id="envState">Not started</span>
-                    <button class="icon-btn push" id="envOpen" aria-label="Environment settings"><i data-i="gear"></i></button>
+                  <div class="ov-group">
+                    <div class="ov-row">
+                      <i data-i="cloud"></i>
+                      <span class="ov-name" id="envName">Default</span>
+                      <span class="env-state" id="envState">Not started</span>
+                      <button class="icon-btn sm push" id="envOpen" aria-label="Environment settings"><i data-i="gear"></i></button>
+                    </div>
+                    <div class="repo" id="repo"></div>
                   </div>
-                  <div class="repo" id="repo"></div>
-                  <p class="plabel">Progress</p>
+
+                  <div class="pg-head"><span>Progress</span><span id="pgCount">0 of 5</span></div>
+                  <div class="pg-bar" id="pgBar"><i></i><i></i><i></i><i></i><i></i></div>
                   <ol class="progress" id="progress"></ol>
-                  <div class="pr">
-                    <p class="pr-title"><i data-i="branch"></i>Pull request</p>
-                    <p class="pr-text" id="prText">Opens when the build is verified. Connect GitHub to push it to a repository.</p>
-                  </div>
+
+                  <div class="changes" id="changes" hidden></div>
                 </section>
 
                 <!-- Sandbox -->
