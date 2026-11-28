@@ -200,6 +200,52 @@
     $('#creditsPop').hidden = !open
     $('#creditsBtn').setAttribute('aria-expanded', open)
   }
+  // Run mode: Auto runs end to end and only stops when it needs you; Manual checks in before each step.
+  const MODES = [
+    { id: 'auto', name: 'Auto', icon: 'f-auto', sub: 'Runs end to end, asks only if needed' },
+    { id: 'manual', name: 'Manual', icon: 'f-manual', sub: 'Checks in before each step' },
+  ]
+  S.mode = 'auto'
+  function renderModes() {
+    const m = MODES.find((x) => x.id === S.mode)
+    $$('[data-mode-btn]').forEach((b) => {
+      $('.mode-l', b).textContent = m.name
+      const i = $('i[data-i]', b)
+      if (i.dataset.i !== m.icon) {
+        i.dataset.i = m.icon
+        i.innerHTML = ''
+        hydrate(b)
+        opticalIcons(b.parentElement.parentElement)
+      }
+    })
+  }
+  function modeMenu(btn, open) {
+    const menu = btn.nextElementSibling
+    open = open ?? menu.hidden
+    if (open)
+      menu.innerHTML =
+        `<span class="menu-label">Run mode</span>` +
+        MODES.map(
+          (m) => `<button type="button" role="menuitemradio" aria-checked="${S.mode === m.id}" data-mode="${m.id}">${ic(m.icon, 14)}<span class="ag-t"><b>${m.name}</b><small>${m.sub}</small></span>${ic('check', 14, 'ag-check')}</button>`
+        ).join('')
+    menu.hidden = !open
+    btn.setAttribute('aria-expanded', open)
+  }
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-mode-btn]')
+    if (btn) return modeMenu(btn)
+    const pick = e.target.closest('[data-mode]')
+    if (pick) {
+      S.mode = pick.dataset.mode
+      renderModes()
+      const b = pick.closest('.modepick').querySelector('[data-mode-btn]')
+      modeMenu(b, false)
+      return b.focus()
+    }
+    $$('[data-mode-btn]').forEach((b) => b.nextElementSibling.hidden || modeMenu(b, false))
+  })
+  document.addEventListener('keydown', (e) => e.key === 'Escape' && $$('[data-mode-btn]').forEach((b) => b.nextElementSibling.hidden || modeMenu(b, false)))
+
   // Agent picker (home composer and the row under the reply box share one choice).
   // Icon only until an agent is picked; then the button names it: "Developer" or "QA".
   const AGENTS = [
