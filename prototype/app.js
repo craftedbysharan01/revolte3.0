@@ -1127,10 +1127,27 @@
     $('#envSpec').textContent = SIZES[draft.size]
     $('#envSizeNote').textContent = note
   }
-  function renderRegion() {
-    $$('#envRegion button').forEach((b) => b.setAttribute('aria-checked', b.dataset.region === draft.region))
+  const rselBtn = $('#envRegion [data-rsel]')
+  const rselMenu = $('#envRegion .rsel-menu')
+  function setRegionMenu(open) {
+    rselMenu.hidden = !open
+    rselBtn.setAttribute('aria-expanded', open)
   }
+  function renderRegion() {
+    $$('#envRegion [data-region]').forEach((b) => {
+      const on = b.dataset.region === draft.region
+      b.setAttribute('aria-selected', on)
+      if (on) {
+        $('#rselName').textContent = $('b', b).textContent
+        $('#rselSub').textContent = $('span', b).textContent
+      }
+    })
+  }
+  document.addEventListener('click', (e) => {
+    if (!rselMenu.hidden && !e.composedPath().includes($('#envRegion'))) setRegionMenu(false)
+  })
   function renderEnv() {
+    setRegionMenu(false)
     $('#envNameInput').value = draft.name
     renderRegion()
     $('#envScript').value = draft.script
@@ -1162,8 +1179,9 @@
       const rows = $$('#envVars .kv-row')
       return $('input', rows[rows.length - 1]).focus()
     }
+    if (e.target.closest('[data-rsel]')) return setRegionMenu(rselMenu.hidden)
     const region = e.target.closest('[data-region]')
-    if (region) return (draft.region = region.dataset.region), renderRegion()
+    if (region) return (draft.region = region.dataset.region), renderRegion(), setRegionMenu(false), rselBtn.focus()
     const row = e.target.closest('.kv-row')
     if (row && e.target.closest('[data-remove]')) return draft.vars.splice(+row.dataset.i, 1), renderVars()
     if (row && e.target.closest('[data-lock]')) {
@@ -1221,7 +1239,7 @@
   })
   document.addEventListener('keydown', (e) => {
     if (!modal.classList.contains('open')) return
-    if (e.key === 'Escape') return closeEnv()
+    if (e.key === 'Escape') return rselMenu.hidden ? closeEnv() : (setRegionMenu(false), rselBtn.focus())
     if (e.key !== 'Tab') return
     const items = $$('button, input, textarea, select, summary', $('#envForm')).filter((el) => el.offsetParent)
     const first = items[0]

@@ -277,11 +277,16 @@
 
           <div class="field">
             <span class="flabel">Cloud</span>
-            <div class="regions" id="envRegion" role="radiogroup" aria-label="Region">
-              <button type="button" role="radio" data-region="us-east"><b>US East</b><span>Virginia · 18 ms</span></button>
-              <button type="button" role="radio" data-region="us-west"><b>US West</b><span>Oregon · 64 ms</span></button>
-              <button type="button" role="radio" data-region="eu"><b>Europe</b><span>Frankfurt · 92 ms</span></button>
-              <button type="button" role="radio" data-region="ap"><b>Asia Pacific</b><span>Mumbai · 140 ms</span></button>
+            <div class="rsel" id="envRegion">
+              <button type="button" class="rsel-btn" data-rsel aria-haspopup="listbox" aria-expanded="false" aria-label="Region">
+                <i data-i="f-environments" data-s="14"></i><b id="rselName"></b><span id="rselSub"></span><i data-i="down" data-s="12" class="rsel-chev"></i>
+              </button>
+              <div class="menu rsel-menu" role="listbox" aria-label="Region" hidden>
+                <button type="button" role="option" data-region="us-east"><b>US East</b><span>Virginia · 18 ms</span><i data-i="check" data-s="14"></i></button>
+                <button type="button" role="option" data-region="us-west"><b>US West</b><span>Oregon · 64 ms</span><i data-i="check" data-s="14"></i></button>
+                <button type="button" role="option" data-region="eu"><b>Europe</b><span>Frankfurt · 92 ms</span><i data-i="check" data-s="14"></i></button>
+                <button type="button" role="option" data-region="ap"><b>Asia Pacific</b><span>Mumbai · 140 ms</span><i data-i="check" data-s="14"></i></button>
+              </div>
             </div>
             <div class="machine">
               <div class="machine-viz" aria-hidden="true">
