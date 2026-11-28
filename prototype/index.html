@@ -44,11 +44,12 @@
             <button class="nav recent" data-soon="This chat">Fix flaky checkout tests</button>
             <button class="nav recent" data-soon="This chat">Billing emails in Slack</button>
           </div>
-          <!-- Free plan: a quiet usage line with an upgrade link, above the account row. -->
-          <div class="upsell" id="upsell">
-            <div class="ups-row"><span><em id="upsellUsed">4</em> of 20 credits</span><button type="button" class="ups-link" data-soon="Upgrade">Upgrade</button></div>
+          <!-- Free plan: a small, inviting card above the account row. The whole card is the upgrade action. -->
+          <button type="button" class="upsell" id="upsell" data-soon="Upgrade" aria-label="Upgrade plan">
+            <span class="ups-row"><span class="ups-plan">Free plan</span><span class="ups-pill">Upgrade</span></span>
             <i class="ups-bar"><b id="upsellBar"></b></i>
-          </div>
+            <span class="ups-meta"><em id="upsellUsed">4</em> of 20 credits used this month</span>
+          </button>
           <div class="sb-foot">
             <span class="avatar">JH</span>
             <span class="sb-name">James Hall</span>

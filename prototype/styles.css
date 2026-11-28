@@ -3555,16 +3555,38 @@ kbd.k {
   .nav:hover i[data-i] { color: var(--foreground); }
 }
 
-/* ---- Free plan: usage line + upgrade link (sidebar, above the account row) ---- */
-.upsell { margin: auto 0 10px; padding: 0 8px; }
+/* ---- Free plan card (sidebar, above the account row): quiet at rest, warms up on hover ---- */
+.upsell {
+  display: block;
+  width: 100%;
+  margin: auto 0 10px;
+  padding: 10px 10px 9px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: radial-gradient(110% 120% at 100% 0%, rgba(142, 162, 255, 0.09), transparent 55%);
+  text-align: left;
+  transition: border-color 200ms ease, background-color 200ms ease, transform 140ms var(--ease-out);
+}
 .upsell + .sb-foot { margin-top: 0; }
-.ups-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--subtle-foreground); font-variant-numeric: tabular-nums; }
-.ups-row em { font-style: normal; color: var(--muted-foreground); }
-.ups-link { font-size: 12px; font-weight: 500; color: var(--muted-foreground); transition: color 150ms ease; }
-.ups-link:hover { color: var(--foreground); }
-.ups-bar { display: block; height: 3px; margin-top: 6px; border-radius: 99px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
-.ups-bar b { display: block; height: 100%; width: 20%; border-radius: inherit; background: rgba(255, 255, 255, 0.4); transition: width 600ms var(--ease-out), background-color 300ms ease; }
+.upsell:hover { border-color: rgba(142, 162, 255, 0.3); background-color: rgba(255, 255, 255, 0.02); }
+.upsell:active { transform: scale(0.98); }
+.ups-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ups-plan { font-size: 12.5px; font-weight: 500; color: var(--foreground); }
+.ups-pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #b9c5ff;
+  background: rgba(142, 162, 255, 0.13);
+  transition: background-color 200ms ease, color 200ms ease;
+}
+.upsell:hover .ups-pill { background: rgba(142, 162, 255, 0.24); color: #fff; }
+.ups-bar { display: block; height: 3px; margin: 8px 0 6px; border-radius: 99px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.ups-bar b { display: block; height: 100%; width: 20%; border-radius: inherit; background: #8ea2ff; transition: width 600ms var(--ease-out), background-color 300ms ease; }
 .upsell.warm .ups-bar b { background: #f0a35a; }
+.ups-meta { display: block; font-size: 11.5px; color: var(--subtle-foreground); font-variant-numeric: tabular-nums; }
+.ups-meta em { font-style: normal; color: var(--muted-foreground); }
 
 /* ---- Agent picker ---- */
 .agentpick { position: relative; display: inline-flex; }
