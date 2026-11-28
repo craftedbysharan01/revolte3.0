@@ -3560,11 +3560,9 @@ kbd.k {
 }
 .msz button:hover { color: var(--foreground); }
 .msz button[aria-checked='true'] { background: var(--muted); color: var(--foreground); }
-/* Deploy uses the solid rocket so the one action that ships stands out. */
 #deploy { color: var(--muted-foreground); transition: color 150ms ease, background-color 150ms ease; }
 #deploy:hover { color: var(--foreground); }
 #deploy i[data-i] { color: inherit; }
-#deploy i[data-i] svg path { fill: currentColor; }
 @media (hover: hover) and (pointer: fine) {
   .nav:hover { color: var(--foreground); }
   .nav:hover i[data-i] { color: var(--foreground); }
