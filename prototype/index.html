@@ -19,15 +19,15 @@
         <div class="sidebar-inner">
           <div class="sb-head">
             <img src="assets/logo.svg" alt="Revolte" class="logo" />
-            <button class="icon-btn" id="sbClose" aria-label="Close sidebar"><i data-i="l-panel-left"></i></button>
+            <button class="icon-btn" id="sbClose" aria-label="Close sidebar" data-tip="Close sidebar" data-kbd="mod+b"><i data-i="l-panel-left"></i></button>
           </div>
           <div class="sb-tabs" role="tablist">
             <button class="sb-tab on" role="tab" aria-selected="true">Chat</button>
             <button class="sb-tab" role="tab" aria-selected="false" data-soon="Workflows">Workflows <span class="try">Try</span></button>
           </div>
           <div class="sb-group">
-            <button class="nav" id="newChat"><i data-i="l-square-pen"></i><span>New chat</span></button>
-            <button class="nav" data-soon="Search"><i data-i="l-search"></i><span>Search</span><kbd>⌘K</kbd></button>
+            <button class="nav" id="newChat"><i data-i="l-square-pen"></i><span>New chat</span><kbd data-k="mod+shift+o"></kbd></button>
+            <button class="nav" data-soon="Search"><i data-i="l-search"></i><span>Search</span><kbd data-k="mod+k"></kbd></button>
             <button class="nav" data-soon="Projects"><i data-i="l-folder"></i><span>Projects</span></button>
           </div>
           <div class="sb-label">Workspace <i data-i="l-chevron-down" data-s="12"></i></div>
@@ -59,7 +59,7 @@
         <div class="body">
           <div class="col">
           <header class="topbar">
-            <button class="icon-btn" id="sbOpen" aria-label="Open sidebar"><i data-i="l-panel-left"></i></button>
+            <button class="icon-btn" id="sbOpen" aria-label="Open sidebar" data-tip="Open sidebar" data-kbd="mod+b"><i data-i="l-panel-left"></i></button>
             <button class="title" id="chatTitle"><span></span><i data-i="f-down"></i></button>
             <div class="speed" id="speed" role="group" aria-label="Prototype speed">
               <span class="speed-tag">Prototype speed</span>
@@ -67,7 +67,7 @@
               <button data-speed="4">4×</button>
               <button data-speed="10">10×</button>
             </div>
-            <button class="icon-btn" id="paneToggle" aria-label="Toggle session pane"><i data-i="l-panel-right"></i></button>
+            <button class="icon-btn" id="paneOpen" aria-label="Open session pane" data-tip="Open pane" data-kbd="mod+."><i data-i="pane-open"></i></button>
           </header>
           <!-- ---------- Home ---------- -->
           <section class="home" id="home">
@@ -81,14 +81,14 @@
                   aria-label="Describe what to build or fix"
                 ></textarea>
                 <div class="composer-bar">
-                  <button type="button" class="icon-btn" aria-label="Add files" data-soon="Attachments"><i data-i="f-add"></i></button>
-                  <button type="button" class="icon-btn" aria-label="Agent" data-soon="Agents"><i data-i="f-agent"></i></button>
+                  <button type="button" class="icon-btn" aria-label="Attach files" data-tip="Attach files" data-soon="Attachments"><i data-i="f-add"></i></button>
+                  <button type="button" class="icon-btn" aria-label="Choose agent" data-tip="Choose agent" data-soon="Agents"><i data-i="f-agent"></i></button>
                   <button type="button" class="chip" data-soon="Applications"><i data-i="f-app"></i>Application</button>
                   <span class="grow"></span>
                   <button type="button" class="chip quiet" data-soon="Modes"><i data-i="f-auto"></i>Auto</button>
                   <button type="button" class="chip quiet" data-soon="Models"><i data-i="f-claude"></i>Sonnet 5 <em>Medium</em></button>
-                  <button type="button" class="icon-btn" aria-label="Dictate" data-soon="Dictation"><i data-i="f-mic"></i></button>
-                  <button type="submit" class="send" id="homeSend" aria-label="Start chat" disabled><i data-i="f-send"></i></button>
+                  <button type="button" class="icon-btn" aria-label="Dictate" data-tip="Dictate" data-soon="Dictation"><i data-i="f-mic"></i></button>
+                  <button type="submit" class="send" id="homeSend" aria-label="Start chat" data-tip="Start chat" data-kbd="enter" disabled><i data-i="f-send"></i></button>
                 </div>
               </form>
 
@@ -151,7 +151,7 @@
                       <svg class="wcursor red" width="33" height="34" viewBox="0 0 33 34"><path d="M4 4 29 13.5l-10.5 4.2L14.3 29z" fill="#ff5a4d" stroke="#fff" stroke-width="2" stroke-linejoin="round" /></svg>
                     </div>
                   </div>
-                  <button class="icon-btn promo-x" id="promoClose" aria-label="Dismiss"><i data-i="close" data-s="14"></i></button>
+                  <button class="icon-btn promo-x" id="promoClose" aria-label="Dismiss" data-tip="Dismiss"><i data-i="close" data-s="14"></i></button>
                 </div>
               </div>
             </div>
@@ -161,11 +161,11 @@
           <section class="chat" id="chat">
             <div class="thread" id="thread"><div class="thread-inner" id="threadInner"></div></div>
             <div class="chat-foot">
-              <div class="waiting" id="waiting"><span class="waiting-dot"></span>Waiting for you</div>
+              <div class="waiting" id="waiting"><i data-i="pause" data-s="14"></i>Waiting for you</div>
               <form class="reply" id="reply">
-                <button type="button" class="icon-btn" aria-label="Add files" data-soon="Attachments"><i data-i="f-add"></i></button>
+                <button type="button" class="icon-btn" aria-label="Attach files" data-tip="Attach files" data-soon="Attachments"><i data-i="f-add"></i></button>
                 <input id="replyInput" placeholder="Reply to Revolte" aria-label="Reply to Revolte" autocomplete="off" />
-                <button type="submit" class="icon-btn" aria-label="Send"><i data-i="enter"></i></button>
+                <button type="submit" class="icon-btn" aria-label="Send" data-tip="Send" data-kbd="enter"><i data-i="enter"></i></button>
               </form>
               <div class="reply-meta">
                 <span class="branch-chip" title="Branch this chat commits to"><i data-i="f-branch" data-s="14"></i>revolte/webhook-dashboard</span>
@@ -183,19 +183,20 @@
             <div class="pane-inner">
               <div class="pane-head">
                 <div class="ptabs" role="tablist" id="ptabs">
-                  <button class="ptab on" data-tab="overview" role="tab" aria-label="Overview" title="Overview"><i data-i="f-overview"></i></button>
-                  <button class="ptab" data-tab="sandbox" role="tab" aria-label="Sandbox preview" title="Sandbox preview"><i data-i="f-sandbox"></i></button>
-                  <button class="ptab" data-tab="code" role="tab" aria-label="Code" title="Code"><i data-i="f-code"></i></button>
-                  <button class="ptab" data-tab="files" role="tab" aria-label="Files" title="Files"><i data-i="f-tabfiles"></i></button>
-                  <button class="ptab" data-tab="workflow" role="tab" aria-label="Workflow" title="Workflow"><i data-i="f-workflow"></i></button>
+                  <button class="ptab on" data-tab="overview" role="tab" aria-label="Overview" data-tip="Overview" data-kbd="mod+1"><i data-i="f-overview"></i><span class="ptab-l">Overview</span></button>
+                  <button class="ptab" data-tab="sandbox" role="tab" aria-label="Sandbox preview" data-tip="Sandbox preview" data-kbd="mod+2"><i data-i="f-sandbox"></i><span class="ptab-l">Sandbox</span></button>
+                  <button class="ptab" data-tab="code" role="tab" aria-label="Code" data-tip="Code" data-kbd="mod+3"><i data-i="f-code"></i><span class="ptab-l">Code</span><span class="ptab-live">Live</span></button>
+                  <button class="ptab" data-tab="files" role="tab" aria-label="Files" data-tip="Files" data-kbd="mod+4"><i data-i="f-tabfiles"></i><span class="ptab-l">Files</span></button>
+                  <button class="ptab" data-tab="workflow" role="tab" aria-label="Workflow" data-tip="Workflow" data-kbd="mod+5"><i data-i="f-workflow"></i><span class="ptab-l">Workflow</span></button>
                 </div>
-                <button class="icon-btn boxed" id="deploy" aria-label="Deploy" data-soon="Deploy"><i data-i="f-deploy"></i></button>
+                <button class="icon-btn boxed" id="deploy" aria-label="Deploy" data-tip="Deploy" data-soon="Deploy"><i data-i="f-deploy"></i></button>
+                <button class="icon-btn" id="paneClose" aria-label="Close session pane" data-tip="Close pane" data-kbd="mod+."><i data-i="pane-close"></i></button>
               </div>
               <div class="pane-body" id="paneBody">
                 <!-- Overview -->
                 <section class="pview on" data-view="overview">
                   <div class="ov-group">
-                    <button class="ov-row" id="envOpen" aria-label="Environment settings">
+                    <button class="ov-row" id="envOpen" aria-label="Environment settings" data-tip="Environment settings">
                       <i data-i="f-environments"></i>
                       <span class="ov-name" id="envName">Default</span>
                       <span class="env-state" id="envState">Not started</span>
@@ -216,8 +217,8 @@
                   <div class="browser" id="browser">
                     <div class="browser-bar">
                       <span class="lights"><i></i><i></i><i></i></span>
-                      <i data-i="left" data-s="14"></i><i data-i="right" data-s="14"></i>
-                      <button class="icon-btn sm" id="pvReload" aria-label="Reload"><i data-i="refresh" data-s="14"></i></button>
+                      <i data-i="nav-back" data-s="14"></i><i data-i="nav-fwd" data-s="14"></i>
+                      <button class="icon-btn sm" id="pvReload" aria-label="Reload" data-tip="Reload preview"><i data-i="refresh" data-s="14"></i></button>
                       <div class="url"><i data-i="lock" data-s="12"></i><span id="pvUrl">https://webhook-monitor.sandbox.revolte.app</span><span class="url-load" id="urlLoad"></span></div>
                       <i data-i="copy" data-s="14"></i><i data-i="out" data-s="14"></i><i data-i="bookmark" data-s="14"></i>
                     </div>
@@ -281,20 +282,25 @@
 
           <div class="field">
             <span class="flabel">Cloud</span>
-            <label class="select">
-              <span>Region</span>
-              <select id="envRegion">
-                <option value="us-east">US East · Virginia</option>
-                <option value="us-west">US West · Oregon</option>
-                <option value="eu">Europe · Frankfurt</option>
-                <option value="ap">Asia Pacific · Mumbai</option>
-              </select>
-              <i data-i="down" data-s="12"></i>
-            </label>
-            <div class="sizes" id="envSize" role="radiogroup" aria-label="Machine size">
-              <button type="button" role="radio" data-size="small"><b>Small</b><span>2 vCPU · 4 GB</span></button>
-              <button type="button" role="radio" data-size="medium"><b>Medium</b><span>4 vCPU · 8 GB</span></button>
-              <button type="button" role="radio" data-size="large"><b>Large</b><span>8 vCPU · 16 GB</span></button>
+            <div class="regions" id="envRegion" role="radiogroup" aria-label="Region">
+              <button type="button" role="radio" data-region="us-east"><b>US East</b><span>Virginia · 18 ms</span></button>
+              <button type="button" role="radio" data-region="us-west"><b>US West</b><span>Oregon · 64 ms</span></button>
+              <button type="button" role="radio" data-region="eu"><b>Europe</b><span>Frankfurt · 92 ms</span></button>
+              <button type="button" role="radio" data-region="ap"><b>Asia Pacific</b><span>Mumbai · 140 ms</span></button>
+            </div>
+            <div class="machine">
+              <div class="machine-viz" aria-hidden="true">
+                <div class="cores" id="envCores"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="memtrack"><span id="envMem"></span></div>
+              </div>
+              <div class="machine-copy">
+                <b id="envSpec">2 vCPU · 4 GB</b>
+                <span id="envSizeNote">Small · good for most apps</span>
+              </div>
+            </div>
+            <div class="size-slider">
+              <input type="range" id="envSize" min="0" max="2" step="1" aria-label="Machine size" aria-valuetext="Small" />
+              <div class="size-ticks"><span>Small</span><span>Medium</span><span>Large</span></div>
             </div>
           </div>
 

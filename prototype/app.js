@@ -6,7 +6,11 @@
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
 
   // ---------- Icons ----------
-  const svg = (n, s) => (s ? (ICONS[n] || '').replace(/width="[\d.]+" height="[\d.]+"/, `width="${s}" height="${s}"`) : ICONS[n] || '')
+  const svg = (n, s) => {
+    let x = ICONS[n] || ''
+    if (x.includes('data-l=')) x = x.replace(/stroke-width="[\d.]+"/, `stroke-width="${(26 / (s || 16)).toFixed(2)}"`)
+    return s ? x.replace(/width="[\d.]+" height="[\d.]+"/, `width="${s}" height="${s}"`) : x
+  }
   const ic = (n, s, cls) => `<i data-i="${n}"${cls ? ` class="${cls}"` : ''}>${svg(n, s)}</i>`
   const hydrate = (root) =>
     $$('i[data-i]', root).forEach((i) => {
@@ -179,8 +183,8 @@
   // ---------- Agent activity group ----------
   function group(label) {
     const el = say(
-      h(`<div class="act open running">
-        <button class="act-head" aria-expanded="true"><span class="act-mark"></span><span class="act-label">${esc(label)}</span><span class="act-time">0s</span>${ic('right', 12, 'act-chev')}</button>
+      h(`<div class="act running">
+        <button class="act-head" aria-expanded="false"><span class="act-mark"></span><span class="act-label">${esc(label)}</span><span class="act-time">0s</span>${ic('right', 12, 'act-chev')}</button>
         <div class="act-steps"><div></div></div>
       </div>`)
     )
@@ -321,7 +325,7 @@
           <div class="card-head">${ic('doc')}Plan${version > 1 ? ` <em style="font-style:normal;color:var(--subtle-foreground);font-weight:400">v${version}</em>` : ''}<span class="meta">~ 2 mins</span></div>
           <ol class="plan-list">${tasks.map((t, i) => `<li><span class="num">${i + 1}</span>${esc(t.t)}</li>`).join('')}</ol>
           <div class="card-foot">
-            <button class="btn primary" data-act="approve">Approve plan</button>
+            <button class="btn primary" data-act="approve" data-tip="Approve plan" data-kbd="mod+enter">Approve plan</button>
             <button class="btn secondary" data-act="change">Ask for changes</button>
             <span class="grow"></span>
             <button class="linkish" data-act="view">View plan</button>
@@ -330,9 +334,9 @@
       )
       const settle = (label, result) => {
         setAwaiting(null)
-        card.classList.add('settled')
-        $('.meta', card).textContent = label
-        if (label !== 'Approved') $('.meta', card).style.color = 'var(--subtle-foreground)'
+        const approved = label === 'Approved'
+        card.className = 'card plan compact ' + (approved ? 'approved' : 'superseded')
+        card.innerHTML = `<button class="plan-row" data-act="view" data-tip="Open plan.md">${ic('doc')}<span class="plan-row-t">Plan${version > 1 ? ` v${version}` : ''}</span><span class="plan-row-m">${tasks.length} tasks · about 2 mins</span><span class="plan-row-s">${approved ? ic('check', 14) + 'Approved' : 'Revised'}</span>${ic('right', 14)}</button>`
         resolve(result)
       }
       setAwaiting({
@@ -388,42 +392,48 @@
   // ======================================================================
   // Right pane
   // ======================================================================
-  // Progress follows the Figma stepper. One marker for "now"; the build lists the plan's own tasks.
-  const STAGES = [
-    ['grill', 'Grill', 'Questions that change the build'],
-    ['plan', 'Plan', 'Decisions and tasks'],
-    ['tasks', 'Tasks', 'Split from your request'],
-    ['build', 'Build', 'Works through the plan'],
-    ['verify', 'Verify', 'Tests, lint, Prettier'],
+  // Progress tells the story of the run: what Revolte understood, what you decided, then the plan's own tasks.
+  const STEPS = [
+    ['understand', 'Understand the request', 'Reads your request and the repository'],
+    ['grill', 'Answer a few questions', 'Only the ones that change the build'],
+    ['plan', 'Agree on a plan', 'Its tasks become the steps below'],
+    ['verify', 'Verify and preview', 'Tests, lint and a live preview'],
   ]
   let planTasks = []
+  const since = {}
+  const stepLi = (k, name, sub, extra = '') =>
+    `<li data-stage="${k}"${extra}><span class="pg-ic">${ic('check', 12)}</span><span class="pg-name">${name}</span><span class="pg-state"></span><span class="pg-sub">${sub}</span></li>`
   function renderProgress() {
     planTasks = []
-    $('#progress').innerHTML = STAGES.map(
-      ([k, n, sub]) => `<li data-stage="${k}"><span class="pg-ic">${ic('check', 12)}</span><span class="pg-name">${n}</span><span class="pg-state"></span><span class="pg-sub">${sub}</span>${k === 'build' ? '<ol class="pg-tasks"></ol>' : ''}</li>`
-    ).join('')
+    for (const k in since) delete since[k]
+    $('#progress').innerHTML = STEPS.map(([k, n, s]) => stepLi(k, n, s)).join('')
   }
   function stage(key, state, label, sub) {
     const li = $(`#progress [data-stage="${key}"]`)
     if (!li) return
-    li.className = state
-    $('.pg-state', li).textContent = state === 'now' ? 'In progress' : label || ''
-    if (sub) $('.pg-sub', li).textContent = sub
+    if ((state === 'now' || state === 'wait') && since[key] == null) since[key] = clock.t
+    li.classList.remove('now', 'wait', 'done')
+    li.classList.add(state)
+    $('.pg-state', li).innerHTML =
+      state === 'now' ? 'In progress' : state === 'wait' ? `<span class="needs">${ic('pause', 12)}Needs you</span>` : state === 'done' && since[key] != null ? fmt(clock.t - since[key]) : ''
+    if (sub != null) $('.pg-sub', li).innerHTML = sub
     renderChanges()
   }
   function setPlanTasks(tasks) {
-    planTasks = tasks.map((t) => ({ ref: t, t: t.t, state: 'pending' }))
-    renderTasks()
+    planTasks = tasks.map((t, i) => ({ ref: t, t: t.t, state: 'pending', key: 'task' + i }))
+    $$('#progress .task').forEach((l) => l.remove())
+    $('#progress [data-stage="plan"]').insertAdjacentHTML('afterend', planTasks.map((p, i) => stepLi(p.key, esc(p.t), '', ` class="task" style="--i:${i}"`)).join(''))
+    renderChanges()
   }
   function setTask(ref, state) {
-    if (state === 'now') planTasks.forEach((p) => p.state === 'now' && (p.state = 'pending'))
-    planTasks.forEach((p) => (p.ref === ref || (ref === 'extra' && p.ref.extra)) && (p.state = state))
-    renderTasks()
+    planTasks.forEach((p) => {
+      if (p.ref === ref || (ref === 'extra' && p.ref.extra)) {
+        p.state = state
+        stage(p.key, state)
+      }
+    })
   }
-  function renderTasks() {
-    const host = $('#progress .pg-tasks')
-    if (host) host.innerHTML = planTasks.map((p) => `<li class="${p.state}"><span class="pt-ic">${ic('check', 10)}</span><span>${esc(p.t)}</span></li>`).join('')
-  }
+  $('#progress').addEventListener('click', (e) => e.target.closest('[data-open-plan]') && openPlan())
   function envState(cls, text) {
     const el = $('#envState')
     el.className = 'env-state ' + cls
@@ -469,30 +479,31 @@
     if (e.key === 'Escape' && $('#repo').classList.contains('open')) renderRepo(false)
   })
 
+  const SHAS = ['a3f9c1e', '7b21d04', 'e58c3a9', '1d0f6b2', '9c4e7a1', '42ab8de']
   function renderChanges(enter) {
     const el = $('#changes')
     if (!S.repo) return (el.hidden = true)
     el.hidden = false
+    el.classList.toggle('enter', !!enter)
     const files = Object.values(S.files || {}).filter((f) => f.lines && f.done)
     const add = files.reduce((n, f) => n + fileStat(f, f.done)[0], 0)
     const del = files.reduce((n, f) => n + fileStat(f, f.done)[1], 0)
+    const commits = planTasks.filter((p) => p.state === 'done')
+    const current = planTasks.find((p) => p.state === 'now')
     const state = S.previewReady ? 'open' : S.building ? 'draft' : 'later'
-    el.classList.toggle('enter', !!enter)
-    if (state === 'later') {
-      el.innerHTML = `<p class="plabel">Pull request</p><p class="pr-later">${ic('f-branch', 14)}Opens on <b>${S.repo}</b> when the build is verified.</p>`
-      return
-    }
-    el.innerHTML = `<p class="plabel">Pull request</p>
-      <div class="pr-card ${state}">
-        <div class="pr-top"><span class="pr-pill">${state === 'open' ? 'Open' : 'Draft'}</span><span class="pr-num">${state === 'open' ? '#412' : 'Not opened yet'}</span></div>
-        <p class="pr-title">Add retry scheduler and deliveries dashboard</p>
-        <p class="pr-branch">${ic('f-branch', 12)}revolte/webhook-dashboard <span>→</span> main</p>
-        <div class="pr-stats">
-          <span>${files.length} file${files.length === 1 ? '' : 's'}</span><span class="add">+${add}</span><span class="del">−${del}</span>
-          <span class="pr-checks">${state === 'open' ? `${ic('check', 12)}24 checks passed` : 'Checks run after the build'}</span>
-        </div>
-        ${state === 'open' ? `<button class="btn secondary pr-btn" data-soon="Opening GitHub">${ic('f-github', 14)}View on GitHub</button>` : ''}
-      </div>`
+    const chip = { open: '<span class="pr-chip open">Open · #412</span>', draft: '<span class="pr-chip">Draft</span>', later: '<span class="pr-chip">Not opened</span>' }[state]
+    const rows = [`<li class="g-main">${ic('f-branch', 12)}<span class="g-mono">main</span></li>`, `<li class="g-branch"><span class="g-mono">revolte/webhook-dashboard</span></li>`]
+    commits.forEach((p, i) => rows.push(`<li class="g-commit"><span class="g-msg">${esc(p.t)}</span><span class="g-sha">${SHAS[i % SHAS.length]}</span></li>`))
+    if (current) rows.push(`<li class="g-commit next"><span class="g-msg">${esc(current.t)}</span></li>`)
+    if (!commits.length && !current) rows.push('<li class="g-commit next"><span class="g-msg">Each finished task lands here as a commit</span></li>')
+    rows.push(
+      state === 'open'
+        ? `<li class="g-pr">${ic('pr', 14)}<span><b>#412 into main</b> · ${files.length} files <span class="add">+${add}</span> <span class="del">−${del}</span></span></li>`
+        : `<li class="g-pr pending">${ic('pr', 14)}<span>Opens into main once the build is verified</span></li>`
+    )
+    el.innerHTML = `<div class="pr-head"><span class="plabel">Pull request</span>${chip}</div><ol class="gitg">${rows.join('')}</ol>${
+      state === 'open' ? `<button class="btn secondary pr-btn" data-soon="Opening GitHub">${ic('f-github', 14)}View on GitHub</button>` : ''
+    }`
   }
 
   const paneWidth = () => (S.planOpen ? (S.immersive ? 'wide' : 'split') : S.tab === 'sandbox' || S.tab === 'code' ? (S.immersive ? 'wide' : 'split') : 'narrow')
@@ -534,9 +545,8 @@
     if (S.planOpen) closePlan()
     showTab(b.dataset.tab)
   })
-  $('#paneToggle').addEventListener('click', () => {
-    shell.dataset.pane = shell.dataset.pane === 'closed' ? paneWidth() : 'closed'
-  })
+  $('#paneClose').addEventListener('click', () => (shell.dataset.pane = 'closed'))
+  $('#paneOpen').addEventListener('click', () => (shell.dataset.pane = paneWidth()))
 
   // ======================================================================
   // Code view: tree, editor, terminal
@@ -862,13 +872,15 @@
     renderPreview()
 
     // -- Understand, then ask
-    stage('grill', 'now')
+    stage('understand', 'now')
     g = group('Understanding your request')
     await quick(g, 'Reading your request', 2000)
     await quick(g, 'Exploring the repository &nbsp;14 files', 5000)
     await quick(g, 'Checking how deliveries are stored', 3500)
     worked += g.finish('Understood the request')
     steps += g.count
+    stage('understand', 'done', '', 'Read your request and 14 files')
+    stage('grill', 'wait', '', 'Three answers change what gets built')
     msg('Three details change what gets built. The recommended answers are selected, so you can skip straight through.')
     const { answers, skipped } = await askQuestions()
     if (run.cancelled) throw CANCEL
@@ -886,10 +898,12 @@
     steps += g.count
     for (;;) {
       renderPlanDoc(answers, tasks, version)
+      stage('plan', 'wait', '', 'Waiting for your approval')
       const res = await showPlan(tasks, version)
       if (run.cancelled) throw CANCEL
       if (res.approved) break
       version++
+      stage('plan', 'now', '', 'Revising with your feedback')
       g = group('Revising the plan')
       await quick(g, 'Working your feedback into the tasks', 4500)
       worked += g.finish('Revised the plan')
@@ -898,14 +912,14 @@
       tasks = [...tasks.filter((t) => !t.extra).slice(0, -1), { t: 'Your change: ' + note, area: 'Change', effort: 'S', after: '3', extra: true }, tasks[tasks.length - 1]]
     }
     if (S.planOpen) closePlan()
-    stage('plan', 'done', 'Approved', `${tasks.length} tasks`)
+    stage('plan', 'done', '', `Approved · ${tasks.length} tasks · <button class="pg-link" data-open-plan>View plan</button>`)
     setPlanTasks(tasks)
 
     // -- Build (about two minutes at 1×)
     S.building = true
     S.code.follow = true
     g = group(BUILD[0].label)
-    const rows = BUILD.map((s) => g.step(stepHtml(s, 'pending'), 'pending'))
+    const rows = []
     // Which plan task each build step belongs to (index into PLAN_TASKS).
     const STEP_TASK = [null, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3]
     const TASK_LAST = {}
@@ -917,7 +931,7 @@
       if (s.stage !== 'tasks') stage('tasks', 'done', '', `${Object.keys(FILES).length} file changes`)
       if (s.stage === 'verify') stage('build', 'done', '', `${Object.keys(FILES).length} files changed`)
       if (STEP_TASK[i] != null && planTasks.find((p) => p.ref === PLAN_TASKS[STEP_TASK[i]]).state !== 'done') setTask(PLAN_TASKS[STEP_TASK[i]], 'now')
-      rows[i].start(stepHtml(s, 'live'))
+      rows[i] = g.step(stepHtml(s, 'live'))
       const f = s.file && S.files[s.file]
       const t0 = clock.t
       let tick
@@ -965,12 +979,11 @@
         if (k === 2) setTask('extra', 'done')
       }
     }
-    planTasks.forEach((p) => (p.state = 'done'))
-    renderTasks()
+    planTasks.forEach((p) => p.state !== 'done' && setTask(p.ref, 'done'))
     steps += g.count
     worked += g.finish('Worked for')
     S.building = false
-    stage('verify', 'done', '', '24 tests pass')
+    stage('verify', 'done', '', '24 tests pass · preview is ready')
     $('#codeStatus').textContent = ''
     $('.ptab[data-tab="code"]').classList.remove('live')
     S.code.follow = true
@@ -978,8 +991,8 @@
     $('.act-time', g.el).textContent = `${fmt(worked)} · ${steps} steps`
 
     msg('Built and verified in the sandbox. 24 tests pass, lint and Prettier are clean. The preview is open on the right.')
-    say(`<div class="msg-actions">${['copy', 'refresh', 'share', 'dots']
-      .map((n) => `<button class="icon-btn" data-soon="This action" aria-label="${n}">${ic(n)}</button>`)
+    say(`<div class="msg-actions">${[['copy', 'Copy'], ['refresh', 'Retry'], ['share', 'Share'], ['dots', 'More']]
+      .map(([n, l]) => `<button class="icon-btn" data-soon="This action" aria-label="${l}" data-tip="${l}">${ic(n, 14)}</button>`)
       .join('')}</div>`)
     revealPreview()
     await sleep(1800, run)
@@ -992,7 +1005,7 @@
       <div class="wf-canvas">
         <div class="glow glow-blue"></div><div class="glow glow-warm"></div>
         <span class="wf-label">Workflow studio</span>
-        <button class="icon-btn wf-x" data-wf-close aria-label="Dismiss">${ic('close', 14)}</button>
+        <button class="icon-btn wf-x" data-wf-close aria-label="Dismiss" data-tip="Dismiss">${ic('close', 14)}</button>
         <div class="wf-stage" aria-hidden="true"></div>
       </div>
       <div class="wf-body">
@@ -1058,6 +1071,8 @@
   const SIZES = { small: '2 vCPU · 4 GB', medium: '4 vCPU · 8 GB', large: '8 vCPU · 16 GB' }
   const NET = { limited: 'Only listed domains', open: 'Any domain', none: 'No network' }
   const envMeta = (e) => `${REGIONS[e.region]} · ${SIZES[e.size].split(' · ')[0]}`
+  const SIZE_KEYS = ['small', 'medium', 'large']
+  const SIZE_INFO = { small: [2, 4, 'Small · good for most apps'], medium: [4, 8, 'Medium · faster builds and tests'], large: [8, 16, 'Large · heavy builds and monorepos'] }
 
   function kvRow(item, i) {
     const locked = item.secret
@@ -1092,11 +1107,26 @@
     summaries()
   }
   function renderSize() {
-    $$('#envSize button').forEach((b) => b.setAttribute('aria-checked', b.dataset.size === draft.size))
+    const [cpu, mem, note] = SIZE_INFO[draft.size]
+    const idx = SIZE_KEYS.indexOf(draft.size)
+    const range = $('#envSize')
+    range.value = idx
+    range.style.setProperty('--p', idx * 50 + '%')
+    range.setAttribute('aria-valuetext', note.split(' · ')[0])
+    $$('#envCores i').forEach((c, i) => {
+      c.style.transitionDelay = i * 35 + 'ms'
+      c.classList.toggle('on', i < cpu)
+    })
+    $('#envMem').style.width = (mem / 16) * 100 + '%'
+    $('#envSpec').textContent = SIZES[draft.size]
+    $('#envSizeNote').textContent = note
+  }
+  function renderRegion() {
+    $$('#envRegion button').forEach((b) => b.setAttribute('aria-checked', b.dataset.region === draft.region))
   }
   function renderEnv() {
     $('#envNameInput').value = draft.name
-    $('#envRegion').value = draft.region
+    renderRegion()
     $('#envScript').value = draft.script
     $$('#envForm details').forEach((d) => (d.open = false))
     renderSize()
@@ -1126,8 +1156,8 @@
       const rows = $$('#envVars .kv-row')
       return $('input', rows[rows.length - 1]).focus()
     }
-    const size = e.target.closest('[data-size]')
-    if (size) return (draft.size = size.dataset.size), renderSize()
+    const region = e.target.closest('[data-region]')
+    if (region) return (draft.region = region.dataset.region), renderRegion()
     const row = e.target.closest('.kv-row')
     if (row && e.target.closest('[data-remove]')) return draft.vars.splice(+row.dataset.i, 1), renderVars()
     if (row && e.target.closest('[data-lock]')) {
@@ -1140,6 +1170,7 @@
     if (dom) return draft.domains.splice(+dom.dataset.domain, 1), renderNet()
   })
   modal.addEventListener('input', (e) => {
+    if (e.target.id === 'envSize') return (draft.size = SIZE_KEYS[+e.target.value]), renderSize()
     const row = e.target.closest('.kv-row')
     if (row) {
       const item = draft.vars[+row.dataset.i]
@@ -1153,8 +1184,7 @@
     else if (e.target.id === 'envRegistries') draft.registries = e.target.checked
   })
   modal.addEventListener('change', (e) => {
-    if (e.target.id === 'envRegion') draft.region = e.target.value
-    else if (e.target.id === 'envNet') (draft.net = e.target.value), renderNet()
+    if (e.target.id === 'envNet') (draft.net = e.target.value), renderNet()
   })
   $('#domainInput').addEventListener('keydown', (e) => {
     const input = e.target
@@ -1173,11 +1203,15 @@
     e.preventDefault()
     draft.name = draft.name.trim() || 'Default'
     draft.vars = draft.vars.filter((v) => v.k).map((v) => (v.secret ? { k: v.k, v: '', secret: true, saved: true } : v))
+    const restart = (draft.size !== S.env.size || draft.region !== S.env.region) && $('#envState').classList.contains('up')
     S.env = draft
     $('#envName').textContent = S.env.name
     $('#envMeta').textContent = envMeta(S.env)
     closeEnv()
-    toast('Environment saved')
+    if (!restart) return toast('Environment saved')
+    envState('boot', 'Restarting')
+    toast(`Restarting the sandbox on ${SIZES[S.env.size]} in ${REGIONS[S.env.region]}`)
+    setTimeout(() => envState('up', 'Running'), 2600)
   })
   document.addEventListener('keydown', (e) => {
     if (!modal.classList.contains('open')) return
@@ -1188,6 +1222,71 @@
     const last = items[items.length - 1]
     if (e.shiftKey && document.activeElement === first) e.preventDefault(), last.focus()
     else if (!e.shiftKey && document.activeElement === last) e.preventDefault(), first.focus()
+  })
+
+  // ======================================================================
+  // Tooltips and keyboard shortcuts
+  // ======================================================================
+  const isMac = /Mac|iPhone|iPad/.test(navigator.platform)
+  const keyLabel = (combo) =>
+    combo
+      .split('+')
+      .map((k) => ({ mod: isMac ? '⌘' : 'Ctrl', shift: isMac ? '⇧' : 'Shift', enter: '↵' })[k] || k.toUpperCase())
+      .join(isMac ? '' : '+')
+  $$('kbd[data-k]').forEach((k) => (k.textContent = keyLabel(k.dataset.k)))
+  const tip = document.createElement('div')
+  tip.className = 'tip'
+  tip.setAttribute('role', 'tooltip')
+  document.body.appendChild(tip)
+  let tipTimer
+  let tipLast = -1e9
+  let tipFor = null
+  function showTip(el) {
+    if (!el.isConnected) return
+    tipFor = el
+    tip.innerHTML = esc(el.dataset.tip) + (el.dataset.kbd ? `<kbd class="k">${keyLabel(el.dataset.kbd)}</kbd>` : '')
+    tip.classList.toggle('instant', performance.now() - tipLast < 600)
+    const r = el.getBoundingClientRect()
+    const x = Math.max(8, Math.min(innerWidth - tip.offsetWidth - 8, r.left + r.width / 2 - tip.offsetWidth / 2))
+    const y = r.bottom + 6 + tip.offsetHeight > innerHeight - 8 ? r.top - tip.offsetHeight - 6 : r.bottom + 6
+    tip.style.left = x + 'px'
+    tip.style.top = y + 'px'
+    tip.classList.add('on')
+  }
+  function hideTip() {
+    clearTimeout(tipTimer)
+    if (tip.classList.contains('on')) tipLast = performance.now()
+    tip.classList.remove('on')
+    tipFor = null
+  }
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.addEventListener('pointerover', (e) => {
+      const el = e.target.closest('[data-tip]')
+      if (el === tipFor) return
+      hideTip()
+      if (el) tipTimer = setTimeout(() => showTip(el), performance.now() - tipLast < 600 ? 0 : 450)
+    })
+    document.addEventListener('pointerdown', hideTip)
+  }
+  document.addEventListener('focusin', (e) => {
+    const el = e.target.closest('[data-tip]')
+    if (el && el.matches(':focus-visible')) showTip(el)
+  })
+  document.addEventListener('focusout', hideTip)
+
+  document.addEventListener('keydown', (e) => {
+    if (!(isMac ? e.metaKey : e.ctrlKey) || modal.classList.contains('open')) return
+    const k = e.key.toLowerCase()
+    const inChat = shell.dataset.view === 'chat'
+    if (k === 'b') shell.dataset.sidebar = shell.dataset.sidebar === 'closed' ? 'open' : 'closed'
+    else if (k === 'o' && e.shiftKey) goHome()
+    else if (k === 'k') toast('Search is not part of this prototype.')
+    else if (k === '.' && inChat) shell.dataset.pane = shell.dataset.pane === 'closed' ? paneWidth() : 'closed'
+    else if (/^[1-5]$/.test(k) && inChat) $$('.ptab')[+k - 1].click()
+    else if (k === 'enter' && $('.plan:not(.compact) [data-act=approve]')) $('.plan:not(.compact) [data-act=approve]').click()
+    else return
+    e.preventDefault()
+    hideTip()
   })
 
   // ---------- Boot ----------

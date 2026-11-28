@@ -11,4 +11,4 @@ with two cursors. 11 second loop; timings come from the Figma motion data (node 
 | `workflow-animation.gif` | 960 px wide, 20 fps, for docs and Slack. |
 | `poster.png` | Still of the completed flow, for a video poster or fallback. |
 
-Icons and the Claude and GitHub marks are the originals from the Figma file.
+Icons are the same Lucide outline family as the prototype; the Claude and GitHub marks are the originals.

@@ -32,3 +32,18 @@ npx serve prototype
 - `icons.js` Solar icons rendered to static SVG
 
 Not simulated: the "Needs your OK" approval step and the "Finished" summary screen.
+
+## Keyboard shortcuts
+
+Hover a control to see its shortcut. Ctrl on Windows and Linux, Cmd on Mac.
+
+| Shortcut | Action |
+| --- | --- |
+| Mod+Shift+O | New chat |
+| Mod+K | Search |
+| Mod+B | Show or hide the sidebar |
+| Mod+. | Show or hide the session pane |
+| Mod+1 to Mod+5 | Overview, Sandbox, Code, Files, Workflow |
+| Mod+Enter | Approve the plan |
+
+Icons: one outline family everywhere (Lucide, `lucide-icons.js`). Brand marks (Revolte, Claude, GitHub) are the originals.
