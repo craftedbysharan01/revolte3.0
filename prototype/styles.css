@@ -641,10 +641,10 @@ i[data-i] svg {
 .promo-link {
   font-size: 12px;
   line-height: 16px;
-  color: var(--muted-foreground);
+  color: #8ea8ff;
   transition: color 150ms ease;
 }
-.promo-link:hover { color: var(--foreground); }
+.promo-link:hover { color: #b9c8ff; }
 .promo-x {
   position: absolute;
   right: 14px;
