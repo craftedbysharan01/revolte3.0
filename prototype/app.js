@@ -169,9 +169,9 @@
     })
     col.addEventListener('pointerleave', () => col.classList.remove('lit'))
   }
-  // Credits: Revolte's single unit of AI usage (revolte.ai/pricing). This account is on Starter:
-  // 50 credits a month, 6 already used in earlier chats. Each step of the run spends a few.
-  const CREDITS = { plan: 50, earlier: 6, chat: 0 }
+  // Credits: Revolte's single unit of AI usage (revolte.ai/pricing). This account is on Free:
+  // 20 credits a month, hard-capped, 4 already used in earlier chats. Each step of the run spends a little.
+  const CREDITS = { plan: 20, earlier: 4, chat: 0 }
   function renderCredits(bump) {
     const used = CREDITS.earlier + CREDITS.chat
     $('#creditsChat').textContent = CREDITS.chat
@@ -181,6 +181,9 @@
     $('#cpBarChat').style.width = (Math.min(CREDITS.chat, CREDITS.plan - CREDITS.earlier) / CREDITS.plan) * 100 + '%'
     $('#credits').style.setProperty('--cp', Math.max(4, Math.min(100, (used / CREDITS.plan) * 100)))
     $('#credits').classList.toggle('warm', used >= CREDITS.plan * 0.8)
+    $('#upsellUsed').textContent = used
+    $('#upsellBar').style.width = Math.min(100, (used / CREDITS.plan) * 100) + '%'
+    $('#upsell').classList.toggle('warm', used >= CREDITS.plan * 0.8)
     $('#creditsBtn').setAttribute('aria-label', `${CREDITS.chat} credits used in this chat, ${used} of ${CREDITS.plan} this month`)
     if (bump) {
       const b = $('#creditsBtn')
@@ -197,6 +200,52 @@
     $('#creditsPop').hidden = !open
     $('#creditsBtn').setAttribute('aria-expanded', open)
   }
+  // Agent picker (home composer and the row under the reply box share one choice).
+  // Icon only until an agent is picked; then the button names it: "Developer" or "QA".
+  const AGENTS = [
+    { id: 'developer', name: 'Developer', sub: 'Plans, writes and ships the code' },
+    { id: 'qa', name: 'QA', sub: 'Tests it and reports what breaks' },
+  ]
+  S.agent = null
+  function renderAgents() {
+    const a = AGENTS.find((x) => x.id === S.agent)
+    $$('[data-agent-btn]').forEach((b) => {
+      b.classList.toggle('picked', !!a)
+      $('.agent-l', b).textContent = a ? a.name : ''
+      b.setAttribute('aria-label', a ? `Agent: ${a.name}` : 'Choose agent')
+      b.dataset.tip = a ? 'Change agent' : 'Choose agent'
+    })
+  }
+  function agentMenu(btn, open) {
+    const menu = btn.nextElementSibling
+    $$('.agent-menu').forEach((m) => m !== menu && ((m.hidden = true), m.previousElementSibling.setAttribute('aria-expanded', 'false')))
+    open = open ?? menu.hidden
+    if (open)
+      menu.innerHTML =
+        `<span class="menu-label">Agent</span>` +
+        AGENTS.map(
+          (a) => `<button type="button" role="menuitemradio" aria-checked="${S.agent === a.id}" data-agent="${a.id}">${ic('f-agent', 14)}<span class="ag-t"><b>${a.name}</b><small>${a.sub}</small></span>${ic('check', 14, 'ag-check')}</button>`
+        ).join('') +
+        (S.agent ? `<div class="menu-sep"></div><button type="button" data-agent="">${ic('close', 14)}<span class="ag-t"><b>No agent</b></span></button>` : '')
+    menu.hidden = !open
+    btn.setAttribute('aria-expanded', open)
+  }
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-agent-btn]')
+    if (btn) return agentMenu(btn)
+    const pick = e.target.closest('[data-agent]')
+    if (pick) {
+      S.agent = pick.dataset.agent || null
+      renderAgents()
+      const b = pick.closest('.agentpick').querySelector('[data-agent-btn]')
+      agentMenu(b, false)
+      return b.focus()
+    }
+    if (!e.target.closest('.agent-menu')) $$('[data-agent-btn]').forEach((b) => b.nextElementSibling.hidden || agentMenu(b, false))
+  })
+  document.addEventListener('keydown', (e) => e.key === 'Escape' && $$('[data-agent-btn]').forEach((b) => b.nextElementSibling.hidden || agentMenu(b, false)))
+
+  $('#upsellClose').addEventListener('click', () => $('#upsell').classList.add('gone'))
   $('#creditsBtn').addEventListener('click', () => setCreditsPop($('#creditsPop').hidden))
   document.addEventListener('click', (e) => {
     if (!$('#creditsPop').hidden && !e.composedPath().includes($('#credits'))) setCreditsPop(false)
@@ -518,7 +567,7 @@
     for (const k in since) delete since[k]
     $('#progress').innerHTML = STEPS.map(([k, n, s]) => stepLi(k, n, s)).join('')
   }
-  const STAGE_COST = { understand: 2, grill: 1, plan: 3, verify: 6 }
+  const STAGE_COST = { understand: 1, grill: 1, plan: 1, verify: 2 }
   const charged = new Set()
   function stage(key, state, label, sub) {
     const li = $(`#progress [data-stage="${key}"]`)
@@ -1086,7 +1135,7 @@
         renderTree()
       }
       rows[i].done(stepHtml(s, 'done'), s.fail ? 'fail' : 'done')
-      spend(2)
+      if (i % 2) spend(1)
       const k = STEP_TASK[i]
       if (k != null && TASK_LAST[k] === i) {
         setTask(PLAN_TASKS[k], 'done')

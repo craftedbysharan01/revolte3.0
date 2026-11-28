@@ -3554,3 +3554,41 @@ kbd.k {
   .nav:hover { color: var(--foreground); }
   .nav:hover i[data-i] { color: var(--foreground); }
 }
+
+/* ---- Free plan upgrade card (sidebar, above the account row) ---- */
+.upsell {
+  position: relative;
+  margin: 12px 0 10px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: radial-gradient(120% 90% at 0% 0%, rgba(142, 162, 255, 0.12), transparent 60%), var(--surface);
+  transition: opacity 200ms ease, transform 220ms var(--ease-out);
+}
+.upsell.gone { display: none; }
+.upsell > b { display: block; font-size: 13px; font-weight: 500; }
+.upsell p { margin: 3px 0 10px; padding-right: 8px; font-size: 12px; line-height: 17px; color: var(--muted-foreground); }
+.upsell-x { position: absolute; top: 6px; right: 6px; color: var(--subtle-foreground); }
+.upsell-meter span { display: block; margin-bottom: 5px; font-size: 11.5px; color: var(--subtle-foreground); font-variant-numeric: tabular-nums; }
+.upsell-meter em { font-style: normal; color: var(--foreground); }
+.upsell-meter i { display: block; height: 4px; border-radius: 99px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.upsell-meter i b { display: block; height: 100%; width: 20%; border-radius: inherit; background: #8ea2ff; transition: width 600ms var(--ease-out), background-color 300ms ease; }
+.upsell.warm .upsell-meter i b { background: #f0a35a; }
+.upsell-cta { width: 100%; margin-top: 10px; height: 30px; }
+@media (max-height: 700px) { .upsell p { display: none; } }
+
+/* ---- Agent picker ---- */
+.agentpick { position: relative; display: inline-flex; }
+.agent-btn .agent-l:empty { display: none; }
+.agent-btn.picked { width: auto; gap: 6px; padding: 0 9px 0 7px; color: var(--foreground); font-size: 13px; font-weight: 500; background: var(--muted); }
+.agent-btn.picked i[data-i] { color: var(--foreground); }
+.agent-menu { left: 0; right: auto; top: calc(100% + 6px); width: 248px; z-index: 40; }
+.reply-meta .agent-menu { top: auto; bottom: calc(100% + 6px); transform-origin: 0 100%; }
+.agent-menu button[data-agent] { height: auto; padding: 7px 8px; gap: 10px; align-items: center; }
+.agent-menu button[data-agent]:hover { background: var(--hover); }
+.agent-menu button > i[data-i] { color: var(--muted-foreground); }
+.agent-menu .ag-t { display: flex; flex-direction: column; flex: 1; min-width: 0; font-family: var(--font-sans); font-size: 13px; }
+.ag-t b { font-size: 13px; line-height: 18px; font-weight: 500; }
+.ag-t small { font-size: 11.5px; line-height: 16px; color: var(--subtle-foreground); }
+.ag-check { opacity: 0; color: var(--foreground) !important; }
+.agent-menu [aria-checked='true'] .ag-check { opacity: 1; }
