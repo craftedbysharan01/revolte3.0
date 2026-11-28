@@ -1469,8 +1469,35 @@
     hideTip()
   })
 
+  // ---------- Optical icon sizing ----------
+  // Icons in the composers are drawn to the same visible size, whatever their shape: each glyph is
+  // measured once off-screen and its box is scaled so its longest side comes out at OPTICAL px.
+  // The stroke stays the same weight because svg() rescales it with the box.
+  const OPTICAL = 12
+  const glyphCache = {}
+  const meter = document.createElement('div')
+  meter.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden'
+  document.body.appendChild(meter)
+  function glyphExtent(n) {
+    if (glyphCache[n] == null) {
+      meter.innerHTML = svg(n, 24)
+      const g = meter.firstChild.getBBox()
+      glyphCache[n] = Math.max(g.width, g.height) || 24
+    }
+    return glyphCache[n]
+  }
+  function opticalIcons(root) {
+    $$('.composer-bar i[data-i], .reply i[data-i], .reply-meta i[data-i], .credits-btn i[data-i]', root).forEach((i) => {
+      const n = i.dataset.i
+      if (n === 'down' || n === 'f-claude' || !ICONS[n]) return
+      const size = Math.round(((OPTICAL * 24) / glyphExtent(n)) * 2) / 2
+      i.innerHTML = svg(n, size)
+    })
+  }
+
   // ---------- Boot ----------
   hydrate(document)
+  opticalIcons(document)
   renderRepo(false)
   if (small()) shell.dataset.sidebar = 'closed'
   renderProgress()
