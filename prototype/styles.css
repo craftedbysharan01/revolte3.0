@@ -564,10 +564,10 @@ i[data-i] svg {
 }
 .promo {
   position: relative;
-  height: 130px;
+  height: 156px;
   display: flex;
   align-items: center;
-  gap: 56px;
+  gap: 32px;
   padding: 0 24px;
   overflow: hidden;
   border-radius: 16px;
@@ -624,7 +624,7 @@ i[data-i] svg {
 }
 .promo-copy {
   position: relative;
-  width: 150px;
+  width: 220px;
   flex: none;
   display: flex;
   flex-direction: column;
@@ -657,7 +657,8 @@ i[data-i] svg {
   position: relative;
   width: 579px;
   height: 120px;
-  flex: none;
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   background-image: radial-gradient(rgba(var(--ov), 0.07) 0.8px, transparent 0.8px);
   background-size: 18.18px 18.18px;
@@ -3672,3 +3673,9 @@ kbd.k {
 /* Play once, then hold (see holdAfterOnePlay in app.js). */
 .held .flow, .held .flow *, .held .wf-title span { animation-play-state: paused !important; }
 .waiting-start .flow, .waiting-start .flow * { animation-play-state: paused !important; }
+
+/* Workflows promo copy: what it is, why it matters, one clear way in. */
+.promo-copy { gap: 6px; }
+.promo-eyebrow { font-size: 11.5px; font-weight: 500; letter-spacing: 0.02em; color: #9db1ff; }
+.promo-sub { margin: 0; font-size: 12.5px; line-height: 18px; color: var(--muted-foreground); }
+.promo-cta { margin-top: 6px; height: 28px; padding: 0 12px; font-size: 12.5px; }
