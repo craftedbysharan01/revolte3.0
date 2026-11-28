@@ -44,13 +44,10 @@
             <button class="nav recent" data-soon="This chat">Fix flaky checkout tests</button>
             <button class="nav recent" data-soon="This chat">Billing emails in Slack</button>
           </div>
-          <!-- Free plan: a quiet upgrade card above the account row. -->
+          <!-- Free plan: a quiet usage line with an upgrade link, above the account row. -->
           <div class="upsell" id="upsell">
-            <button type="button" class="icon-btn sm upsell-x" id="upsellClose" aria-label="Dismiss" data-tip="Dismiss"><i data-i="close" data-s="12"></i></button>
-            <b>Upgrade to Starter</b>
-            <p>50 credits a month, full agents and workflows, pay-as-you-go cloud.</p>
-            <div class="upsell-meter"><span><em id="upsellUsed">4</em> of 20 free credits</span><i><b id="upsellBar"></b></i></div>
-            <button type="button" class="btn primary upsell-cta" data-soon="Upgrade">Upgrade · $20/mo</button>
+            <div class="ups-row"><span><em id="upsellUsed">4</em> of 20 credits</span><button type="button" class="ups-link" data-soon="Upgrade">Upgrade</button></div>
+            <i class="ups-bar"><b id="upsellBar"></b></i>
           </div>
           <div class="sb-foot">
             <span class="avatar">JH</span>

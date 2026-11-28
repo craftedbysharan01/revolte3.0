@@ -245,7 +245,6 @@
   })
   document.addEventListener('keydown', (e) => e.key === 'Escape' && $$('[data-agent-btn]').forEach((b) => b.nextElementSibling.hidden || agentMenu(b, false)))
 
-  $('#upsellClose').addEventListener('click', () => $('#upsell').classList.add('gone'))
   $('#creditsBtn').addEventListener('click', () => setCreditsPop($('#creditsPop').hidden))
   document.addEventListener('click', (e) => {
     if (!$('#creditsPop').hidden && !e.composedPath().includes($('#credits'))) setCreditsPop(false)
