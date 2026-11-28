@@ -22,8 +22,8 @@
     return t.content.firstElementChild
   }
 
-  // ---------- Virtual clock (the speed switch scales agent time) ----------
-  const clock = { t: 0, speed: 1, waiters: [], tickers: new Set() }
+  // ---------- Virtual clock: the agent runs at 4x real time, so the build takes about 30 seconds ----------
+  const clock = { t: 0, speed: 4, waiters: [], tickers: new Set() }
   let lastTick = performance.now()
   setInterval(() => {
     const now = performance.now()
@@ -131,15 +131,9 @@
   }
   $('#newChat').addEventListener('click', goHome)
 
-  // ---------- Sidebar and prototype speed ----------
+  // ---------- Sidebar ----------
   $('#sbClose').addEventListener('click', () => (shell.dataset.sidebar = 'closed'))
   $('#sbOpen').addEventListener('click', () => (shell.dataset.sidebar = 'open'))
-  $('#speed').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-speed]')
-    if (!b) return
-    clock.speed = +b.dataset.speed
-    $$('#speed button').forEach((x) => x.classList.toggle('on', x === b))
-  })
 
   // ======================================================================
   // Chat thread
@@ -1296,7 +1290,7 @@
   homeInput.focus()
   // Review helpers: ?prompt=... starts a chat, ?speed=10 sets the speed.
   const qs = new URLSearchParams(location.search)
-  if (qs.get('speed')) $(`#speed [data-speed="${qs.get('speed')}"]`)?.click()
+  if (+qs.get('speed') > 0) clock.speed = +qs.get('speed')
   if (qs.get('prompt')) startChat(qs.get('prompt'))
   window.__proto = { S, clock, startChat, showTab }
 })()
