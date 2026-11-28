@@ -341,7 +341,7 @@
         card.innerHTML = `
           <div class="q-bar" aria-hidden="true"><i style="width:${((idx + 1) / QUESTIONS.length) * 100}%"></i></div>
           <div class="q-head">
-            <span class="q-eyebrow">${ic('f-agent', 13)}Revolte needs a few details<span class="q-count">${idx + 1} of ${QUESTIONS.length}</span></span>
+            <span class="q-eyebrow">${ic('f-agent', 13)}Revolte needs your input<span class="q-count">${idx + 1} of ${QUESTIONS.length}</span></span>
           </div>
           <div class="q-body ${swap ? 'swap' : ''}">
             <p class="q-title">${esc(q.q)}</p>

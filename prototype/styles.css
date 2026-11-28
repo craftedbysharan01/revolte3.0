@@ -3422,17 +3422,25 @@ kbd.k {
   border-top: 1px solid var(--border-subtle);
   background: var(--card);
 }
-/* A quiet grey hairline that never stops moving, like a conveyor: the work is waiting, not stopped. */
+/* A quiet solid grey hairline with a soft light that keeps running along it: the work is waiting, not stopped. */
 .q-bar { position: relative; height: 1px; overflow: hidden; background: rgba(255, 255, 255, 0.05); }
 .q-bar i {
+  position: relative;
   display: block;
   height: 100%;
-  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.28) 0 10px, rgba(255, 255, 255, 0.08) 10px 16px);
-  background-size: 32px 100%;
-  animation: conveyor 900ms linear infinite;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.22);
   transition: width 420ms var(--ease-out);
 }
-@keyframes conveyor { to { background-position: 32px 0; } }
+.q-bar i::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+  animation: run 1.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes run { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
 .q-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px 0; }
 .q-eyebrow { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted-foreground); }
 .q-eyebrow i[data-i] { color: #8ea2ff; }
@@ -3474,4 +3482,4 @@ kbd.k {
 .q-link:hover { color: var(--foreground); }
 .q-foot .btn.primary { display: inline-flex; align-items: center; gap: 8px; }
 .q-foot .btn.primary kbd { font: 500 11px var(--font-mono); opacity: 0.55; }
-@media (prefers-reduced-motion: reduce) { .questions.docked { animation: none; } .q-bar i { transition: none; animation: none; } }
+@media (prefers-reduced-motion: reduce) { .questions.docked { animation: none; } .q-bar i { transition: none; } .q-bar i::after { animation: none; display: none; } }
