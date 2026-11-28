@@ -153,9 +153,22 @@
 
   const waitingEl = $('#waiting')
   const replyInput = $('#replyInput')
+  // "Waiting for you" is a nudge, not a status: it only appears once the
+  // user has left a question unanswered for a while (real time, not the
+  // prototype clock), and any activity puts it away and restarts the wait.
+  const IDLE_NUDGE_MS = 8000
+  let idleTimer = 0
+  function armIdleNudge() {
+    clearTimeout(idleTimer)
+    waitingEl.classList.remove('on')
+    if (S.awaiting) idleTimer = setTimeout(() => S.awaiting && waitingEl.classList.add('on'), IDLE_NUDGE_MS)
+  }
+  ;['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((ev) =>
+    document.addEventListener(ev, () => S.awaiting && armIdleNudge(), { passive: true, capture: true })
+  )
   function setAwaiting(a) {
     S.awaiting = a
-    waitingEl.classList.toggle('on', !!a)
+    armIdleNudge()
     replyInput.placeholder = a && a.placeholder ? a.placeholder : 'Reply to Revolte'
   }
   $('#reply').addEventListener('submit', (e) => {
@@ -262,7 +275,7 @@
             ${q.options
               .map(
                 (o, i) => `<button class="opt ${!a.own && a.pick === i ? 'on' : ''}" data-i="${i}" role="radio" aria-checked="${!a.own && a.pick === i}">
-                  <span class="radio"></span>${esc(o)}${i === 0 ? '<span class="rec">Recommended</span>' : ''}</button>`
+                  <span class="radio"></span>${esc(o)}${i === 0 ? `<span class="rec">${ic('star', 11)}Recommended</span>` : ''}</button>`
               )
               .join('')}
             <input class="own" placeholder="Or type your own answer" value="${esc(a.own)}" aria-label="Your own answer" />

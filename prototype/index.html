@@ -159,6 +159,7 @@
               <form class="reply" id="reply">
                 <button type="button" class="icon-btn" aria-label="Attach files" data-tip="Attach files" data-soon="Attachments"><i data-i="f-add" data-s="18"></i></button>
                 <input id="replyInput" placeholder="Reply to Revolte" aria-label="Reply to Revolte" autocomplete="off" />
+                <button type="button" class="icon-btn" aria-label="Dictate" data-tip="Dictate" data-soon="Dictation"><i data-i="f-mic" data-s="14"></i></button>
                 <button type="submit" class="icon-btn" aria-label="Send" data-tip="Send" data-kbd="enter"><i data-i="enter" data-s="16"></i></button>
               </form>
               <div class="reply-meta">
@@ -166,7 +167,6 @@
                 <span class="grow"></span>
                 <button class="chip quiet" data-soon="Modes"><i data-i="f-auto" data-s="14"></i>Auto</button>
                 <button class="chip quiet" data-soon="Models"><i data-i="f-claude" data-s="12"></i>Sonnet 5.5 <em>Medium</em></button>
-                <button type="button" class="icon-btn" aria-label="Dictate" data-tip="Dictate" data-soon="Dictation"><i data-i="f-mic" data-s="14"></i></button>
               </div>
             </div>
           </section>
@@ -184,8 +184,8 @@
                   <button class="ptab" data-tab="files" role="tab" aria-label="Files" data-tip="Files" data-kbd="mod+4"><i data-i="f-tabfiles"></i><span class="ptab-l">Files</span></button>
                   <button class="ptab" data-tab="workflow" role="tab" aria-label="Workflow" data-tip="Workflow" data-kbd="mod+5"><i data-i="f-workflow"></i><span class="ptab-l">Workflow</span></button>
                 </div>
-                <button class="icon-btn boxed" id="deploy" aria-label="Deploy" data-tip="Deploy" data-soon="Deploy"><i data-i="f-deploy"></i></button>
                 <button class="icon-btn" id="paneClose" aria-label="Close session pane" data-tip="Close pane" data-kbd="mod+."><i data-i="pane-close"></i></button>
+                <button class="btn deploy-btn" id="deploy" data-soon="Deploy"><i data-i="f-deploy" data-s="14"></i>Deploy</button>
               </div>
               <div class="pane-body" id="paneBody">
                 <!-- Overview -->

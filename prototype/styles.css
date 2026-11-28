@@ -1270,9 +1270,14 @@ i[data-i] svg {
 }
 .rec {
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 11px;
   color: var(--subtle-foreground);
 }
+.rec i[data-i] { color: #e8b45a; }
+.rec i[data-i] svg path, .rec i[data-i] svg polygon { fill: currentColor; }
 .own {
   height: 38px;
   padding: 0 12px;
@@ -1557,7 +1562,18 @@ i.inl { margin-right: 5px; vertical-align: -1px; }
   padding: 0 12px;
   border-bottom: 1px solid var(--border-subtle);
 }
-.pane-head #deploy { margin-left: auto; }
+.pane-head #paneClose { margin-left: auto; }
+.deploy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 9px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  color: var(--foreground);
+}
+.deploy-btn:hover { background: var(--muted); }
 #paneOpen { display: none; margin-left: auto; }
 [data-pane='closed'] #paneOpen { display: inline-flex; }
 .pane-body {
