@@ -1010,7 +1010,6 @@
       </div>
       <div class="wf-body">
         <p class="wf-title"><span class="w1">Chat,</span> <span class="w2">build,</span> <span class="w3">test,</span> <span class="w4">PR</span></p>
-        <p class="wf-sub">Run this as a workflow next time: plan, build, test and open a draft PR in one go.</p>
         <div class="wf-actions">
           <button class="btn ghost" data-wf-close>Not now</button>
           <button class="btn primary" data-soon="Workflows">${ic('f-workflow', 14)}Try workflow</button>

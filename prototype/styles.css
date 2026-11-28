@@ -923,9 +923,11 @@ i[data-i] svg {
 @container (max-width: 470px) { .wf-stage .flow { --k: 0.32; } }
 .wf-body {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 16px 20px 18px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  padding: 14px 16px 14px 20px;
 }
 .wf-title {
   font-size: 16px;
@@ -953,7 +955,6 @@ i[data-i] svg {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 10px;
 }
 .wf-actions .btn { display: inline-flex; align-items: center; gap: 8px; height: 32px; }
 .wf-actions .btn.primary i[data-i] { color: #0f0f10; }
