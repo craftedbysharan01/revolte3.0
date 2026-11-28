@@ -3660,3 +3660,9 @@ kbd.k {
 .questions .opt.opt-skip i[data-i] { color: var(--subtle-foreground); }
 .questions .opt.opt-skip:hover, .questions .opt.opt-skip:hover i[data-i] { color: var(--foreground); }
 .questions .q-body { padding-bottom: 10px; }
+/* Quiet letter keys on the left of each option; outlined, never a white fill. */
+.opt-key { flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; border: 1px solid var(--border); font: 500 11px var(--font-sans); color: var(--subtle-foreground); transition: color 150ms ease, border-color 150ms ease; }
+.opt.on .opt-key { color: var(--foreground); border-color: rgba(var(--ov), 0.3); }
+.questions .opt { gap: 12px; padding-left: 10px; }
+.questions .opt.opt-skip { gap: 12px; }
+.questions .opt.opt-skip i[data-i] { width: 20px; display: inline-flex; justify-content: center; }

@@ -479,7 +479,7 @@
             <div class="q-opts" role="radiogroup" aria-label="${esc(q.q)}">${q.options
               .map(
                 (o, i) => `<button class="opt ${!a.own && a.pick === i ? 'on' : ''}" data-i="${i}" role="radio" aria-checked="${!a.own && a.pick === i}">
-                  <span class="opt-t">${esc(o)}</span>${i === 0 ? `<span class="rec">${ic('star', 11)}Recommended</span>` : ''}${ic('check', 14, 'opt-check')}</button>`
+                  <span class="opt-key" aria-hidden="true">${'ABCDEFG'[i]}</span><span class="opt-t">${esc(o)}</span>${i === 0 ? `<span class="rec">${ic('star', 11)}Recommended</span>` : ''}${ic('check', 14, 'opt-check')}</button>`
               )
               .join('')}<button class="opt opt-skip" data-act="skip">${ic('f-auto', 14)}<span class="opt-t">Skip all, use recommended</span></button></div>
           </div>
@@ -507,7 +507,8 @@
       }
       function keys(e) {
         if (e.metaKey || e.ctrlKey || e.altKey || e.target.closest('input, textarea, [contenteditable]')) return
-        const n = +e.key
+        const L = 'abcdefg'.indexOf(e.key.toLowerCase())
+        const n = e.key.length === 1 && L >= 0 ? L + 1 : +e.key
         if (n >= 1 && n <= QUESTIONS[idx].options.length) return e.preventDefault(), pick(n - 1)
         if (e.key === 'Enter' && !e.target.closest('button')) return e.preventDefault(), next()
         if (e.key === 'ArrowLeft' && idx > 0) return e.preventDefault(), go(idx - 1, 'back')
