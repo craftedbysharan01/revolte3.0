@@ -3577,13 +3577,13 @@ kbd.k {
   border-radius: 999px;
   font-size: 11.5px;
   font-weight: 500;
-  color: #b9c5ff;
-  background: rgba(142, 162, 255, 0.13);
+  color: var(--muted-foreground);
+  background: var(--muted);
   transition: background-color 200ms ease, color 200ms ease;
 }
-.upsell:hover .ups-pill { background: rgba(142, 162, 255, 0.24); color: #fff; }
+.upsell:hover .ups-pill { background: var(--selected); color: var(--foreground); }
 .ups-bar { display: block; height: 3px; margin: 8px 0 6px; border-radius: 99px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
-.ups-bar b { display: block; height: 100%; width: 20%; border-radius: inherit; background: #8ea2ff; transition: width 600ms var(--ease-out), background-color 300ms ease; }
+.ups-bar b { display: block; height: 100%; width: 20%; border-radius: inherit; background: rgba(255, 255, 255, 0.4); transition: width 600ms var(--ease-out), background-color 300ms ease; }
 .upsell.warm .ups-bar b { background: #f0a35a; }
 .ups-meta { display: block; font-size: 11.5px; color: var(--subtle-foreground); font-variant-numeric: tabular-nums; }
 .ups-meta em { font-style: normal; color: var(--muted-foreground); }
