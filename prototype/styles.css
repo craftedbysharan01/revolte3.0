@@ -47,10 +47,10 @@
      lift off the page, near-black warm text and warm greys, hairline borders and soft shadows.
      Every text colour is checked to WCAG AA (4.5:1) on page, sidebar and cards. */
   color-scheme: light;
-  --background: #faf9f5;
-  --sidebar: #f2f0e8;
-  --surface: #fdfcf9;
-  --card: #fdfcf9;
+  --background: #f9f8f4;
+  --sidebar: #ebe9e1;
+  --surface: #ffffff;
+  --card: #ffffff;
   --muted: #ebe8de;
   --foreground: #1f1e1b;
   --muted-foreground: #5a5953;
@@ -67,7 +67,7 @@
   --shim-lo: #6e6d67;
   --shim-hi: #cfccc2;
   --canvas: #f1efe7;
-  --node: #fdfcf9;
+  --node: #ffffff;
   --node-in: #f6f4ee;
   --success: #1c6e45;
   --info: #3a55c0;
@@ -3706,3 +3706,66 @@ svg[data-l] .fk { transition: stroke-opacity 160ms ease; }
   :root.theme-anim *, :root.theme-anim *::before, :root.theme-anim *::after { transition: none !important; }
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
 }
+
+/* ============ Light theme depth ============
+   Four layers, back to front:
+   1. base   - the app backdrop, in the sidebar's warm tone
+   2. sheet  - the workspace (chat + pane) floats on it: lighter, rounded, soft shadow
+   3. raised - composer, cards, question panel: white, hairline edge, small lift
+   4. float  - menus, popovers, modal: strongest shadow                                   */
+:root[data-theme='light'] {
+  --lift-1: 0 0 0 1px rgba(60, 48, 28, 0.07), 0 1px 2px rgba(60, 48, 28, 0.06);
+  --lift-2: 0 0 0 1px rgba(60, 48, 28, 0.08), 0 1px 2px rgba(60, 48, 28, 0.05), 0 8px 24px -6px rgba(60, 48, 28, 0.12);
+  --lift-3: 0 0 0 1px rgba(60, 48, 28, 0.08), 0 4px 10px rgba(60, 48, 28, 0.06), 0 18px 44px -8px rgba(60, 48, 28, 0.2);
+}
+:root[data-theme='light'] body { background: var(--sidebar); }
+:root[data-theme='light'] .sidebar { background: transparent; border-right-color: transparent; }
+@media (min-width: 761px) {
+  :root[data-theme='light'] .main {
+    margin: 8px 8px 8px 0;
+    height: calc(100% - 16px);
+    border-radius: 14px;
+    background: var(--background);
+    box-shadow: var(--lift-2);
+    overflow: hidden;
+  }
+  :root[data-theme='light'] .shell[data-sidebar='closed'] .main { margin-left: 8px; }
+}
+/* raised */
+:root[data-theme='light'] .composer,
+:root[data-theme='light'] .reply,
+:root[data-theme='light'] .questions.docked {
+  background: var(--card);
+  border-color: transparent;
+  box-shadow: var(--lift-2);
+}
+:root[data-theme='light'] .chat-foot.asking .reply { box-shadow: var(--lift-2); }
+:root[data-theme='light'] .card,
+:root[data-theme='light'] .card.plan,
+:root[data-theme='light'] .wf-card,
+:root[data-theme='light'] .promo,
+:root[data-theme='light'] .bubble,
+:root[data-theme='light'] .rsel-btn,
+:root[data-theme='light'] .mrow,
+:root[data-theme='light'] .input {
+  background: var(--card);
+  border-color: transparent;
+  box-shadow: var(--lift-1);
+}
+:root[data-theme='light'] .upsell { background: var(--card); box-shadow: var(--lift-1); }
+:root[data-theme='light'] .sb-tabs { border-color: transparent; background: rgba(60, 48, 28, 0.05); }
+:root[data-theme='light'] .sb-tab.on { background: var(--card); box-shadow: var(--lift-1); }
+:root[data-theme='light'] .btn.secondary,
+:root[data-theme='light'] .deploy-btn { background: var(--card); border-color: transparent; box-shadow: var(--lift-1); }
+/* float */
+:root[data-theme='light'] .menu,
+:root[data-theme='light'] .credits-pop,
+:root[data-theme='light'] .modal,
+:root[data-theme='light'] .tip {
+  background: var(--card);
+  border-color: transparent;
+  box-shadow: var(--lift-3);
+}
+:root[data-theme='light'] .code-view .tree,
+:root[data-theme='light'] .code-view .editor,
+:root[data-theme='light'] .browser { background: var(--card); border-color: transparent; box-shadow: var(--lift-1); }
