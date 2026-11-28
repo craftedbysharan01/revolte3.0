@@ -715,7 +715,7 @@ i[data-i] svg {
 .wmenu .red i { color: var(--danger); }
 
 /* Figma timeline: 11s loop. Percentages are the keyframe times from the file. */
-.promo .wnode, .promo .wedge, .promo .wport, .promo .wcursor, .promo .wmenu {
+.flow .wnode, .flow .wedge, .flow .wport, .flow .wcursor, .flow .wmenu {
   animation-duration: 11s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
@@ -848,6 +848,104 @@ i[data-i] svg {
   85.455% { opacity: 1; animation-timing-function: ease-out; }
   87.273%, 100% { opacity: 0; }
 }
+
+/* ---- Workflow studio card (shown in the chat after the preview) ---- */
+.wf-card {
+  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  overflow: hidden;
+}
+.wf-card.gone {
+  animation: wfOut 220ms ease forwards;
+}
+@keyframes wfOut {
+  to { opacity: 0; transform: translateY(4px) scale(0.99); }
+}
+.wf-canvas {
+  position: relative;
+  height: 188px;
+  margin: 8px 8px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #12121c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.wf-canvas .glow-blue { left: 6%; top: -120px; width: 88%; }
+.wf-canvas .glow-warm { left: 32%; top: -60px; }
+.wf-canvas::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 0.8px, transparent 0.8px);
+  background-size: 18px 18px;
+  pointer-events: none;
+}
+.wf-label {
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  z-index: 2;
+  font-size: 13px;
+  font-weight: 500;
+}
+.wf-x {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  z-index: 2;
+}
+.wf-stage {
+  position: absolute;
+  inset: 30px 0 6px;
+  container-type: inline-size;
+}
+.wf-stage .flow {
+  --k: 0.56;
+  left: calc(50% - 604px * var(--k));
+  top: calc(50% - 100px * var(--k));
+  transform: scale(var(--k));
+}
+@container (max-width: 760px) { .wf-stage .flow { --k: 0.5; } }
+@container (max-width: 640px) { .wf-stage .flow { --k: 0.44; } }
+@container (max-width: 560px) { .wf-stage .flow { --k: 0.39; } }
+@container (max-width: 470px) { .wf-stage .flow { --k: 0.32; } }
+.wf-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 20px 18px;
+}
+.wf-title {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+}
+.wf-title span {
+  color: var(--disabled-foreground);
+  animation: 11s linear infinite;
+}
+.wf-title .w1 { animation-name: w1; }
+.wf-title .w2 { animation-name: w2; }
+.wf-title .w3 { animation-name: w3; }
+.wf-title .w4 { animation-name: w4; }
+@keyframes w1 { 0%, 4% { color: var(--disabled-foreground); } 7%, 95.4% { color: var(--foreground); } 99%, 100% { color: var(--disabled-foreground); } }
+@keyframes w2 { 0%, 24% { color: var(--disabled-foreground); } 27%, 95.4% { color: var(--foreground); } 99%, 100% { color: var(--disabled-foreground); } }
+@keyframes w3 { 0%, 45% { color: var(--disabled-foreground); } 48%, 95.4% { color: var(--foreground); } 99%, 100% { color: var(--disabled-foreground); } }
+@keyframes w4 { 0%, 66% { color: var(--disabled-foreground); } 69%, 95.4% { color: var(--foreground); } 99%, 100% { color: var(--disabled-foreground); } }
+.wf-sub {
+  font-size: 13.5px;
+  line-height: 20px;
+  color: var(--muted-foreground);
+}
+.wf-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+.wf-actions .btn { display: inline-flex; align-items: center; gap: 8px; height: 32px; }
+.wf-actions .btn.primary i[data-i] { color: #0f0f10; }
 
 /* ============ Chat ============ */
 .col {
@@ -2838,8 +2936,9 @@ textarea.input {
   }
   .pview.enter, .pview.leave, .q-body.swap, .ecode.swap { animation: fadeOnly 200ms ease both; }
   .glow, .trow.active::after, .ptab.live::after, .home-title { animation: none; }
-  .promo .wnode, .promo .wedge, .promo .wport { animation: none; opacity: 1; }
-  .promo .wcursor, .promo .wmenu { animation: none; opacity: 0; }
+  .flow .wnode, .flow .wedge, .flow .wport { animation: none; opacity: 1; }
+  .flow .wcursor, .flow .wmenu { animation: none; opacity: 0; }
+  .wf-title span { animation: none; color: var(--foreground); }
 }
 @keyframes fadeOnly {
   from { opacity: 0; }

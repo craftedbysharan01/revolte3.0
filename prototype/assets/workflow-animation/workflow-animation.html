@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Revolte · Workflow animation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+/* Revolte workflow animation. 11s loop, timings from the Figma motion data (node 4890:12816).
+   Drop .wf-stage anywhere; set --k to scale it. */
+:root {
+  color-scheme: dark;
+  --font-sans: 'Host Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --background: #0c0c0d;
+  --sidebar: #101011;
+  --surface: #141416;
+  --card: #19191b;
+  --muted: #202023;
+  --foreground: #f7f6f3;
+  --muted-foreground: #a6a6aa;
+  --subtle-foreground: #7e7e83;
+  --disabled-foreground: #55555a;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --selected: rgba(255, 255, 255, 0.08);
+  --hover: rgba(255, 255, 255, 0.05);
+  --danger: #f0645a;
+  --success: #3dd68c;
+  --warning: #e9b44c;
+  --info: #6f8fff;
+  --link: #2684ff;
+  --coral: #ff4a3d;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #0c0c0d; }
+body {
+  display: grid;
+  place-items: center;
+  font: 400 14px/22px var(--font-sans);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+i[data-i] { display: inline-flex; flex: none; color: var(--muted-foreground); }
+i[data-i] svg { display: block; }
+i.inl { margin-right: 5px; vertical-align: -1px; }
+.wf-canvas {
+  position: relative;
+  width: 1280px;
+  height: 360px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #12121c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.wf-canvas::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+.wf-canvas .glow-blue { left: 6%; top: -150px; width: 88%; height: 230px; }
+.wf-canvas .glow-warm { left: 32%; top: -80px; width: 460px; height: 110px; }
+.wf-stage .flow {
+  --k: 1;
+  left: calc(50% - 604px * var(--k));
+  top: calc(50% - 96px * var(--k));
+  transform: scale(var(--k));
+}
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.glow-blue {
+  left: 39px;
+  top: -111px;
+  width: 760px;
+  height: 150px;
+  background: radial-gradient(closest-side, rgba(96, 104, 255, 0.62), rgba(96, 104, 255, 0) 100%);
+  filter: blur(28px);
+  animation: glowBlue 9s ease-in-out infinite alternate;
+}
+.glow-warm {
+  left: 269px;
+  top: -53px;
+  width: 300px;
+  height: 70px;
+  background: radial-gradient(closest-side, rgba(255, 150, 104, 0.5), rgba(255, 150, 104, 0) 100%);
+  filter: blur(22px);
+  animation: glowWarm 7s ease-in-out infinite alternate;
+}
+@keyframes glowBlue {
+  from {
+    opacity: 0.55;
+    transform: translateX(-36px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(36px) scale(1.06);
+  }
+}
+@keyframes glowWarm {
+  from {
+    opacity: 0.9;
+    transform: translateX(60px) scale(1.1);
+  }
+  to {
+    opacity: 0.35;
+    transform: translateX(-70px) scale(0.92);
+  }
+}
+
+.flow {
+  position: absolute;
+  left: 9px;
+  top: 12px;
+  width: 1208px;
+  height: 192px;
+  transform: scale(0.4545);
+  transform-origin: 0 0;
+}
+.wnode {
+  position: absolute;
+  top: 0;
+  width: 260px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
+  font-size: 11px;
+  line-height: 16px;
+  opacity: 0;
+}
+.n1 { left: 0; }
+.n2 { left: 316px; }
+.n3 { left: 632px; }
+.n4 { left: 948px; }
+.wcat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 2px;
+  color: var(--muted-foreground);
+}
+.wcat-ic {
+  display: inline-flex;
+}
+.wcat-ic.blue i { color: var(--info); }
+.wcat-ic.green i { color: var(--success); }
+.wdots {
+  margin-left: auto;
+}
+.wcard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+.wcard hr {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
+}
+.wtitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.wtitle b {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+}
+.wtitle small {
+  display: block;
+  font-size: 11px;
+  color: var(--subtle-foreground);
+}
+.wtile {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--muted);
+}
+.wtile i { color: var(--foreground); }
+.wrow {
+  display: flex;
+  justify-content: space-between;
+  color: var(--subtle-foreground);
+}
+.wrow b {
+  font-weight: 500;
+  color: var(--foreground);
+}
+.wedge {
+  position: absolute;
+  top: 86px;
+  width: 56px;
+  height: 1.5px;
+  background: #4e4e4e;
+  transform-origin: 0 50%;
+  opacity: 0;
+}
+.wport {
+  position: absolute;
+  top: 82px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1.5px solid #6a6a6e;
+  opacity: 0;
+}
+.e1 { left: 260px; } .p1a { left: 255px; } .p1b { left: 311px; }
+.e2 { left: 576px; } .p2a { left: 571px; } .p2b { left: 627px; }
+.e3 { left: 892px; } .p3a { left: 887px; } .p3b { left: 943px; }
+.wcursor {
+  position: absolute;
+  opacity: 0;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.45));
+}
+.wcursor.blue { left: 231px; top: 82px; }
+.wcursor.red { left: 952px; top: 96px; }
+.wmenu {
+  position: absolute;
+  left: 878px;
+  top: 102px;
+  width: 130px;
+  padding: 3px;
+  border-radius: 7px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 7px 11px -2px rgba(0, 0, 0, 0.3);
+  font-size: 9.5px;
+  line-height: 13px;
+  opacity: 0;
+}
+.wmenu div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 23px;
+  padding: 0 6px;
+  border-radius: 4px;
+}
+.wmenu .on { background: rgba(255, 255, 255, 0.06); }
+.wmenu .red,
+.wmenu .red i { color: var(--danger); }
+
+/* Figma timeline: 11s loop. Percentages are the keyframe times from the file. */
+.flow .wnode, .flow .wedge, .flow .wport, .flow .wcursor, .flow .wmenu {
+  animation-duration: 11s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.n1 { animation-name: n1; }
+.n2 { animation-name: n2; }
+.n3 { animation-name: n3; }
+.n4 { animation-name: n4; }
+@keyframes n1 {
+  0%, 1.818% { opacity: 0; translate: -31px 0; animation-timing-function: ease-out; }
+  6.364% { opacity: 1; translate: 0 0; }
+  95.455% { opacity: 1; translate: 0 0; animation-timing-function: ease-out; }
+  99.091%, 100% { opacity: 0; translate: 0 0; }
+}
+@keyframes n2 {
+  0%, 21.818% { opacity: 0; translate: -31px 0; animation-timing-function: ease-out; }
+  25.909% { opacity: 1; translate: 0 0; }
+  95.455% { opacity: 1; translate: 0 0; animation-timing-function: ease-out; }
+  99.091%, 100% { opacity: 0; translate: 0 0; }
+}
+@keyframes n3 {
+  0%, 42.727% { opacity: 0; translate: -31px 0; scale: 1; animation-timing-function: ease-out; }
+  46.818% { opacity: 1; translate: 0 0; scale: 1; }
+  86.364% { opacity: 1; scale: 1; animation-timing-function: ease-in-out; }
+  88.182% { opacity: 0.35; scale: 0.96; animation-timing-function: ease-out; }
+  90.909% { opacity: 1; scale: 1; }
+  95.455% { opacity: 1; translate: 0 0; animation-timing-function: ease-out; }
+  99.091%, 100% { opacity: 0; translate: 0 0; }
+}
+@keyframes n4 {
+  0%, 63.636% { opacity: 0; translate: -31px 0; animation-timing-function: ease-out; }
+  67.727% { opacity: 1; translate: 0 0; }
+  95.455% { opacity: 1; translate: 0 0; animation-timing-function: ease-out; }
+  99.091%, 100% { opacity: 0; translate: 0 0; }
+}
+.e1 { animation-name: e1; }
+.e2 { animation-name: e2; }
+.e3 { animation-name: e3; }
+@keyframes e1 {
+  0%, 14.455% { opacity: 0; transform: scaleX(0.01); }
+  14.545% { opacity: 1; transform: scaleX(0.01); animation-timing-function: ease-in-out; }
+  21.818% { opacity: 1; transform: scaleX(1); }
+  95.455% { opacity: 1; transform: scaleX(1); animation-timing-function: ease-out; }
+  99.091%, 100% { opacity: 0; transform: scaleX(1); }
+}
+@keyframes e2 {
+  0%, 35.364% { opacity: 0; transform: scaleX(0.01); }
+  35.455% { opacity: 1; transform: scaleX(0.01); animation-timing-function: ease-in-out; }
+  42.727% { opacity: 1; transform: scaleX(1); }
+  95.455% { opacity: 1; transform: scaleX(1); animation-timing-function: ease-out; }
+  99.091%, 100% { opacity: 0; transform: scaleX(1); }
+}
+@keyframes e3 {
+  0%, 56.273% { opacity: 0; transform: scaleX(0.01); }
+  56.364% { opacity: 1; transform: scaleX(0.01); animation-timing-function: ease-in-out; }
+  63.636% { opacity: 1; transform: scaleX(1); }
+  95.455% { opacity: 1; transform: scaleX(1); animation-timing-function: ease-out; }
+  99.091%, 100% { opacity: 0; transform: scaleX(1); }
+}
+.p1a { animation-name: p1a; } .p1b { animation-name: p1b; }
+.p2a { animation-name: p2a; } .p2b { animation-name: p2b; }
+.p3a { animation-name: p3a; } .p3b { animation-name: p3b; }
+@keyframes p1a { 0%, 11.818% { opacity: 0; animation-timing-function: ease-out; } 13.636% { opacity: 1; } 95.455% { opacity: 1; animation-timing-function: ease-out; } 99.091%, 100% { opacity: 0; } }
+@keyframes p1b { 0%, 20.909% { opacity: 0; animation-timing-function: ease-out; } 22.727% { opacity: 1; } 95.455% { opacity: 1; animation-timing-function: ease-out; } 99.091%, 100% { opacity: 0; } }
+@keyframes p2a { 0%, 32.727% { opacity: 0; animation-timing-function: ease-out; } 34.545% { opacity: 1; } 95.455% { opacity: 1; animation-timing-function: ease-out; } 99.091%, 100% { opacity: 0; } }
+@keyframes p2b { 0%, 41.818% { opacity: 0; animation-timing-function: ease-out; } 43.636% { opacity: 1; } 95.455% { opacity: 1; animation-timing-function: ease-out; } 99.091%, 100% { opacity: 0; } }
+@keyframes p3a { 0%, 53.636% { opacity: 0; animation-timing-function: ease-out; } 55.455% { opacity: 1; } 95.455% { opacity: 1; animation-timing-function: ease-out; } 99.091%, 100% { opacity: 0; } }
+@keyframes p3b { 0%, 62.727% { opacity: 0; animation-timing-function: ease-out; } 64.545% { opacity: 1; } 95.455% { opacity: 1; animation-timing-function: ease-out; } 99.091%, 100% { opacity: 0; } }
+
+.wcursor.blue { animation-name: blueFade, blueMove, bluePress; }
+@keyframes blueFade {
+  0%, 3.636% { opacity: 0; animation-timing-function: ease-out; }
+  7.273% { opacity: 1; }
+  95.455% { opacity: 1; animation-timing-function: ease-out; }
+  99.091%, 100% { opacity: 0; }
+}
+@keyframes blueMove {
+  0%, 3.636% { translate: -66px 48px; animation-timing-function: ease-in-out; }
+  12.727% { translate: 0 0; }
+  14.545% { translate: 0 0; animation-timing-function: ease-in-out; }
+  21.818% { translate: 57px 0; }
+  26.364% { translate: 57px 0; animation-timing-function: ease-in-out; }
+  34.545% { translate: 316px 0; }
+  35.455% { translate: 316px 0; animation-timing-function: ease-in-out; }
+  42.727% { translate: 373px 0; }
+  47.273% { translate: 373px 0; animation-timing-function: ease-in-out; }
+  55.455% { translate: 632px 0; }
+  56.364% { translate: 632px 0; animation-timing-function: ease-in-out; }
+  63.636% { translate: 689px 0; }
+  69.091% { translate: 689px 0; animation-timing-function: ease-in-out; }
+  78.182%, 100% { translate: 620px 88px; }
+}
+@keyframes bluePress {
+  0%, 13.636% { scale: 1; animation-timing-function: ease-out; }
+  14.545%, 21.818% { scale: 0.86; animation-timing-function: ease-out; }
+  23.182%, 34.545% { scale: 1; animation-timing-function: ease-out; }
+  35.455%, 42.727% { scale: 0.86; animation-timing-function: ease-out; }
+  44.091%, 55.455% { scale: 1; animation-timing-function: ease-out; }
+  56.364%, 63.636% { scale: 0.86; animation-timing-function: ease-out; }
+  65%, 100% { scale: 1; }
+}
+.wcursor.red { animation-name: redFade, redMove, redPress; }
+@keyframes redFade {
+  0%, 5.455% { opacity: 0; animation-timing-function: ease-out; }
+  9.091% { opacity: 1; }
+  95.455% { opacity: 1; animation-timing-function: ease-out; }
+  99.091%, 100% { opacity: 0; }
+}
+@keyframes redMove {
+  0%, 5.455% { translate: 154px 88px; animation-timing-function: ease-in-out; }
+  12.727% { translate: 128px 66px; animation-timing-function: ease-in-out; }
+  32.727% { translate: 101px 48px; animation-timing-function: ease-in-out; }
+  52.727% { translate: 132px 75px; }
+  65.455% { translate: 132px 75px; animation-timing-function: ease-in-out; }
+  74.545% { translate: -48px -18px; }
+  78.182% { translate: -48px -18px; animation-timing-function: ease-in-out; }
+  83.636%, 100% { translate: -22px 7px; }
+}
+@keyframes redPress {
+  0%, 75% { scale: 1; animation-timing-function: ease-out; }
+  75.727% { scale: 0.86; animation-timing-function: ease-out; }
+  76.818%, 84.091% { scale: 1; animation-timing-function: ease-out; }
+  84.818% { scale: 0.86; animation-timing-function: ease-out; }
+  85.909%, 100% { scale: 1; }
+}
+.wmenu { animation-name: wmenu; }
+@keyframes wmenu {
+  0%, 75.909% { opacity: 0; animation-timing-function: ease-out; }
+  77.727% { opacity: 1; }
+  85.455% { opacity: 1; animation-timing-function: ease-out; }
+  87.273%, 100% { opacity: 0; }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .glow { animation: none; }
+  .flow .wnode, .flow .wedge, .flow .wport { animation: none; opacity: 1; }
+  .flow .wcursor, .flow .wmenu { animation: none; opacity: 0; }
+}
+</style>
+</head>
+<body>
+<div class="wf-canvas" aria-label="A workflow building itself: trigger, developer agent, QA agent, draft pull request">
+  <div class="glow glow-blue"></div><div class="glow glow-warm"></div>
+  <div class="wf-stage"><div class="flow">
+                      <div class="wnode n1">
+                        <div class="wcat"><span class="wcat-ic blue"><i data-i="play" data-s="12"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="12" height="12" stroke-width="1.5" aria-hidden="true"><path d="M20.4086 9.35258C22.5305 10.5065 22.5305 13.4935 20.4086 14.6474L7.59662 21.6145C5.53435 22.736 3 21.2763 3 18.9671L3 5.0329C3 2.72368 5.53435 1.26402 7.59661 2.38548L20.4086 9.35258Z" fill="currentColor"></path></svg></i></span>Trigger<i data-i="dots" data-s="14" class="wdots"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="14" height="14" stroke-width="1.5" aria-hidden="true"><path d="M7 12C7 13.1046 6.10457 14 5 14C3.89543 14 3 13.1046 3 12C3 10.8954 3.89543 10 5 10C6.10457 10 7 10.8954 7 12Z" fill="currentColor"></path><path d="M14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12Z" fill="currentColor"></path><path d="M21 12C21 13.1046 20.1046 14 19 14C17.8954 14 17 13.1046 17 12C17 10.8954 17.8954 10 19 10C20.1046 10 21 10.8954 21 12Z" fill="currentColor"></path></svg></i></div>
+                        <div class="wcard">
+                          <div class="wtitle"><span class="wtile"><i data-i="play" data-s="16"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="16" height="16" stroke-width="1.5" aria-hidden="true"><path d="M20.4086 9.35258C22.5305 10.5065 22.5305 13.4935 20.4086 14.6474L7.59662 21.6145C5.53435 22.736 3 21.2763 3 18.9671L3 5.0329C3 2.72368 5.53435 1.26402 7.59661 2.38548L20.4086 9.35258Z" fill="currentColor"></path></svg></i></span><div><b>Manual trigger</b><small>Runs when you start it</small></div></div>
+                          <hr>
+                          <div class="wrow"><span>Starts from</span><b>Chat</b></div>
+                          <div class="wrow"><span>CLI</span><b>Allowed</b></div>
+                        </div>
+                      </div>
+                      <div class="wnode n2">
+                        <div class="wcat"><span class="wcat-ic"><i data-i="f-agent" data-s="12"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M5.33464 4.66699H10.668C12.1407 4.66699 13.3346 5.8609 13.3346 7.33366V10.0003C13.3346 11.4731 12.1407 12.667 10.668 12.667H5.33464C3.86188 12.667 2.66797 11.4731 2.66797 10.0003V7.33366C2.66797 5.8609 3.86188 4.66699 5.33464 4.66699Z" stroke-width="1.14286" stroke-linecap="round" stroke="currentColor"></path><path d="M8.00065 4.66667V3M1.33398 8V10M14.6673 8V10" stroke-width="1.14286" stroke-linecap="round" stroke="currentColor"></path><path d="M8.66732 2.33366C8.66732 2.70185 8.36884 3.00033 8.00065 3.00033C7.63246 3.00033 7.33398 2.70185 7.33398 2.33366C7.33398 1.96547 7.63246 1.66699 8.00065 1.66699C8.36884 1.66699 8.66732 1.96547 8.66732 2.33366Z" stroke-width="1.14286" stroke-linecap="round" stroke="currentColor"></path><path d="M5.99935 9.49967C6.45959 9.49967 6.83268 9.12658 6.83268 8.66634C6.83268 8.2061 6.45959 7.83301 5.99935 7.83301C5.53911 7.83301 5.16602 8.2061 5.16602 8.66634C5.16602 9.12658 5.53911 9.49967 5.99935 9.49967Z" fill="currentColor"></path><path d="M9.99935 9.49967C10.4596 9.49967 10.8327 9.12658 10.8327 8.66634C10.8327 8.2061 10.4596 7.83301 9.99935 7.83301C9.53911 7.83301 9.16602 8.2061 9.16602 8.66634C9.16602 9.12658 9.53911 9.49967 9.99935 9.49967Z" fill="currentColor"></path></svg></i></span>Agent<i data-i="dots" data-s="14" class="wdots"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="14" height="14" stroke-width="1.5" aria-hidden="true"><path d="M7 12C7 13.1046 6.10457 14 5 14C3.89543 14 3 13.1046 3 12C3 10.8954 3.89543 10 5 10C6.10457 10 7 10.8954 7 12Z" fill="currentColor"></path><path d="M14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12Z" fill="currentColor"></path><path d="M21 12C21 13.1046 20.1046 14 19 14C17.8954 14 17 13.1046 17 12C17 10.8954 17.8954 10 19 10C20.1046 10 21 10.8954 21 12Z" fill="currentColor"></path></svg></i></div>
+                        <div class="wcard">
+                          <div class="wtitle"><span class="wtile"><i data-i="code" data-s="16"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="16" height="16" stroke-width="1.5" aria-hidden="true"><path d="M17 7.82959L18.6965 9.35641C20.239 10.7447 21.0103 11.4389 21.0103 12.3296C21.0103 13.2203 20.239 13.9145 18.6965 15.3028L17 16.8296" stroke-linecap="round" stroke="currentColor"></path><path d="M13.9863 5L11.9995 12.4149L10.0127 19.8297" stroke-linecap="round" stroke="currentColor"></path><path d="M6.99956 7.82959L5.30309 9.35641C3.76054 10.7447 2.98926 11.4389 2.98926 12.3296C2.98926 13.2203 3.76054 13.9145 5.30309 15.3028L6.99956 16.8296" stroke-linecap="round" stroke="currentColor"></path></svg></i></span><div><b>Developer</b><small>Builds the change</small></div></div>
+                          <hr>
+                          <div class="wrow"><span>Model</span><b><i data-i="f-claude" data-s="11" class="inl"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.76545 9.27819L5.50864 7.73889L5.55456 7.60472L5.50864 7.53058H5.37452L4.91551 7.50237L3.34801 7.45998L1.98875 7.40349L0.671826 7.33289L0.339966 7.26224L0.0292969 6.8527L0.0610556 6.64793L0.339966 6.46086L0.738939 6.49616L1.62154 6.55614L2.94549 6.64793L3.90583 6.70442L5.3286 6.8527H5.55456L5.58632 6.76091L5.50864 6.70442L5.44866 6.64793L4.07878 5.71941L2.59598 4.73794L1.81928 4.17304L1.39912 3.88704L1.18732 3.61876L1.09553 3.03272L1.47685 2.61255L1.98875 2.64791L2.11938 2.68321L2.63836 3.08212L3.74692 3.9401L5.19443 5.00623L5.40628 5.18272L5.49099 5.12269L5.50161 5.08037L5.40628 4.92146L4.61895 3.49869L3.77868 2.05119L3.40444 1.45099L3.30562 1.09091C3.27032 0.942576 3.24559 0.819027 3.24559 0.667206L3.67986 0.0776265L3.91988 0L4.49895 0.0776809L4.74256 0.289479L5.10264 1.1121L5.68519 2.40784L6.58898 4.16955L6.85378 4.69207L6.99498 5.17575L7.04798 5.32403H7.13977V5.23927L7.21386 4.24723L7.35157 3.02918L7.48574 1.46161L7.53166 1.02037L7.75054 0.490763L8.18476 0.20477L8.5237 0.36716L8.80261 0.766132L8.76377 1.0238L8.59784 2.10065L8.27306 3.78828L8.06121 4.91803H8.18476L8.32601 4.77678L8.89794 4.01773L9.85822 2.81732L10.2819 2.34072L10.7762 1.81466L11.0939 1.56402H11.6941L12.1354 2.22072L11.9377 2.89854L11.3199 3.68233L10.8079 4.34605L10.0736 5.3346L9.61461 6.12546L9.65699 6.18898L9.76649 6.17841L11.4258 5.82536L12.3225 5.66292L13.3923 5.47934L13.876 5.7053L13.9289 5.9348L13.7382 6.40437L12.5944 6.68677L11.2528 6.95511L9.25453 7.42823L9.2298 7.44588L9.25807 7.48117L10.1583 7.56588L10.5432 7.58707H11.4858L13.2404 7.7177L13.6995 8.02135L13.9748 8.39205L13.9289 8.67444L13.2228 9.03458L12.2696 8.80862L10.0454 8.27907L9.28275 8.0884H9.17685V8.15198L9.81236 8.77332L10.9774 9.82544L12.4355 11.1812L12.5096 11.5166L12.3225 11.7813L12.1248 11.7531L10.8432 10.7893L10.349 10.355L9.2298 9.41236H9.15572V9.51118L9.41338 9.88896L10.7762 11.9367L10.8468 12.5651L10.748 12.7699L10.3949 12.8935L10.0065 12.8228L9.20861 11.7037L8.38604 10.4432L7.72227 9.31349L7.6411 9.35941L7.24921 13.5784L7.06563 13.7937L6.64193 13.9561L6.28893 13.6878L6.10176 13.2535L6.28888 12.3956L6.51484 11.2765L6.69842 10.3867L6.86435 9.28173L6.96322 8.91457L6.95614 8.88984L6.87497 8.9004L6.04178 10.0443L4.77432 11.7566L3.77165 12.8299L3.53158 12.9252L3.11496 12.7098L3.1538 12.325L3.38679 11.9826L4.77426 10.2173L5.61099 9.12282L6.15122 8.49092L6.14768 8.39907H6.11592L2.43 10.7928L1.7733 10.8775L1.49085 10.6128L1.52615 10.1785L1.66032 10.0372L2.76888 9.27465L2.76545 9.27819Z" fill="#D97757"></path></svg></i>Sonnet 5</b></div>
+                          <div class="wrow"><span>Effort</span><b>Medium</b></div>
+                        </div>
+                      </div>
+                      <div class="wnode n3">
+                        <div class="wcat"><span class="wcat-ic"><i data-i="f-agent" data-s="12"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M5.33464 4.66699H10.668C12.1407 4.66699 13.3346 5.8609 13.3346 7.33366V10.0003C13.3346 11.4731 12.1407 12.667 10.668 12.667H5.33464C3.86188 12.667 2.66797 11.4731 2.66797 10.0003V7.33366C2.66797 5.8609 3.86188 4.66699 5.33464 4.66699Z" stroke-width="1.14286" stroke-linecap="round" stroke="currentColor"></path><path d="M8.00065 4.66667V3M1.33398 8V10M14.6673 8V10" stroke-width="1.14286" stroke-linecap="round" stroke="currentColor"></path><path d="M8.66732 2.33366C8.66732 2.70185 8.36884 3.00033 8.00065 3.00033C7.63246 3.00033 7.33398 2.70185 7.33398 2.33366C7.33398 1.96547 7.63246 1.66699 8.00065 1.66699C8.36884 1.66699 8.66732 1.96547 8.66732 2.33366Z" stroke-width="1.14286" stroke-linecap="round" stroke="currentColor"></path><path d="M5.99935 9.49967C6.45959 9.49967 6.83268 9.12658 6.83268 8.66634C6.83268 8.2061 6.45959 7.83301 5.99935 7.83301C5.53911 7.83301 5.16602 8.2061 5.16602 8.66634C5.16602 9.12658 5.53911 9.49967 5.99935 9.49967Z" fill="currentColor"></path><path d="M9.99935 9.49967C10.4596 9.49967 10.8327 9.12658 10.8327 8.66634C10.8327 8.2061 10.4596 7.83301 9.99935 7.83301C9.53911 7.83301 9.16602 8.2061 9.16602 8.66634C9.16602 9.12658 9.53911 9.49967 9.99935 9.49967Z" fill="currentColor"></path></svg></i></span>Agent<i data-i="dots" data-s="14" class="wdots"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="14" height="14" stroke-width="1.5" aria-hidden="true"><path d="M7 12C7 13.1046 6.10457 14 5 14C3.89543 14 3 13.1046 3 12C3 10.8954 3.89543 10 5 10C6.10457 10 7 10.8954 7 12Z" fill="currentColor"></path><path d="M14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12Z" fill="currentColor"></path><path d="M21 12C21 13.1046 20.1046 14 19 14C17.8954 14 17 13.1046 17 12C17 10.8954 17.8954 10 19 10C20.1046 10 21 10.8954 21 12Z" fill="currentColor"></path></svg></i></div>
+                        <div class="wcard">
+                          <div class="wtitle"><span class="wtile"><i data-i="tube" data-s="16"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="16" height="16" stroke-width="1.5" aria-hidden="true"><path d="M19 7.80374L18.1594 7.31987L9.74872 2.49415M9.74872 2.49415L2.65093 14.7455C1.31093 17.0584 2.10615 20.0159 4.42709 21.3513C6.74803 22.6867 9.7158 21.8942 11.0558 19.5813L12.5511 17.0003M9.74872 2.49415L8.91283 2M12.5511 17.0003L14.1886 14.1738L15.902 11.2163L18.1594 7.31987M15.902 11.2163L13.344 9.74451M14.1886 14.1738L9.98568 11.7556M12.5511 17.0003L9.93838 15.4971" stroke-linecap="round" stroke="currentColor"></path><path d="M22 14.9167C22 16.0673 21.1046 17 20 17C18.8954 17 18 16.0673 18 14.9167C18 14.1968 18.783 13.2359 19.3691 12.6175C19.7161 12.2514 20.2839 12.2514 20.6309 12.6175C21.217 13.2359 22 14.1968 22 14.9167Z" stroke-linecap="round" stroke="currentColor"></path></svg></i></span><div><b>QA</b><small>Tests, lint and security scan</small></div></div>
+                          <hr>
+                          <div class="wrow"><span>Model</span><b><i data-i="f-claude" data-s="11" class="inl"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.76545 9.27819L5.50864 7.73889L5.55456 7.60472L5.50864 7.53058H5.37452L4.91551 7.50237L3.34801 7.45998L1.98875 7.40349L0.671826 7.33289L0.339966 7.26224L0.0292969 6.8527L0.0610556 6.64793L0.339966 6.46086L0.738939 6.49616L1.62154 6.55614L2.94549 6.64793L3.90583 6.70442L5.3286 6.8527H5.55456L5.58632 6.76091L5.50864 6.70442L5.44866 6.64793L4.07878 5.71941L2.59598 4.73794L1.81928 4.17304L1.39912 3.88704L1.18732 3.61876L1.09553 3.03272L1.47685 2.61255L1.98875 2.64791L2.11938 2.68321L2.63836 3.08212L3.74692 3.9401L5.19443 5.00623L5.40628 5.18272L5.49099 5.12269L5.50161 5.08037L5.40628 4.92146L4.61895 3.49869L3.77868 2.05119L3.40444 1.45099L3.30562 1.09091C3.27032 0.942576 3.24559 0.819027 3.24559 0.667206L3.67986 0.0776265L3.91988 0L4.49895 0.0776809L4.74256 0.289479L5.10264 1.1121L5.68519 2.40784L6.58898 4.16955L6.85378 4.69207L6.99498 5.17575L7.04798 5.32403H7.13977V5.23927L7.21386 4.24723L7.35157 3.02918L7.48574 1.46161L7.53166 1.02037L7.75054 0.490763L8.18476 0.20477L8.5237 0.36716L8.80261 0.766132L8.76377 1.0238L8.59784 2.10065L8.27306 3.78828L8.06121 4.91803H8.18476L8.32601 4.77678L8.89794 4.01773L9.85822 2.81732L10.2819 2.34072L10.7762 1.81466L11.0939 1.56402H11.6941L12.1354 2.22072L11.9377 2.89854L11.3199 3.68233L10.8079 4.34605L10.0736 5.3346L9.61461 6.12546L9.65699 6.18898L9.76649 6.17841L11.4258 5.82536L12.3225 5.66292L13.3923 5.47934L13.876 5.7053L13.9289 5.9348L13.7382 6.40437L12.5944 6.68677L11.2528 6.95511L9.25453 7.42823L9.2298 7.44588L9.25807 7.48117L10.1583 7.56588L10.5432 7.58707H11.4858L13.2404 7.7177L13.6995 8.02135L13.9748 8.39205L13.9289 8.67444L13.2228 9.03458L12.2696 8.80862L10.0454 8.27907L9.28275 8.0884H9.17685V8.15198L9.81236 8.77332L10.9774 9.82544L12.4355 11.1812L12.5096 11.5166L12.3225 11.7813L12.1248 11.7531L10.8432 10.7893L10.349 10.355L9.2298 9.41236H9.15572V9.51118L9.41338 9.88896L10.7762 11.9367L10.8468 12.5651L10.748 12.7699L10.3949 12.8935L10.0065 12.8228L9.20861 11.7037L8.38604 10.4432L7.72227 9.31349L7.6411 9.35941L7.24921 13.5784L7.06563 13.7937L6.64193 13.9561L6.28893 13.6878L6.10176 13.2535L6.28888 12.3956L6.51484 11.2765L6.69842 10.3867L6.86435 9.28173L6.96322 8.91457L6.95614 8.88984L6.87497 8.9004L6.04178 10.0443L4.77432 11.7566L3.77165 12.8299L3.53158 12.9252L3.11496 12.7098L3.1538 12.325L3.38679 11.9826L4.77426 10.2173L5.61099 9.12282L6.15122 8.49092L6.14768 8.39907H6.11592L2.43 10.7928L1.7733 10.8775L1.49085 10.6128L1.52615 10.1785L1.66032 10.0372L2.76888 9.27465L2.76545 9.27819Z" fill="#D97757"></path></svg></i>Sonnet 5</b></div>
+                          <div class="wrow"><span>Effort</span><b>High</b></div>
+                          <div class="wrow"><span>Output</span><b>Structured</b></div>
+                        </div>
+                      </div>
+                      <div class="wnode n4">
+                        <div class="wcat"><span class="wcat-ic green"><i data-i="plug" data-s="12"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="12" height="12" stroke-width="1.5" aria-hidden="true"><path d="M12 15.1082V20.1498C12 21.2635 11.0955 22.1875 10.0128 21.9673C5.44193 21.0381 2 16.9659 2 12.0832C2 6.51441 6.47715 2 12 2C17.5228 2 22 6.51441 22 12.0832C22 16.0744 19.7003 19.5239 16.3641 21.1581" stroke-linecap="round" stroke="currentColor"></path><path d="M9 11.8C9 11.3582 9.35817 11 9.8 11H14.2C14.6418 11 15 11.3582 15 11.8V12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12V11.8Z" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"></path><path d="M13.5 11V9" stroke-linecap="round" stroke="currentColor"></path><path d="M10.5 11V9" stroke-linecap="round" stroke="currentColor"></path></svg></i></span>Action<i data-i="dots" data-s="14" class="wdots"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="14" height="14" stroke-width="1.5" aria-hidden="true"><path d="M7 12C7 13.1046 6.10457 14 5 14C3.89543 14 3 13.1046 3 12C3 10.8954 3.89543 10 5 10C6.10457 10 7 10.8954 7 12Z" fill="currentColor"></path><path d="M14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12Z" fill="currentColor"></path><path d="M21 12C21 13.1046 20.1046 14 19 14C17.8954 14 17 13.1046 17 12C17 10.8954 17.8954 10 19 10C20.1046 10 21 10.8954 21 12Z" fill="currentColor"></path></svg></i></div>
+                        <div class="wcard">
+                          <div class="wtitle"><span class="wtile"><i data-i="f-github" data-s="16"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16" viewBox="0 0.085 7.27273 7.10227" fill="none"><path d="M3.63639 0.0849609C1.62832 0.0849609 0 1.713 0 3.72135C0 5.328 1.04193 6.6911 2.48679 7.17192C2.66852 7.20559 2.73526 7.09303 2.73526 6.99698C2.73526 6.91027 2.73185 6.62383 2.73031 6.31999C1.71866 6.53993 1.5052 5.89093 1.5052 5.89093C1.33977 5.47061 1.10142 5.35882 1.10142 5.35882C0.771506 5.13314 1.12631 5.1378 1.12631 5.1378C1.49145 5.16343 1.68372 5.51252 1.68372 5.51252C2.00807 6.06843 2.53443 5.90772 2.74193 5.81479C2.77457 5.57979 2.86881 5.41934 2.97281 5.32854C2.16511 5.23661 1.31605 4.92479 1.31605 3.53144C1.31605 3.13442 1.4581 2.81002 1.69071 2.55536C1.65295 2.46377 1.52849 2.09394 1.72594 1.59303C1.72594 1.59303 2.03131 1.4953 2.72622 1.96578C3.01628 1.88522 3.32736 1.84482 3.63639 1.84343C3.94543 1.84482 4.25676 1.88519 4.54736 1.96578C5.24142 1.49533 5.54636 1.59306 5.54636 1.59306C5.74429 2.09391 5.61977 2.4638 5.58202 2.55536C5.81517 2.81002 5.95625 3.13442 5.95625 3.53144C5.95625 4.92811 5.10557 5.23564 4.29582 5.32567C4.42625 5.43851 4.54247 5.65982 4.54247 5.99908C4.54247 6.48561 4.53827 6.87721 4.53827 6.99698C4.53827 7.09377 4.60372 7.20715 4.78804 7.17141C6.2321 6.69007 7.27273 5.32749 7.27273 3.72138C7.27273 1.713 5.64463 0.0849609 3.63639 0.0849609Z" fill="currentColor"></path></svg></i></span><div><b>Create draft PR</b><small>Opens a draft pull request</small></div></div>
+                          <hr>
+                          <div class="wrow"><span>Repository</span><b>webhook-monitor</b></div>
+                          <div class="wrow"><span>Base branch</span><b>main</b></div>
+                        </div>
+                      </div>
+                      <span class="wedge e1"></span><span class="wport p1a"></span><span class="wport p1b"></span>
+                      <span class="wedge e2"></span><span class="wport p2a"></span><span class="wport p2b"></span>
+                      <span class="wedge e3"></span><span class="wport p3a"></span><span class="wport p3b"></span>
+                      <svg class="wcursor blue" width="33" height="34" viewBox="0 0 33 34"><path d="M29 4 4 13.5l10.5 4.2L18.7 29z" fill="#8f8cff" stroke="#fff" stroke-width="2" stroke-linejoin="round"></path></svg>
+                      <div class="wmenu">
+                        <div class="on"><i data-i="refresh" data-s="11"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="11" height="11" stroke-width="1.5" aria-hidden="true"><path d="M3.67981 13L3.67981 11.3333C3.67981 6.73096 7.4402 3 12.0789 3C15.1178 3 17.7799 4.60136 19.2545 7M2 11.3333L3.67981 13L5.35962 11.3333" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"></path><path d="M20.3139 11V12.6667C20.3139 17.269 16.5391 21 11.8827 21C8.83213 21 6.15995 19.3986 4.67969 17M22.0001 12.6667L20.3139 11L18.6277 12.6667" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"></path></svg></i>Change node</div>
+                        <div class="red"><i data-i="trash" data-s="11"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="11" height="11" stroke-width="1.5" aria-hidden="true"><path d="M9.1709 4C9.58273 2.83481 10.694 2 12.0002 2C13.3064 2 14.4177 2.83481 14.8295 4" stroke-linecap="round" stroke="currentColor"></path><path d="M20.5001 6H3.5" stroke-linecap="round" stroke="currentColor"></path><path d="M18.8332 8.5L18.3732 15.3991C18.1962 18.054 18.1077 19.3815 17.2427 20.1907C16.3777 21 15.0473 21 12.3865 21H11.6132C8.95235 21 7.62195 21 6.75694 20.1907C5.89194 19.3815 5.80344 18.054 5.62644 15.3991L5.1665 8.5" stroke-linecap="round" stroke="currentColor"></path><path d="M9.5 11L10 16" stroke-linecap="round" stroke="currentColor"></path><path d="M14.5 11L14 16" stroke-linecap="round" stroke="currentColor"></path></svg></i>Delete node</div>
+                      </div>
+                      <svg class="wcursor red" width="33" height="34" viewBox="0 0 33 34"><path d="M4 4 29 13.5l-10.5 4.2L14.3 29z" fill="#ff5a4d" stroke="#fff" stroke-width="2" stroke-linejoin="round"></path></svg>
+                    </div></div>
+</div>
+</body>
+</html>

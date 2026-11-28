@@ -982,6 +982,36 @@
       .map((n) => `<button class="icon-btn" data-soon="This action" aria-label="${n}">${ic(n)}</button>`)
       .join('')}</div>`)
     revealPreview()
+    await sleep(1800, run)
+    showWorkflowCard()
+  }
+
+  // After the preview: offer to turn this chat into a workflow. Reuses the home page's animation.
+  function showWorkflowCard() {
+    const card = h(`<div class="wf-card">
+      <div class="wf-canvas">
+        <div class="glow glow-blue"></div><div class="glow glow-warm"></div>
+        <span class="wf-label">Workflow studio</span>
+        <button class="icon-btn wf-x" data-wf-close aria-label="Dismiss">${ic('close', 14)}</button>
+        <div class="wf-stage" aria-hidden="true"></div>
+      </div>
+      <div class="wf-body">
+        <p class="wf-title"><span class="w1">Chat,</span> <span class="w2">build,</span> <span class="w3">test,</span> <span class="w4">PR</span></p>
+        <p class="wf-sub">Run this as a workflow next time: plan, build, test and open a draft PR in one go.</p>
+        <div class="wf-actions">
+          <button class="btn ghost" data-wf-close>Not now</button>
+          <button class="btn primary" data-soon="Workflows">${ic('f-workflow', 14)}Try workflow</button>
+        </div>
+      </div>
+    </div>`)
+    $('.wf-stage', card).appendChild($('.promo-visual .flow').cloneNode(true))
+    card.addEventListener('click', (e) => {
+      if (!e.target.closest('[data-wf-close]')) return
+      card.classList.add('gone')
+      card.addEventListener('animationend', () => card.remove(), { once: true })
+    })
+    atBottom = true
+    say(card)
   }
 
   function startChat(prompt) {
