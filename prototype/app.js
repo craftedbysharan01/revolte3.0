@@ -358,10 +358,15 @@
         card.innerHTML = `
           <div class="q-head">
             <p class="q-title">${esc(q.q)}</p>
-            <span class="q-steps" role="tablist" aria-label="Questions">${QUESTIONS.map(
-              (_, i) =>
-                `<button type="button" role="tab" data-step="${i}" class="${i === idx ? 'cur' : i <= furthest ? 'seen' : ''}" aria-selected="${i === idx}" aria-label="Question ${i + 1}" ${i > furthest ? 'disabled' : ''}><i></i></button>`
-            ).join('')}<span class="q-count">${idx + 1}/${QUESTIONS.length}</span></span>
+            <span class="q-steps" role="tablist" aria-label="Questions">
+              ${idx > 0 ? `<button type="button" class="q-back" data-step="${idx - 1}" aria-label="Previous question">${ic('left', 14)}Back</button>` : ''}
+              ${QUESTIONS.map((qq, i) => {
+                const done = i < idx || (i <= furthest && i !== idx)
+                const ans = answers[i].own.trim() || qq.options[answers[i].pick]
+                const tip = i === idx ? '' : i > furthest ? '' : `data-tip="${esc(done ? 'Change: ' + ans : qq.q)}"`
+                return `<button type="button" role="tab" data-step="${i}" class="${i === idx ? 'cur' : done ? 'done' : ''}" aria-selected="${i === idx}" aria-label="Question ${i + 1}${done ? ', answered: ' + esc(ans) : ''}" ${i > furthest ? 'disabled' : ''} ${tip}>${done ? ic('check', 12) : i + 1}</button>`
+              }).join('')}
+            </span>
           </div>
           <div class="q-body ${dir ? 'swap ' + dir : ''}">
             <div class="q-opts" role="radiogroup" aria-label="${esc(q.q)}">${q.options

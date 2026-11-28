@@ -3425,15 +3425,37 @@ kbd.k {
 
 .q-head { display: flex; align-items: flex-start; gap: 12px; padding: 14px 12px 0 16px; }
 .q-head .q-title { flex: 1; min-width: 0; padding-top: 3px; }
-/* Step bars: where you are, and which questions you can jump back to. */
-.q-steps { flex: none; display: inline-flex; align-items: center; gap: 2px; height: 26px; }
-.q-steps button { display: grid; place-items: center; width: 22px; height: 22px; }
-.q-steps button:disabled { cursor: default; }
-.q-steps i { display: block; width: 16px; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.1); transition: background-color 200ms ease, width 240ms var(--ease-out); }
-.q-steps .seen i { background: rgba(255, 255, 255, 0.32); }
-.q-steps .seen:hover i { background: rgba(255, 255, 255, 0.6); }
-.q-steps .cur i { width: 22px; background: var(--foreground); }
-.q-count { margin-left: 6px; font-size: 12px; color: var(--subtle-foreground); font-variant-numeric: tabular-nums; }
+/* Numbered steps: answered ones show a check and can be clicked to change; "Back" appears from question 2. */
+.q-steps { flex: none; display: inline-flex; align-items: center; gap: 4px; height: 26px; }
+.q-steps button[data-step]:not(.q-back) {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  font: 500 11px var(--font-mono);
+  color: var(--subtle-foreground);
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, transform 140ms var(--ease-out);
+}
+.q-steps button:disabled { cursor: default; opacity: 0.6; }
+.q-steps .cur { background: var(--foreground); border-color: var(--foreground) !important; color: #0f0f10 !important; }
+.q-steps .done { color: var(--foreground) !important; background: var(--muted); border-color: transparent !important; cursor: pointer; }
+.q-steps .done:hover { background: var(--hover); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12); }
+.q-steps .done:active { transform: scale(0.94); }
+.q-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 24px;
+  padding: 0 8px 0 4px;
+  margin-right: 4px;
+  border-radius: 7px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.q-back:hover { background: var(--hover); color: var(--foreground); }
 .questions .q-body.swap.back { animation-name: qswapBack; }
 @keyframes qswapBack { from { opacity: 0; transform: translateX(-8px); filter: blur(2px); } }
 .questions .q-body { padding: 10px 16px 4px; gap: 10px; }
