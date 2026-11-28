@@ -11,7 +11,7 @@
   --muted: #202023;
   --foreground: #f7f6f3;
   --muted-foreground: #a6a6aa;
-  --subtle-foreground: #7e7e83;
+  --subtle-foreground: #8a8a8f;
   --disabled-foreground: #55555a;
   --border: rgba(var(--ov), 0.12);
   --border-subtle: rgba(var(--ov), 0.08);
@@ -25,6 +25,8 @@
   --coral: #ff4a3d;
 
   --ov: 255, 255, 255;
+  --amber: #f0a35a;
+  --focus: rgba(247, 246, 243, 0.55);
   --on-fg: #0f0f10;
   --shim-lo: #8a8a8e;
   --shim-hi: #ffffff;
@@ -39,29 +41,35 @@
 
 /* ---- Light theme (default). Dark stays available from the theme switch in the sidebar. ---- */
 :root[data-theme='light'] {
+  /* Soft off-white rather than pure white, and every text colour checked to WCAG AA (4.5:1)
+     against the page, sidebar and card backgrounds. */
   color-scheme: light;
-  --background: #ffffff;
-  --sidebar: #f7f7f6;
-  --surface: #ffffff;
-  --card: #ffffff;
-  --muted: #efefed;
-  --foreground: #18181b;
-  --muted-foreground: #5d5d63;
-  --subtle-foreground: #8a8a90;
-  --disabled-foreground: #b9b9bd;
-  --ov: 20, 20, 26;
-  --border: rgba(20, 20, 26, 0.12);
-  --border-subtle: rgba(20, 20, 26, 0.08);
-  --selected: rgba(20, 20, 26, 0.065);
-  --hover: rgba(20, 20, 26, 0.04);
-  --on-fg: #ffffff;
-  --shim-lo: #8a8a90;
-  --shim-hi: #d4d4d8;
-  --canvas: #f5f5fa;
-  --node: #ffffff;
-  --node-in: #fafafa;
-  --success: #1f9d61;
-  --info: #4f6fe8;
+  --background: #f3f3f1;
+  --sidebar: #ececea;
+  --surface: #f9f9f8;
+  --card: #f9f9f8;
+  --muted: #e4e4e1;
+  --foreground: #1c1c1f;
+  --muted-foreground: #55555b;
+  --subtle-foreground: #64646b;
+  --disabled-foreground: #a9a9ae;
+  --ov: 28, 28, 34;
+  --border: rgba(28, 28, 34, 0.13);
+  --border-subtle: rgba(28, 28, 34, 0.085);
+  --selected: rgba(28, 28, 34, 0.07);
+  --hover: rgba(28, 28, 34, 0.045);
+  --on-fg: #f9f9f8;
+  --shim-lo: #64646b;
+  --shim-hi: #b4b4b9;
+  --canvas: #ececf2;
+  --node: #f9f9f8;
+  --node-in: #f3f3f1;
+  --success: #12703f;
+  --info: #3a58c9;
+  --link: #1a5cc9;
+  --danger: #b42f26;
+  --amber: #93500f;
+  --focus: #1a5cc9;
 }
 :root[data-theme='light'] .logo { filter: invert(1) brightness(0.1); }
 
@@ -119,7 +127,7 @@ i[data-i] svg {
   margin-left: auto;
 }
 :focus-visible {
-  outline: 2px solid rgba(247, 246, 243, 0.4);
+  outline: 2px solid var(--focus);
   outline-offset: 1px;
 }
 
@@ -1507,9 +1515,9 @@ i[data-i] svg {
   opacity: 1;
   transform: none;
 }
-.waiting i[data-i] { color: #f0a35a; }
+.waiting i[data-i] { color: var(--amber); }
 .waiting { transition: opacity 200ms ease, transform 240ms var(--ease-out), color 400ms ease, border-color 400ms ease; }
-.waiting.warn { color: #f0a35a; border-color: rgba(240, 163, 90, 0.35); }
+.waiting.warn { color: var(--amber); border-color: rgba(240, 163, 90, 0.35); }
 .waiting.hop { animation: waitHop 560ms var(--ease-out); }
 .waiting { overflow: hidden; }
 .waiting::after {
@@ -1885,12 +1893,12 @@ i.inl { margin-right: 5px; vertical-align: -1px; }
 .progress > li.now .pg-state { color: var(--foreground); font-weight: 500; }
 .progress > li.wait { color: var(--foreground); }
 .progress > li.wait .pg-ic::before { display: none; }
-.progress > li.wait .pg-ic .pg-wait { display: inline-flex; color: #f0a35a; }
+.progress > li.wait .pg-ic .pg-wait { display: inline-flex; color: var(--amber); }
 .needs {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #f0a35a;
+  color: var(--amber);
   font-weight: 500;
 }
 .needs i[data-i] { color: inherit; }
@@ -3407,7 +3415,7 @@ kbd.k {
   stroke-dasharray: var(--cp, 12) 100;
   transition: stroke-dasharray 600ms var(--ease-out), stroke 300ms ease;
 }
-.credits.warm .cring .cring-v { stroke: #f0a35a; }
+.credits.warm .cring .cring-v { stroke: var(--amber); }
 .credits-btn.bump #creditsChat { animation: cbump 420ms var(--ease-out); }
 @keyframes cbump { 40% { color: var(--foreground); transform: translateY(-1px); } }
 #creditsChat { display: inline-block; }
@@ -3625,7 +3633,7 @@ kbd.k {
 .upsell:hover .ups-pill { background: var(--selected); color: var(--foreground); }
 .ups-bar { display: block; height: 3px; margin: 8px 0 6px; border-radius: 99px; background: rgba(var(--ov), 0.08); overflow: hidden; }
 .ups-bar b { display: block; height: 100%; width: 20%; border-radius: inherit; background: rgba(var(--ov), 0.4); transition: width 600ms var(--ease-out), background-color 300ms ease; }
-.upsell.warm .ups-bar b { background: #f0a35a; }
+.upsell.warm .ups-bar b { background: var(--amber); }
 .ups-meta { display: block; font-size: 11.5px; color: var(--subtle-foreground); font-variant-numeric: tabular-nums; }
 .ups-meta em { font-style: normal; color: var(--muted-foreground); }
 
