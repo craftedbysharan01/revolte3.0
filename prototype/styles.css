@@ -3617,14 +3617,6 @@ kbd.k {
 .ag-check { opacity: 0; color: var(--foreground) !important; }
 .agent-menu [aria-checked='true'] .ag-check { opacity: 1; }
 
-/* ---- Filled icons on hover (see prepFill in app.js) ---- */
-svg[data-l] .fz { fill: currentColor; fill-opacity: 0; transition: fill-opacity 160ms ease; }
-svg[data-l] .fk { transition: stroke-opacity 160ms ease; }
-@media (hover: hover) and (pointer: fine) {
-  :is(button, a, summary, [role='tab'], .trow, .ov-row):not(:disabled):hover svg[data-l] .fz { fill-opacity: 1; }
-  :is(button, a, summary, [role='tab'], .trow, .ov-row):not(:disabled):hover svg[data-l] .fk { stroke-opacity: 0; }
-}
-
 /* ---- Run mode picker (Auto / Manual) ---- */
 .modepick { position: relative; display: inline-flex; }
 .mode-menu { left: auto; right: 0; top: calc(100% + 6px); width: 280px; z-index: 40; transform-origin: 100% 0; }
@@ -3653,3 +3645,7 @@ svg[data-l] .fk { transition: stroke-opacity 160ms ease; }
 .q-arrows .icon-btn:disabled { color: var(--disabled-foreground); background: none; cursor: default; }
 .questions > .q-title { margin: 4px 16px 0; font-size: 15px; line-height: 22px; font-weight: 500; }
 .q-arrows .icon-btn:disabled, .q-arrows .icon-btn:disabled i[data-i] { color: var(--disabled-foreground) !important; opacity: 0.6; }
+
+/* Question footer: skip-all link on the left, Skip and Next on the right. */
+.q-foot { padding: 8px 12px 12px 16px; }
+.q-foot .btn { height: 30px; }
