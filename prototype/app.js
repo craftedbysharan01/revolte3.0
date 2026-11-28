@@ -303,7 +303,10 @@
     return new Promise((resolve) => {
       const answers = QUESTIONS.map((q) => ({ pick: 0, own: '' }))
       let idx = 0
-      const card = say(h(`<div class="card questions" tabindex="-1"></div>`))
+      // The questions dock at the bottom of the chat, right above the reply box, like a composer
+      // takeover. Once answered, a compact summary is left in the thread.
+      const card = h(`<div class="card questions docked" tabindex="-1"></div>`)
+      $('#reply').before(card)
       const finish = (skipped) => {
         setAwaiting(null)
         const out = QUESTIONS.map((q, i) => (skipped && i >= idx ? q.options[0] : answers[i].own.trim() || q.options[answers[i].pick]))
@@ -312,7 +315,8 @@
           <summary>${ic('checkCircle')}${all ? 'Used the recommended answers' : `Answered ${QUESTIONS.length} questions`}${ic('right', 12, 'act-chev')}</summary>
           <dl>${QUESTIONS.map((q, i) => `<div><dt>${esc(q.q)}</dt><dd>${esc(out[i])}</dd></div>`).join('')}</dl>
         </details>`)
-        card.replaceWith(d)
+        card.remove()
+        say(d)
         resolve({ answers: out, skipped: all })
       }
       const next = () => (idx < QUESTIONS.length - 1 ? (idx++, render(true)) : finish(false))

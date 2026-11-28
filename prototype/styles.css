@@ -3389,3 +3389,14 @@ kbd.k {
 .ep-menu [aria-checked='true'] .ep-check { opacity: 1; }
 .ep-menu .ep-set { height: 32px; color: var(--muted-foreground); }
 .ep-menu button:hover { background: var(--hover); }
+
+/* ---- Clarifying questions docked above the reply box ---- */
+.questions.docked {
+  margin-bottom: 8px;
+  max-height: calc(100vh - 220px);
+  overflow: auto;
+  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.35);
+  animation: dockIn 320ms var(--ease-out) both;
+}
+@keyframes dockIn { from { opacity: 0; transform: translateY(10px); } }
+@media (prefers-reduced-motion: reduce) { .questions.docked { animation: none; } }
