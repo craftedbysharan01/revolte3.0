@@ -358,14 +358,13 @@
         card.innerHTML = `
           <div class="q-head">
             <p class="q-title">${esc(q.q)}</p>
-            <span class="q-steps" role="tablist" aria-label="Questions">
-              ${idx > 0 ? `<button type="button" class="q-back" data-step="${idx - 1}" aria-label="Previous question">${ic('left', 14)}Back</button>` : ''}
-              ${QUESTIONS.map((qq, i) => {
-                const done = i < idx || (i <= furthest && i !== idx)
-                const ans = answers[i].own.trim() || qq.options[answers[i].pick]
-                const tip = i === idx ? '' : i > furthest ? '' : `data-tip="${esc(done ? 'Change: ' + ans : qq.q)}"`
-                return `<button type="button" role="tab" data-step="${i}" class="${i === idx ? 'cur' : done ? 'done' : ''}" aria-selected="${i === idx}" aria-label="Question ${i + 1}${done ? ', answered: ' + esc(ans) : ''}" ${i > furthest ? 'disabled' : ''} ${tip}>${done ? ic('check', 12) : i + 1}</button>`
-              }).join('')}
+            <span class="q-jump">
+              <button type="button" class="q-chip" data-act="jump" aria-haspopup="menu" aria-expanded="false">${idx + 1} of ${QUESTIONS.length}${ic('down', 12)}</button>
+              <span class="menu q-menu" role="menu" hidden>${QUESTIONS.map((qq, i) => {
+                const reached = i <= furthest
+                const ans = i === idx ? 'Answering now' : reached ? answers[i].own.trim() || qq.options[answers[i].pick] : 'Not reached yet'
+                return `<button type="button" role="menuitem" data-step="${i}" class="${i === idx ? 'cur' : ''}" ${reached ? '' : 'disabled'}><span class="qm-n">${i < idx || (reached && i !== idx) ? ic('check', 12) : i + 1}</span><span class="qm-t"><b>${esc(qq.q)}</b><small>${esc(ans)}</small></span></button>`
+              }).join('')}</span>
             </span>
           </div>
           <div class="q-body ${dir ? 'swap ' + dir : ''}">
@@ -408,12 +407,25 @@
         if (e.key === 'ArrowRight' && idx < furthest) return e.preventDefault(), go(idx + 1, 'fwd')
       }
       document.addEventListener('keydown', keys)
+      // "1 of 3" opens a list of every question with the answer given, so any of them can be changed.
+      function toggleJump(open) {
+        const menu = $('.q-menu', card)
+        const chip = $('.q-chip', card)
+        open = open ?? menu.hidden
+        menu.hidden = !open
+        chip.setAttribute('aria-expanded', open)
+      }
+      document.addEventListener('click', (e) => {
+        const menu = card.isConnected && $('.q-menu', card)
+        if (menu && !menu.hidden && !e.composedPath().includes($('.q-jump', card))) toggleJump(false)
+      })
       card.addEventListener('click', (e) => {
         const opt = e.target.closest('.opt')
         if (opt) return pick(+opt.dataset.i)
         const act = e.target.closest('[data-act]')
         const step = e.target.closest('[data-step]')
-        if (step && !step.disabled && +step.dataset.step !== idx) return go(+step.dataset.step, +step.dataset.step < idx ? 'back' : 'fwd')
+        if (step && !step.disabled) return +step.dataset.step === idx ? toggleJump(false) : go(+step.dataset.step, +step.dataset.step < idx ? 'back' : 'fwd')
+        if (act && act.dataset.act === 'jump') return toggleJump()
         if (!act || act.disabled) return
         if (act.dataset.act === 'skip') finish(true)
         else if (act.dataset.act === 'prev') go(idx - 1, 'back')

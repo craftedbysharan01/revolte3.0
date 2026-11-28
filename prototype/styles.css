@@ -3425,37 +3425,35 @@ kbd.k {
 
 .q-head { display: flex; align-items: flex-start; gap: 12px; padding: 14px 12px 0 16px; }
 .q-head .q-title { flex: 1; min-width: 0; padding-top: 3px; }
-/* Numbered steps: answered ones show a check and can be clicked to change; "Back" appears from question 2. */
-.q-steps { flex: none; display: inline-flex; align-items: center; gap: 4px; height: 26px; }
-.q-steps button[data-step]:not(.q-back) {
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  font: 500 11px var(--font-mono);
-  color: var(--subtle-foreground);
-  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, transform 140ms var(--ease-out);
-}
-.q-steps button:disabled { cursor: default; opacity: 0.6; }
-.q-steps .cur { background: var(--foreground); border-color: var(--foreground) !important; color: #0f0f10 !important; }
-.q-steps .done { color: var(--foreground) !important; background: var(--muted); border-color: transparent !important; cursor: pointer; }
-.q-steps .done:hover { background: var(--hover); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12); }
-.q-steps .done:active { transform: scale(0.94); }
-.q-back {
+/* "1 of 3" chip: opens the list of questions and answers, to jump back and change one. */
+.q-jump { position: relative; flex: none; }
+.q-chip {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  height: 24px;
-  padding: 0 8px 0 4px;
-  margin-right: 4px;
-  border-radius: 7px;
+  gap: 4px;
+  height: 26px;
+  padding: 0 8px 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
   font-size: 12px;
+  font-weight: 500;
   color: var(--muted-foreground);
-  transition: background-color 150ms ease, color 150ms ease;
+  font-variant-numeric: tabular-nums;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
 }
-.q-back:hover { background: var(--hover); color: var(--foreground); }
+.q-chip:hover, .q-chip[aria-expanded='true'] { color: var(--foreground); border-color: var(--border); background: var(--hover); }
+.q-chip i[data-i] { transition: transform 180ms var(--ease-out); }
+.q-chip[aria-expanded='true'] i[data-i] { transform: rotate(180deg); }
+.q-menu { left: auto; right: 0; top: calc(100% + 6px); bottom: auto; width: 300px; z-index: 5; transform-origin: 100% 0; }
+.q-menu button[data-step] { height: auto; align-items: flex-start; padding: 8px; gap: 10px; }
+.q-menu button[data-step]:hover:not(:disabled) { background: var(--hover); }
+.q-menu button:disabled { opacity: 0.45; cursor: default; }
+.q-menu .cur { background: rgba(255, 255, 255, 0.05); }
+.qm-n { flex: none; display: grid; place-items: center; width: 18px; height: 18px; margin-top: 1px; border-radius: 50%; border: 1px solid var(--border); font: 500 10.5px var(--font-mono); color: var(--subtle-foreground); }
+.q-menu .cur .qm-n { background: var(--foreground); border-color: var(--foreground); color: #0f0f10; }
+.qm-t { display: flex; flex-direction: column; gap: 1px; min-width: 0; font-family: inherit; }
+.qm-t b { font-size: 12.5px; line-height: 17px; font-weight: 500; white-space: normal; }
+.qm-t small { font-size: 12px; color: var(--subtle-foreground); }
 .questions .q-body.swap.back { animation-name: qswapBack; }
 @keyframes qswapBack { from { opacity: 0; transform: translateX(-8px); filter: blur(2px); } }
 .questions .q-body { padding: 10px 16px 4px; gap: 10px; }
@@ -3537,3 +3535,6 @@ kbd.k {
 }
 .msz button:hover { color: var(--foreground); }
 .msz button[aria-checked='true'] { background: var(--muted); color: var(--foreground); }
+.q-menu .qm-t b, .q-menu .qm-t small { font-family: inherit; }
+.q-menu .qm-t { font-family: var(--font-sans, inherit); }
+.questions.docked:has(.q-menu:not([hidden])) { overflow: visible; }
