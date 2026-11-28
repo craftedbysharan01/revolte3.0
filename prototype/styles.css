@@ -3374,3 +3374,18 @@ kbd.k {
 @media (prefers-reduced-motion: reduce) {
   .credits-pop, .credits-btn.bump #creditsChat { animation: none; }
 }
+
+/* ---- Environment picker in the home composer ---- */
+.envpick { position: relative; }
+.ep-chev { color: var(--subtle-foreground); margin-left: -2px; transition: transform 180ms var(--ease-out); }
+#envPickBtn[aria-expanded='true'] .ep-chev { transform: rotate(180deg); }
+.ep-menu { left: 0; right: auto; top: calc(100% + 6px); width: 252px; z-index: 40; }
+.ep-menu button[data-env] { height: auto; padding: 7px 8px; gap: 10px; }
+.ep-menu .ep-t { display: flex; flex-direction: column; flex: 1; min-width: 0; font-family: inherit; }
+.ep-menu .ep-t b { font-size: 13px; line-height: 18px; font-weight: 500; }
+.ep-menu .ep-t small { font-size: 11.5px; line-height: 16px; color: var(--subtle-foreground); font-variant-numeric: tabular-nums; }
+.ep-menu button > i[data-i] { color: var(--muted-foreground); }
+.ep-menu .ep-check { opacity: 0; color: var(--foreground) !important; }
+.ep-menu [aria-checked='true'] .ep-check { opacity: 1; }
+.ep-menu .ep-set { height: 32px; color: var(--muted-foreground); }
+.ep-menu button:hover { background: var(--hover); }

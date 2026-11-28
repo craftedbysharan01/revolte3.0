@@ -1239,6 +1239,48 @@
     modal.setAttribute('aria-hidden', 'true')
     if (opener) opener.focus()
   }
+  // Environment picker in the home composer: choose where the next chat runs.
+  const ENVS = [
+    S.env,
+    { ...JSON.parse(JSON.stringify(S.env)), name: 'Staging', region: 'us-west', size: 'medium' },
+    { ...JSON.parse(JSON.stringify(S.env)), name: 'EU data', region: 'eu', size: 'small', net: 'none' },
+  ]
+  const epBtn = $('#envPickBtn')
+  const epMenu = $('#envPickMenu')
+  function applyEnv() {
+    $('#envName').textContent = S.env.name
+    $('#envMeta').textContent = envMeta(S.env)
+    $('#envPickName').textContent = S.env.name
+  }
+  function renderEnvPick() {
+    epMenu.innerHTML =
+      `<p class="menu-label">Environment</p>` +
+      ENVS.map(
+        (e, i) => `<button type="button" role="menuitemradio" aria-checked="${e === S.env}" data-env="${i}">${ic('f-environments', 14)}<span class="ep-t"><b>${esc(e.name)}</b><small>${envMeta(e)}</small></span>${ic('check', 14, 'ep-check')}</button>`
+      ).join('') +
+      `<div class="menu-sep"></div><button type="button" class="ep-set" data-env-settings>${ic('f-gear', 14)}Environment settings</button>`
+  }
+  function setEnvPick(open) {
+    if (open) renderEnvPick()
+    epMenu.hidden = !open
+    epBtn.setAttribute('aria-expanded', open)
+  }
+  epBtn.addEventListener('click', () => setEnvPick(epMenu.hidden))
+  epMenu.addEventListener('click', (e) => {
+    const item = e.target.closest('[data-env]')
+    if (item) {
+      S.env = ENVS[+item.dataset.env]
+      applyEnv()
+      setEnvPick(false)
+      return epBtn.focus()
+    }
+    if (e.target.closest('[data-env-settings]')) setEnvPick(false), openEnv(epBtn)
+  })
+  document.addEventListener('click', (e) => {
+    if (!epMenu.hidden && !e.composedPath().includes($('#envPick'))) setEnvPick(false)
+  })
+  document.addEventListener('keydown', (e) => e.key === 'Escape' && !epMenu.hidden && (setEnvPick(false), epBtn.focus()))
+
   $('#envOpen').addEventListener('click', (e) => openEnv(e.currentTarget))
   $('#navEnv').addEventListener('click', (e) => openEnv(e.currentTarget))
   modal.addEventListener('click', (e) => {
@@ -1298,9 +1340,9 @@
     draft.name = draft.name.trim() || 'Default'
     draft.vars = draft.vars.filter((v) => v.k).map((v) => (v.secret ? { k: v.k, v: '', secret: true, saved: true } : v))
     const restart = (draft.size !== S.env.size || draft.region !== S.env.region) && $('#envState').classList.contains('up')
+    ENVS[ENVS.indexOf(S.env)] = draft
     S.env = draft
-    $('#envName').textContent = S.env.name
-    $('#envMeta').textContent = envMeta(S.env)
+    applyEnv()
     closeEnv()
     if (!restart) return toast('Environment saved')
     envState('boot', 'Restarting')
