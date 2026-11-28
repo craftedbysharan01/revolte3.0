@@ -1654,6 +1654,17 @@
     if (host) $$('svg[data-l]', host).forEach(prepFill)
   })
 
+  // ---------- Theme ----------
+  // Light by default; the sun/moon button in the sidebar footer switches, and the choice is remembered.
+  function setTheme(t) {
+    document.documentElement.dataset.theme = t
+    try { localStorage.setItem('revolte-theme', t) } catch (_) {}
+  }
+  let savedTheme = null
+  try { savedTheme = localStorage.getItem('revolte-theme') } catch (_) {}
+  setTheme(savedTheme === 'dark' ? 'dark' : 'light')
+  $('#themeToggle').addEventListener('click', () => setTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'))
+
   // ---------- Boot ----------
   hydrate(document)
   opticalIcons(document)
