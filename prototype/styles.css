@@ -624,7 +624,7 @@ i[data-i] svg {
 }
 .promo-copy {
   position: relative;
-  width: 120px;
+  width: 150px;
   flex: none;
   display: flex;
   flex-direction: column;
