@@ -176,7 +176,6 @@
     $('#creditsChat').textContent = CREDITS.chat
     $('#cpChat').textContent = CREDITS.chat
     $('#cpMonth').textContent = used
-    $('#cpLeft').textContent = Math.max(0, CREDITS.plan - used)
     $('#cpBar').style.width = (CREDITS.earlier / CREDITS.plan) * 100 + '%'
     $('#cpBarChat').style.width = (Math.min(CREDITS.chat, CREDITS.plan - CREDITS.earlier) / CREDITS.plan) * 100 + '%'
     $('#credits').style.setProperty('--cp', Math.max(4, Math.min(100, (used / CREDITS.plan) * 100)))
@@ -466,7 +465,7 @@
   let planTasks = []
   const since = {}
   const stepLi = (k, name, sub, extra = '') =>
-    `<li data-stage="${k}"${extra}><span class="pg-ic">${ic('check', 12)}</span><span class="pg-name">${name}</span><span class="pg-state"></span><span class="pg-sub">${sub}</span></li>`
+    `<li data-stage="${k}"${extra}><span class="pg-ic">${ic('check', 12, 'pg-done')}${ic('pause', 14, 'pg-wait')}</span><span class="pg-name">${name}</span><span class="pg-state"></span><span class="pg-sub">${sub}</span></li>`
   function renderProgress() {
     charged.clear()
     planTasks = []
@@ -483,7 +482,7 @@
     li.classList.remove('now', 'wait', 'done')
     li.classList.add(state)
     $('.pg-state', li).innerHTML =
-      state === 'now' ? 'In progress' : state === 'wait' ? `<span class="needs">${ic('pause', 12)}Needs you</span>` : state === 'done' && since[key] != null ? fmt(clock.t - since[key]) : ''
+      state === 'now' ? 'In progress' : state === 'wait' ? `<span class="needs">Needs you</span>` : state === 'done' && since[key] != null ? fmt(clock.t - since[key]) : ''
     if (sub != null) $('.pg-sub', li).innerHTML = sub
     renderChanges()
   }
