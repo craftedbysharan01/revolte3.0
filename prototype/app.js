@@ -1680,7 +1680,15 @@
   let savedTheme = null
   try { savedTheme = localStorage.getItem('revolte-theme') } catch (_) {}
   setTheme(savedTheme === 'dark' ? 'dark' : 'light')
-  $('#themeToggle').addEventListener('click', () => setTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'))
+  $('#themeToggle').addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (document.startViewTransition && !reduce) return document.startViewTransition(() => setTheme(next))
+    const root = document.documentElement
+    root.classList.add('theme-anim')
+    setTheme(next)
+    setTimeout(() => root.classList.remove('theme-anim'), 320)
+  })
 
   // ---------- Boot ----------
   hydrate(document)

@@ -25,6 +25,8 @@
   --coral: #ff4a3d;
 
   --ov: 255, 255, 255;
+  --shc: 0, 0, 0;
+  --sha: 1;
   --amber: #f0a35a;
   --focus: rgba(247, 246, 243, 0.55);
   --on-fg: #0f0f10;
@@ -41,35 +43,38 @@
 
 /* ---- Light theme (default). Dark stays available from the theme switch in the sidebar. ---- */
 :root[data-theme='light'] {
-  /* A low-glare, mid-grey light theme rather than white, and every text colour checked to WCAG AA (4.5:1)
-     against the page, sidebar and card backgrounds. */
+  /* Warm light theme: an ivory canvas, the sidebar one step darker, cards one step lighter so they
+     lift off the page, near-black warm text and warm greys, hairline borders and soft shadows.
+     Every text colour is checked to WCAG AA (4.5:1) on page, sidebar and cards. */
   color-scheme: light;
-  --background: #cdcdc8;
-  --sidebar: #c4c4bf;
-  --surface: #d4d4cf;
-  --card: #d4d4cf;
-  --muted: #bbbbb6;
-  --foreground: #18181b;
-  --muted-foreground: #38383d;
-  --subtle-foreground: #434348;
-  --disabled-foreground: #7c7c82;
-  --ov: 28, 28, 34;
-  --border: rgba(28, 28, 34, 0.13);
-  --border-subtle: rgba(28, 28, 34, 0.085);
-  --selected: rgba(28, 28, 34, 0.07);
-  --hover: rgba(28, 28, 34, 0.045);
-  --on-fg: #d4d4cf;
-  --shim-lo: #434348;
-  --shim-hi: #8a8a90;
-  --canvas: #c3c3ca;
-  --node: #d4d4cf;
-  --node-in: #cdcdc8;
-  --success: #0b4a2a;
-  --info: #283e8f;
-  --link: #123f8c;
-  --danger: #801f19;
-  --amber: #653609;
-  --focus: #123f8c;
+  --background: #faf9f5;
+  --sidebar: #f2f0e8;
+  --surface: #fdfcf9;
+  --card: #fdfcf9;
+  --muted: #ebe8de;
+  --foreground: #1f1e1b;
+  --muted-foreground: #5a5953;
+  --subtle-foreground: #6e6d67;
+  --disabled-foreground: #b3b1a9;
+  --ov: 31, 30, 27;
+  --border: rgba(31, 30, 27, 0.13);
+  --border-subtle: rgba(31, 30, 27, 0.08);
+  --selected: rgba(31, 30, 27, 0.06);
+  --hover: rgba(31, 30, 27, 0.04);
+  --shc: 60, 48, 28;
+  --sha: 0.22;
+  --on-fg: #faf9f5;
+  --shim-lo: #6e6d67;
+  --shim-hi: #cfccc2;
+  --canvas: #f1efe7;
+  --node: #fdfcf9;
+  --node-in: #f6f4ee;
+  --success: #1c6e45;
+  --info: #3a55c0;
+  --link: #2558c2;
+  --danger: #ad3329;
+  --amber: #8f4f0e;
+  --focus: #2558c2;
 }
 :root[data-theme='light'] .logo { filter: invert(1) brightness(0.1); }
 
@@ -716,7 +721,7 @@ i[data-i] svg {
   border-radius: 16px;
   background: var(--node);
   border: 1px solid var(--border);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 14px 32px rgba(var(--shc), calc(0.5 * var(--sha)));
   font-size: 11px;
   line-height: 16px;
   opacity: 0;
@@ -815,7 +820,7 @@ i[data-i] svg {
 .wcursor {
   position: absolute;
   opacity: 0;
-  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 3px 5px rgba(var(--shc), calc(0.45 * var(--sha))));
 }
 .wcursor.blue { left: 231px; top: 82px; }
 .wcursor.red { left: 952px; top: 96px; }
@@ -828,7 +833,7 @@ i[data-i] svg {
   border-radius: 7px;
   background: var(--card);
   border: 1px solid var(--border);
-  box-shadow: 0 7px 11px -2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 7px 11px -2px rgba(var(--shc), calc(0.3 * var(--sha)));
   font-size: 9.5px;
   line-height: 13px;
   opacity: 0;
@@ -1795,7 +1800,7 @@ i.inl { margin-right: 5px; vertical-align: -1px; }
   border-radius: 10px;
   background: var(--card);
   border: 1px solid var(--border);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 12px 28px rgba(var(--shc), calc(0.45 * var(--sha)));
   transform-origin: 50% 0;
   animation: menuIn 160ms var(--ease-out) both;
 }
@@ -2833,7 +2838,7 @@ i.inl { margin-right: 5px; vertical-align: -1px; }
 .backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(var(--shc), calc(0.6 * var(--sha)));
   opacity: 0;
   transition: opacity 180ms ease;
 }
@@ -2847,7 +2852,7 @@ i.inl { margin-right: 5px; vertical-align: -1px; }
   border-radius: 16px;
   background: var(--surface);
   border: 1px solid var(--border);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 24px 64px rgba(var(--shc), calc(0.6 * var(--sha)));
   opacity: 0;
   transform: scale(0.96) translateY(6px);
   transition: opacity 160ms ease, transform 160ms var(--ease-out);
@@ -3272,7 +3277,7 @@ textarea.input {
   border-radius: 7px;
   background: #26262a;
   border: 1px solid var(--border);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 16px rgba(var(--shc), calc(0.4 * var(--sha)));
   font-size: 12px;
   line-height: 16px;
   white-space: nowrap;
@@ -3301,7 +3306,7 @@ kbd.k {
   border-radius: 10px;
   background: var(--card);
   border: 1px solid var(--border);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 30px rgba(var(--shc), calc(0.5 * var(--sha)));
   font-size: 13px;
   opacity: 0;
   transform: translate(-50%, 100%);
@@ -3429,7 +3434,7 @@ kbd.k {
   border-radius: 12px;
   background: var(--card);
   border: 1px solid var(--border);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 16px 36px rgba(var(--shc), calc(0.5 * var(--sha)));
   transform-origin: 85% 100%;
   animation: popUp 170ms var(--ease-out) both;
 }
@@ -3479,7 +3484,7 @@ kbd.k {
   border-color: var(--border);
   border-bottom: 0;
   background: var(--card);
-  box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 -16px 40px rgba(var(--shc), calc(0.4 * var(--sha)));
   animation: dockIn 340ms var(--ease-out) both;
 }
 @keyframes dockIn { from { opacity: 0; transform: translateY(12px); } }
@@ -3691,3 +3696,13 @@ svg[data-l] .fk { transition: stroke-opacity 160ms ease; }
 .reply-meta .agent-btn.locked[hidden] { display: none; }
 .ov-static { cursor: default; }
 .ov-static i[data-i] { color: var(--muted-foreground); }
+
+/* Theme switch: colours ease across instead of snapping. */
+:root.theme-anim *, :root.theme-anim *::before, :root.theme-anim *::after {
+  transition: background-color 280ms ease, border-color 280ms ease, color 280ms ease, fill 280ms ease, box-shadow 280ms ease !important;
+}
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 320ms; animation-timing-function: ease; }
+@media (prefers-reduced-motion: reduce) {
+  :root.theme-anim *, :root.theme-anim *::before, :root.theme-anim *::after { transition: none !important; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}
