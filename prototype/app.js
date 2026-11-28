@@ -1625,13 +1625,41 @@
 
   // The workflow animation plays once and then holds on its finished frame (all nodes placed,
   // every word lit) instead of looping. 10.3s is just before the 11s timeline starts fading out.
+  // It starts only once it is actually on screen (and the tab is visible), so nobody arrives to a
+  // finished frame; it replays when you come back to the home page or hover the card.
   function holdAfterOnePlay(el) {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    setTimeout(() => el.classList.add('held'), 10300)
+    clearTimeout(el._hold)
+    el._hold = setTimeout(() => el.classList.add('held'), 10300)
+  }
+  function replayFlow(el) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const flow = $('.flow', el)
+    if (flow) flow.replaceWith(flow.cloneNode(true))
+    el.classList.remove('held', 'waiting-start')
+    holdAfterOnePlay(el)
+  }
+  {
+    const promo = $('#promo')
+    promo.classList.add('waiting-start')
+    let seen = false
+    const start = () => {
+      if (seen || document.visibilityState !== 'visible' || shell.dataset.view !== 'home') return
+      const r = promo.getBoundingClientRect()
+      if (r.bottom < 0 || r.top > innerHeight || !r.height) return
+      seen = true
+      replayFlow(promo)
+    }
+    new IntersectionObserver(start).observe(promo)
+    document.addEventListener('visibilitychange', start)
+    setTimeout(start, 300)
+    // Hovering a finished card plays it again.
+    promo.addEventListener('pointerenter', () => promo.classList.contains('held') && replayFlow(promo))
+    // Coming back to the home page plays it again.
+    $('#newChat').addEventListener('click', () => setTimeout(() => replayFlow(promo), 50))
   }
 
   // ---------- Boot ----------
-  holdAfterOnePlay($('#promo'))
   hydrate(document)
   opticalIcons(document)
   renderRepo(false)
