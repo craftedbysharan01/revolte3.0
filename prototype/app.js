@@ -208,12 +208,24 @@
   // "Waiting for you" is a nudge, not a status: it only appears once the
   // user has left a question unanswered for a while (real time, not the
   // prototype clock), and any activity puts it away and restarts the wait.
+  // It escalates gently while ignored: appears (8s), turns orange (16s), then hops every few seconds (24s+).
   const IDLE_NUDGE_MS = 8000
-  let idleTimer = 0
+  let idleTimers = []
   function armIdleNudge() {
-    clearTimeout(idleTimer)
-    waitingEl.classList.remove('on')
-    if (S.awaiting) idleTimer = setTimeout(() => S.awaiting && waitingEl.classList.add('on'), IDLE_NUDGE_MS)
+    idleTimers.forEach(clearTimeout)
+    idleTimers = []
+    waitingEl.classList.remove('on', 'warn', 'hop')
+    if (!S.awaiting) return
+    const at = (ms, fn) => idleTimers.push(setTimeout(() => S.awaiting && fn(), ms))
+    at(IDLE_NUDGE_MS, () => waitingEl.classList.add('on'))
+    at(IDLE_NUDGE_MS * 2, () => waitingEl.classList.add('warn'))
+    const hop = () => {
+      waitingEl.classList.remove('hop')
+      void waitingEl.offsetWidth
+      waitingEl.classList.add('hop')
+      at(4000, hop)
+    }
+    at(IDLE_NUDGE_MS * 3, hop)
   }
   ;['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((ev) =>
     document.addEventListener(ev, () => S.awaiting && armIdleNudge(), { passive: true, capture: true })
@@ -226,7 +238,7 @@
   $('#reply').addEventListener('submit', (e) => {
     e.preventDefault()
     const text = replyInput.value.trim()
-    if (!text) return
+    if (!text) return S.awaiting && S.awaiting.onEmpty && S.awaiting.onEmpty()
     replyInput.value = ''
     atBottom = true
     if (S.awaiting) return S.awaiting.onReply(text)
@@ -306,6 +318,7 @@
       // takeover. Once answered, a compact summary is left in the thread.
       const card = h(`<div class="card questions docked" tabindex="-1"></div>`)
       $('#reply').before(card)
+      $('.chat-foot').classList.add('asking')
       const finish = (skipped) => {
         setAwaiting(null)
         const out = QUESTIONS.map((q, i) => (skipped && i >= idx ? q.options[0] : answers[i].own.trim() || q.options[answers[i].pick]))
@@ -315,6 +328,8 @@
           <dl>${QUESTIONS.map((q, i) => `<div><dt>${esc(q.q)}</dt><dd>${esc(out[i])}</dd></div>`).join('')}</dl>
         </details>`)
         card.remove()
+        $('.chat-foot').classList.remove('asking')
+        document.removeEventListener('keydown', keys)
         say(d)
         resolve({ answers: out, skipped: all })
       }
@@ -322,24 +337,27 @@
       function render(swap) {
         const q = QUESTIONS[idx]
         const a = answers[idx]
+        const last = idx === QUESTIONS.length - 1
         card.innerHTML = `
-          <div class="card-head">Question ${idx + 1} of ${QUESTIONS.length}
-            <span class="q-dots">${QUESTIONS.map((_, i) => `<span class="${i <= idx ? 'on' : ''}"></span>`).join('')}</span>
+          <div class="q-bar" aria-hidden="true"><i style="width:${((idx + 1) / QUESTIONS.length) * 100}%"></i></div>
+          <div class="q-head">
+            <span class="q-eyebrow">${ic('f-agent', 13)}Revolte needs one detail</span>
+            <span class="q-count">${idx + 1}<em>/${QUESTIONS.length}</em></span>
           </div>
           <div class="q-body ${swap ? 'swap' : ''}">
             <p class="q-title">${esc(q.q)}</p>
-            ${q.options
+            <div class="q-opts" role="radiogroup" aria-label="${esc(q.q)}">${q.options
               .map(
                 (o, i) => `<button class="opt ${!a.own && a.pick === i ? 'on' : ''}" data-i="${i}" role="radio" aria-checked="${!a.own && a.pick === i}">
-                  <span class="radio"></span>${esc(o)}${i === 0 ? `<span class="rec">${ic('star', 11)}Recommended</span>` : ''}</button>`
+                  <kbd>${i + 1}</kbd><span class="opt-t">${esc(o)}</span>${i === 0 ? `<span class="rec">${ic('star', 11)}Recommended</span>` : ''}${ic('check', 14, 'opt-check')}</button>`
               )
-              .join('')}
+              .join('')}</div>
           </div>
-          <div class="card-foot">
-            <button class="btn ghost" data-act="skip">Skip, use recommended</button>
+          <div class="q-foot">
+            <button class="q-link" data-act="skip">Skip, use recommended</button>
             <span class="grow"></span>
             ${idx > 0 ? '<button class="btn ghost" data-act="back">Back</button>' : ''}
-            <button class="btn primary" data-act="next">${idx < QUESTIONS.length - 1 ? 'Continue' : 'Submit answers'}</button>
+            <button class="btn primary" data-act="next">${last ? 'Submit' : 'Continue'}<kbd>↵</kbd></button>
           </div>`
         setAwaiting({
           placeholder: 'Or answer in your own words',
@@ -347,19 +365,28 @@
             answers[idx].own = text
             next()
           },
+          onEmpty: () => next(),
         })
       }
+      const pick = (i) => {
+        answers[idx].pick = i
+        answers[idx].own = ''
+        $$('.opt', card).forEach((o) => {
+          const on = +o.dataset.i === i
+          o.classList.toggle('on', on)
+          o.setAttribute('aria-checked', on)
+        })
+      }
+      function keys(e) {
+        if (e.metaKey || e.ctrlKey || e.altKey || e.target.closest('input, textarea, [contenteditable]')) return
+        const n = +e.key
+        if (n >= 1 && n <= QUESTIONS[idx].options.length) return e.preventDefault(), pick(n - 1)
+        if (e.key === 'Enter' && !e.target.closest('button')) e.preventDefault(), next()
+      }
+      document.addEventListener('keydown', keys)
       card.addEventListener('click', (e) => {
         const opt = e.target.closest('.opt')
-        if (opt) {
-          answers[idx].pick = +opt.dataset.i
-          answers[idx].own = ''
-          $$('.opt', card).forEach((o) => {
-            o.classList.toggle('on', o === opt)
-            o.setAttribute('aria-checked', o === opt)
-          })
-          return
-        }
+        if (opt) return pick(+opt.dataset.i)
         const act = e.target.closest('[data-act]')
         if (!act) return
         if (act.dataset.act === 'skip') finish(true)

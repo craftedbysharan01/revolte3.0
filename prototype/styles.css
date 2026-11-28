@@ -1461,6 +1461,16 @@ i[data-i] svg {
   transform: none;
 }
 .waiting i[data-i] { color: #f0a35a; }
+.waiting { transition: opacity 200ms ease, transform 240ms var(--ease-out), color 400ms ease, border-color 400ms ease; }
+.waiting.warn { color: #f0a35a; border-color: rgba(240, 163, 90, 0.35); }
+.waiting.hop { animation: waitHop 560ms var(--ease-out); }
+@keyframes waitHop {
+  0%, 100% { transform: none; }
+  30% { transform: translateY(-5px); }
+  55% { transform: translateY(0); }
+  72% { transform: translateY(-2px); }
+}
+@media (prefers-reduced-motion: reduce) { .waiting.hop { animation: none; } }
 .reply {
   display: flex;
   align-items: center;
@@ -3393,54 +3403,66 @@ kbd.k {
 .ep-menu .ep-set { height: 32px; color: var(--muted-foreground); }
 .ep-menu button:hover { background: var(--hover); }
 
-/* ---- Clarifying questions docked above the reply box ---- */
+/* ---- Clarifying questions: one panel with the reply box while Revolte is asking ---- */
 .questions.docked {
-  margin-bottom: 8px;
+  position: relative;
   max-height: calc(100vh - 220px);
   overflow: auto;
-  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.35);
-  animation: dockIn 320ms var(--ease-out) both;
+  border-radius: 14px 14px 0 0;
+  border-color: var(--border);
+  border-bottom: 0;
+  background: var(--card);
+  box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.4);
+  animation: dockIn 340ms var(--ease-out) both;
 }
-@keyframes dockIn { from { opacity: 0; transform: translateY(10px); } }
-@media (prefers-reduced-motion: reduce) { .questions.docked { animation: none; } }
-
-/* ---- Machine size: one simple segmented choice under the region ---- */
-.mseg {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  margin-top: 8px;
-  padding: 3px;
-  border-radius: 10px;
-  background: var(--background);
-  border: 1px solid var(--border-subtle);
+@keyframes dockIn { from { opacity: 0; transform: translateY(12px); } }
+.chat-foot.asking .reply {
+  border-radius: 0 0 14px 14px;
+  border-color: var(--border);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--card);
 }
-.mseg button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-  padding: 7px 6px;
-  border-radius: 7px;
+.q-bar { height: 2px; background: rgba(255, 255, 255, 0.06); }
+.q-bar i { display: block; height: 100%; background: linear-gradient(90deg, #8ea2ff, #f7f6f3); border-radius: 0 2px 2px 0; transition: width 420ms var(--ease-out); }
+.q-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px 0; }
+.q-eyebrow { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted-foreground); }
+.q-eyebrow i[data-i] { color: #8ea2ff; }
+.q-count { margin-left: auto; font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.q-count em { font-style: normal; font-weight: 400; color: var(--subtle-foreground); }
+.questions .q-body { padding: 8px 16px 6px; gap: 10px; }
+.questions .q-title { font-size: 15px; line-height: 22px; margin: 0; }
+.q-opts { display: flex; flex-direction: column; gap: 2px; margin: 0 -8px; }
+.questions .opt {
+  min-height: 40px;
+  padding: 0 10px 0 8px;
+  gap: 10px;
+  border: 0;
+  border-radius: 9px;
   color: var(--muted-foreground);
   transition: background-color 150ms ease, color 150ms ease, transform 140ms var(--ease-out);
 }
-.mseg button:hover { color: var(--foreground); }
-.mseg button:active { transform: scale(0.98); }
-.mseg b { font-size: 13px; font-weight: 500; }
-.mseg span { font-size: 11.5px; color: var(--subtle-foreground); font-variant-numeric: tabular-nums; }
-.mseg button[aria-checked='true'] { background: var(--muted); color: var(--foreground); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
-
-/* ---- Plan card: no fill, at most three tasks until "View more" ---- */
-.card.plan { background: none; }
-.plan-list.clipped li:nth-child(n + 4):not(.plan-more) { display: none; }
-.plan-list li.plan-more { padding-top: 6px; padding-bottom: 6px; }
-.plan-more button {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12.5px;
-  color: var(--muted-foreground);
-  transition: color 150ms ease;
+.questions .opt:hover { background: var(--hover); color: var(--foreground); }
+.questions .opt.on { background: rgba(255, 255, 255, 0.07); color: var(--foreground); }
+.opt kbd {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font: 500 11px var(--font-mono);
+  color: var(--subtle-foreground);
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
 }
-.plan-more button:hover { color: var(--foreground); }
+.opt.on kbd { background: var(--foreground); border-color: var(--foreground); color: #0f0f10; }
+.opt-t { flex: 1; min-width: 0; }
+.questions .rec { margin-left: 0; }
+.opt-check { flex: none; opacity: 0; transform: scale(0.6); color: var(--foreground); transition: opacity 160ms ease, transform 200ms var(--ease-out); }
+.opt.on .opt-check { opacity: 1; transform: none; }
+.q-foot { display: flex; align-items: center; gap: 8px; padding: 8px 12px 12px 16px; }
+.q-link { font-size: 12.5px; color: var(--subtle-foreground); transition: color 150ms ease; }
+.q-link:hover { color: var(--foreground); }
+.q-foot .btn.primary { display: inline-flex; align-items: center; gap: 8px; }
+.q-foot .btn.primary kbd { font: 500 11px var(--font-mono); opacity: 0.55; }
+@media (prefers-reduced-motion: reduce) { .questions.docked { animation: none; } .q-bar i { transition: none; } }
