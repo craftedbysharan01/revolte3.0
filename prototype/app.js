@@ -1549,6 +1549,65 @@
     })
   }
 
+  // ---------- Filled icons on hover ----------
+  // Outline icons turn solid while their control is hovered. The first time an icon is hovered,
+  // its closed shapes are marked to fill (.fz). Detail lines that sit inside a filled shape
+  // (the bot's eyes, the gear's hub) are marked .fk: on hover they are cut out of the fill with an
+  // SVG mask, so the solid icon keeps its detail instead of turning into a blob.
+  let fillMaskId = 0
+  const NS = 'http://www.w3.org/2000/svg'
+  const isClosed = (k) => ['rect', 'circle', 'ellipse', 'polygon'].includes(k.tagName) || (k.tagName === 'path' && /z\s*$/i.test(k.getAttribute('d') || ''))
+  const within = (a, b) => a.x >= b.x - 0.5 && a.y >= b.y - 0.5 && a.x + a.width <= b.x + b.width + 0.5 && a.y + a.height <= b.y + b.height + 0.5
+  function prepFill(el) {
+    if (el.dataset.fp) return
+    el.dataset.fp = '1'
+    const sw = el.getAttribute('stroke-width') || '2'
+    const fills = []
+    ;[...el.children].forEach((k) => {
+      if (k.tagName === 'defs') return
+      let bb
+      try { bb = k.getBBox() } catch (_) { return }
+      const host = fills.find((f) => within(bb, f.bb))
+      if (host) {
+        k.classList.add('fk')
+        host.knocks.push(k)
+      } else if (isClosed(k)) {
+        k.classList.add('fz')
+        fills.push({ el: k, bb, knocks: [] })
+      }
+    })
+    fills.forEach((f) => {
+      if (!f.knocks.length) return
+      const id = 'fm' + ++fillMaskId
+      const defs = document.createElementNS(NS, 'defs')
+      const mask = document.createElementNS(NS, 'mask')
+      mask.setAttribute('id', id)
+      mask.setAttribute('maskUnits', 'userSpaceOnUse')
+      ;[['x', -4], ['y', -4], ['width', 32], ['height', 32]].forEach(([k, v]) => mask.setAttribute(k, v))
+      const base = document.createElementNS(NS, 'rect')
+      ;[['x', -4], ['y', -4], ['width', 32], ['height', 32], ['fill', 'white']].forEach(([k, v]) => base.setAttribute(k, v))
+      mask.appendChild(base)
+      f.knocks.forEach((k) => {
+        const c = k.cloneNode(true)
+        c.removeAttribute('class')
+        c.setAttribute('stroke', 'black')
+        c.setAttribute('stroke-width', sw)
+        c.setAttribute('stroke-linecap', 'round')
+        c.setAttribute('stroke-linejoin', 'round')
+        c.setAttribute('fill', isClosed(k) ? 'black' : 'none')
+        mask.appendChild(c)
+      })
+      defs.appendChild(mask)
+      el.insertBefore(defs, el.firstChild)
+      f.el.setAttribute('mask', `url(#${id})`)
+    })
+  }
+  const FILL_HOST = 'button, a, summary, [role="tab"], .trow, .ov-row'
+  document.addEventListener('pointerover', (e) => {
+    const host = e.target.closest && e.target.closest(FILL_HOST)
+    if (host) $$('svg[data-l]', host).forEach(prepFill)
+  })
+
   // ---------- Boot ----------
   hydrate(document)
   opticalIcons(document)
