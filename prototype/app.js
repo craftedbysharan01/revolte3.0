@@ -319,8 +319,8 @@
   // "Waiting for you" is a nudge, not a status: it only appears once the
   // user has left a question unanswered for a while (real time, not the
   // prototype clock), and any activity puts it away and restarts the wait.
-  // It escalates gently while ignored: appears (20s), turns orange (40s), shimmers (60s), then hops every few seconds (80s+).
-  const IDLE_NUDGE_MS = 20000
+  // It escalates gently while ignored: appears (45s), turns orange (1:00), shimmers (1:15), then hops every few seconds (1:30+).
+  const IDLE_NUDGE_MS = 45000 // appears after 45s idle; then every 15s it steps up
   let idleTimers = []
   function armIdleNudge() {
     idleTimers.forEach(clearTimeout)
@@ -329,15 +329,15 @@
     if (!S.awaiting) return
     const at = (ms, fn) => idleTimers.push(setTimeout(() => S.awaiting && fn(), ms))
     at(IDLE_NUDGE_MS, () => waitingEl.classList.add('on'))
-    at(IDLE_NUDGE_MS * 2, () => waitingEl.classList.add('warn'))
+    at(IDLE_NUDGE_MS + 15000, () => waitingEl.classList.add('warn'))
     const hop = () => {
       waitingEl.classList.remove('hop')
       void waitingEl.offsetWidth
       waitingEl.classList.add('hop')
       at(4000, hop)
     }
-    at(IDLE_NUDGE_MS * 3, () => waitingEl.classList.add('shine'))
-    at(IDLE_NUDGE_MS * 4, hop)
+    at(IDLE_NUDGE_MS + 30000, () => waitingEl.classList.add('shine'))
+    at(IDLE_NUDGE_MS + 45000, hop)
   }
   ;['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((ev) =>
     document.addEventListener(ev, () => S.awaiting && armIdleNudge(), { passive: true, capture: true })
