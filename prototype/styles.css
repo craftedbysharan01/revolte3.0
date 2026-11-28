@@ -213,9 +213,12 @@ i[data-i] svg {
   border-radius: 8px;
   font-size: 13.5px;
   text-align: left;
-  color: var(--foreground);
-  transition: background-color 150ms ease;
+  /* Inactive items sit back in the icon colour; only the selected one (or the one under the pointer) turns white. */
+  color: var(--muted-foreground);
+  transition: background-color 150ms ease, color 150ms ease;
 }
+.nav.on { background: var(--selected); color: var(--foreground); }
+.nav.on i[data-i] { color: var(--foreground); }
 .nav i[data-i],
 .sb-head i[data-i],
 .sb-foot i[data-i] {
@@ -3547,3 +3550,7 @@ kbd.k {
 #deploy:hover { color: var(--foreground); }
 #deploy i[data-i] { color: inherit; }
 #deploy i[data-i] svg path { fill: currentColor; }
+@media (hover: hover) and (pointer: fine) {
+  .nav:hover { color: var(--foreground); }
+  .nav:hover i[data-i] { color: var(--foreground); }
+}
