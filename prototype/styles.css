@@ -3666,3 +3666,6 @@ kbd.k {
 .questions .opt { gap: 12px; padding-left: 10px; }
 .questions .opt.opt-skip { gap: 12px; }
 .questions .opt.opt-skip i[data-i] { width: 20px; display: inline-flex; justify-content: center; }
+/* Small 'new' dot on an icon button (same blue as the Workflows dot). */
+.icon-btn.has-dot { position: relative; }
+.icon-btn.has-dot::after { content: ''; position: absolute; top: 5px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: #7d97ff; box-shadow: 0 0 0 2px var(--sidebar); }
