@@ -479,16 +479,11 @@
             <div class="q-opts" role="radiogroup" aria-label="${esc(q.q)}">${q.options
               .map(
                 (o, i) => `<button class="opt ${!a.own && a.pick === i ? 'on' : ''}" data-i="${i}" role="radio" aria-checked="${!a.own && a.pick === i}">
-                  <kbd>${i + 1}</kbd><span class="opt-t">${esc(o)}</span>${i === 0 ? `<span class="rec">${ic('star', 11)}Recommended</span>` : ''}${ic('check', 14, 'opt-check')}</button>`
+                  <span class="opt-t">${esc(o)}</span>${i === 0 ? `<span class="rec">${ic('star', 11)}Recommended</span>` : ''}${ic('check', 14, 'opt-check')}</button>`
               )
-              .join('')}</div>
+              .join('')}<button class="opt opt-skip" data-act="skip">${ic('f-auto', 14)}<span class="opt-t">Skip all, use recommended</span></button></div>
           </div>
-          <div class="q-foot">
-            <button class="q-link" data-act="skip">Skip all, use recommended</button>
-            <span class="grow"></span>
-            <button class="btn ghost" data-act="skip1" data-tip="Use the recommended answer for this one">Skip</button>
-            <button class="btn primary" data-act="next" data-kbd="enter">${idx === QUESTIONS.length - 1 ? 'Submit' : 'Next'}</button>
-          </div>`
+`
         setAwaiting({
           placeholder: 'Or answer in your own words',
           onReply(text) {
@@ -507,6 +502,8 @@
           o.classList.toggle('on', on)
           o.setAttribute('aria-checked', on)
         })
+        // One click is the answer: show the pick for a beat, then move on.
+        advancing = setTimeout(() => ((advancing = 0), next()), 220)
       }
       function keys(e) {
         if (e.metaKey || e.ctrlKey || e.altKey || e.target.closest('input, textarea, [contenteditable]')) return
@@ -518,7 +515,7 @@
       }
       document.addEventListener('keydown', keys)
       card.addEventListener('click', (e) => {
-        const opt = e.target.closest('.opt')
+        const opt = e.target.closest('.opt:not(.opt-skip)')
         if (opt) return pick(+opt.dataset.i)
         const act = e.target.closest('[data-act]')
         const step = e.target.closest('[data-step]')
@@ -529,11 +526,6 @@
         else if (act.dataset.act === 'skip1') (answers[idx].pick = 0), (answers[idx].own = ''), next()
         else if (act.dataset.act === 'prev') go(idx - 1, 'back')
         else if (act.dataset.act === 'fwd') go(idx + 1, 'fwd')
-      })
-      // Double-click an option to pick it and move on in one go.
-      card.addEventListener('dblclick', (e) => {
-        const opt = e.target.closest('.opt')
-        if (opt) pick(+opt.dataset.i), next()
       })
       render('')
     })

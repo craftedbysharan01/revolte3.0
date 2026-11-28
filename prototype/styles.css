@@ -3651,3 +3651,9 @@ kbd.k {
 .q-foot .btn { height: 30px; }
 /* Plan card: the header strip gets a soft grey fill so it reads as the card's title bar. */
 .card.plan:not(.compact) .card-head { background: rgba(var(--ov), 0.05); }
+
+/* "Skip all" sits in the list as the last option, quieter than the answers. */
+.questions .opt.opt-skip { color: var(--subtle-foreground); gap: 10px; padding-left: 10px; }
+.questions .opt.opt-skip i[data-i] { color: var(--subtle-foreground); }
+.questions .opt.opt-skip:hover, .questions .opt.opt-skip:hover i[data-i] { color: var(--foreground); }
+.questions .q-body { padding-bottom: 10px; }
