@@ -19,26 +19,26 @@
         <div class="sidebar-inner">
           <div class="sb-head">
             <img src="assets/logo.svg" alt="Revolte" class="logo" />
-            <button class="icon-btn" id="sbClose" aria-label="Close sidebar"><i data-i="sidebar"></i></button>
+            <button class="icon-btn" id="sbClose" aria-label="Close sidebar"><i data-i="l-panel-left"></i></button>
           </div>
           <div class="sb-tabs" role="tablist">
             <button class="sb-tab on" role="tab" aria-selected="true">Chat</button>
             <button class="sb-tab" role="tab" aria-selected="false" data-soon="Workflows">Workflows <span class="try">Try</span></button>
           </div>
           <div class="sb-group">
-            <button class="nav" id="newChat"><i data-i="newchat"></i><span>New chat</span></button>
-            <button class="nav" data-soon="Search"><i data-i="search"></i><span>Search</span><kbd>⌘K</kbd></button>
-            <button class="nav" data-soon="Projects"><i data-i="folder"></i><span>Projects</span></button>
+            <button class="nav" id="newChat"><i data-i="l-square-pen"></i><span>New chat</span></button>
+            <button class="nav" data-soon="Search"><i data-i="l-search"></i><span>Search</span><kbd>⌘K</kbd></button>
+            <button class="nav" data-soon="Projects"><i data-i="l-folder"></i><span>Projects</span></button>
           </div>
-          <div class="sb-label">Workspace <i data-i="f-chev"></i></div>
+          <div class="sb-label">Workspace <i data-i="l-chevron-down" data-s="12"></i></div>
           <div class="sb-group">
-            <button class="nav" data-soon="Context"><i data-i="f-files"></i><span>Context</span></button>
-            <button class="nav" data-soon="Integrations"><i data-i="f-gear"></i><span>Integrations</span></button>
-            <button class="nav" data-soon="Models"><i data-i="chip"></i><span>Models</span></button>
-            <button class="nav" data-soon="Agents"><i data-i="f-agents"></i><span>Agents</span></button>
-            <button class="nav" id="navEnv"><i data-i="f-environments"></i><span>Environments</span></button>
+            <button class="nav" data-soon="Context"><i data-i="l-book-open"></i><span>Context</span></button>
+            <button class="nav" data-soon="Integrations"><i data-i="l-blocks"></i><span>Integrations</span></button>
+            <button class="nav" data-soon="Models"><i data-i="l-cpu"></i><span>Models</span></button>
+            <button class="nav" data-soon="Agents"><i data-i="l-bot"></i><span>Agents</span></button>
+            <button class="nav" id="navEnv"><i data-i="l-cloud"></i><span>Environments</span></button>
           </div>
-          <div class="sb-label">Recents <i data-i="f-chev"></i></div>
+          <div class="sb-label">Recents <i data-i="l-chevron-down" data-s="12"></i></div>
           <div class="sb-group" id="recents">
             <button class="nav recent" data-soon="This chat">Portfolio for a designer</button>
             <button class="nav recent" data-soon="This chat">Fix flaky checkout tests</button>
@@ -48,7 +48,7 @@
             <span class="avatar">JH</span>
             <span class="sb-name">James Hall</span>
             <span class="sb-plan">Free</span>
-            <button class="icon-btn push" aria-label="Download CLI" data-soon="Download CLI"><i data-i="download"></i></button>
+            <button class="icon-btn push" aria-label="Download CLI" data-soon="Download CLI"><i data-i="l-download"></i></button>
           </div>
         </div>
       </nav>
@@ -59,7 +59,7 @@
         <div class="body">
           <div class="col">
           <header class="topbar">
-            <button class="icon-btn" id="sbOpen" aria-label="Open sidebar"><i data-i="sidebar"></i></button>
+            <button class="icon-btn" id="sbOpen" aria-label="Open sidebar"><i data-i="l-panel-left"></i></button>
             <button class="title" id="chatTitle"><span></span><i data-i="f-down"></i></button>
             <div class="speed" id="speed" role="group" aria-label="Prototype speed">
               <span class="speed-tag">Prototype speed</span>
@@ -67,7 +67,7 @@
               <button data-speed="4">4×</button>
               <button data-speed="10">10×</button>
             </div>
-            <button class="icon-btn" id="paneToggle" aria-label="Toggle session pane"><i data-i="sidebar" class="flip"></i></button>
+            <button class="icon-btn" id="paneToggle" aria-label="Toggle session pane"><i data-i="l-panel-right"></i></button>
           </header>
           <!-- ---------- Home ---------- -->
           <section class="home" id="home">
@@ -346,6 +346,7 @@
 
     <script src="icons.js"></script>
     <script src="figma-icons.js"></script>
+    <script src="lucide-icons.js"></script>
     <script src="data.js"></script>
     <script src="app.js"></script>
   </body>

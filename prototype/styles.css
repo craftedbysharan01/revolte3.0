@@ -201,6 +201,11 @@ i[data-i] svg {
   color: var(--foreground);
   transition: background-color 150ms ease;
 }
+.nav i[data-i],
+.sb-head i[data-i],
+.sb-foot i[data-i] {
+  color: var(--muted-foreground);
+}
 .nav span {
   flex: 1;
   white-space: nowrap;
