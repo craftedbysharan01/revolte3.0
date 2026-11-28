@@ -334,7 +334,6 @@
                   <span class="radio"></span>${esc(o)}${i === 0 ? `<span class="rec">${ic('star', 11)}Recommended</span>` : ''}</button>`
               )
               .join('')}
-            <input class="own" placeholder="Or type your own answer" value="${esc(a.own)}" aria-label="Your own answer" />
           </div>
           <div class="card-foot">
             <button class="btn ghost" data-act="skip">Skip, use recommended</button>
@@ -343,7 +342,7 @@
             <button class="btn primary" data-act="next">${idx < QUESTIONS.length - 1 ? 'Continue' : 'Submit answers'}</button>
           </div>`
         setAwaiting({
-          placeholder: 'Answer in your own words',
+          placeholder: 'Or answer in your own words',
           onReply(text) {
             answers[idx].own = text
             next()
@@ -355,7 +354,6 @@
         if (opt) {
           answers[idx].pick = +opt.dataset.i
           answers[idx].own = ''
-          $('.own', card).value = ''
           $$('.opt', card).forEach((o) => {
             o.classList.toggle('on', o === opt)
             o.setAttribute('aria-checked', o === opt)
@@ -367,14 +365,6 @@
         if (act.dataset.act === 'skip') finish(true)
         else if (act.dataset.act === 'back') idx--, render(true)
         else next()
-      })
-      card.addEventListener('input', (e) => {
-        if (!e.target.classList.contains('own')) return
-        answers[idx].own = e.target.value
-        $$('.opt', card).forEach((o) => o.classList.toggle('on', !e.target.value && +o.dataset.i === answers[idx].pick))
-      })
-      card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && e.target.classList.contains('own')) e.preventDefault(), next()
       })
       render(false)
     })
