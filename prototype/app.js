@@ -168,6 +168,42 @@
     })
     col.addEventListener('pointerleave', () => col.classList.remove('lit'))
   }
+  // Credits: Revolte's single unit of AI usage (revolte.ai/pricing). This account is on Starter:
+  // 50 credits a month, 6 already used in earlier chats. Each step of the run spends a few.
+  const CREDITS = { plan: 50, earlier: 6, chat: 0 }
+  function renderCredits(bump) {
+    const used = CREDITS.earlier + CREDITS.chat
+    $('#creditsChat').textContent = CREDITS.chat
+    $('#cpChat').textContent = CREDITS.chat
+    $('#cpMonth').textContent = used
+    $('#cpLeft').textContent = Math.max(0, CREDITS.plan - used)
+    $('#cpBar').style.width = (CREDITS.earlier / CREDITS.plan) * 100 + '%'
+    $('#cpBarChat').style.width = (Math.min(CREDITS.chat, CREDITS.plan - CREDITS.earlier) / CREDITS.plan) * 100 + '%'
+    $('#credits').style.setProperty('--cp', Math.max(4, Math.min(100, (used / CREDITS.plan) * 100)))
+    $('#credits').classList.toggle('warm', used >= CREDITS.plan * 0.8)
+    $('#creditsBtn').setAttribute('aria-label', `${CREDITS.chat} credits used in this chat, ${used} of ${CREDITS.plan} this month`)
+    if (bump) {
+      const b = $('#creditsBtn')
+      b.classList.remove('bump')
+      void b.offsetWidth
+      b.classList.add('bump')
+    }
+  }
+  function spend(n) {
+    CREDITS.chat += n
+    renderCredits(true)
+  }
+  function setCreditsPop(open) {
+    $('#creditsPop').hidden = !open
+    $('#creditsBtn').setAttribute('aria-expanded', open)
+  }
+  $('#creditsBtn').addEventListener('click', () => setCreditsPop($('#creditsPop').hidden))
+  document.addEventListener('click', (e) => {
+    if (!$('#creditsPop').hidden && !e.composedPath().includes($('#credits'))) setCreditsPop(false)
+  })
+  document.addEventListener('keydown', (e) => e.key === 'Escape' && !$('#creditsPop').hidden && (setCreditsPop(false), $('#creditsBtn').focus()))
+  renderCredits()
+
   const waitingEl = $('#waiting')
   const replyInput = $('#replyInput')
   // "Waiting for you" is a nudge, not a status: it only appears once the
@@ -428,13 +464,17 @@
   const stepLi = (k, name, sub, extra = '') =>
     `<li data-stage="${k}"${extra}><span class="pg-ic">${ic('check', 12)}</span><span class="pg-name">${name}</span><span class="pg-state"></span><span class="pg-sub">${sub}</span></li>`
   function renderProgress() {
+    charged.clear()
     planTasks = []
     for (const k in since) delete since[k]
     $('#progress').innerHTML = STEPS.map(([k, n, s]) => stepLi(k, n, s)).join('')
   }
+  const STAGE_COST = { understand: 2, grill: 1, plan: 3, verify: 6 }
+  const charged = new Set()
   function stage(key, state, label, sub) {
     const li = $(`#progress [data-stage="${key}"]`)
     if (!li) return
+    if (state === 'done' && STAGE_COST[key] && !charged.has(key)) charged.add(key), spend(STAGE_COST[key])
     if ((state === 'now' || state === 'wait') && since[key] == null) since[key] = clock.t
     li.classList.remove('now', 'wait', 'done')
     li.classList.add(state)
@@ -997,6 +1037,7 @@
         renderTree()
       }
       rows[i].done(stepHtml(s, 'done'), s.fail ? 'fail' : 'done')
+      spend(2)
       const k = STEP_TASK[i]
       if (k != null && TASK_LAST[k] === i) {
         setTask(PLAN_TASKS[k], 'done')
@@ -1073,6 +1114,10 @@
     threadInner.innerHTML = ''
     atBottom = true
     setAwaiting(null)
+    CREDITS.earlier += CREDITS.chat
+    CREDITS.chat = 0
+    setCreditsPop(false)
+    renderCredits()
     resetFiles()
     renderTree()
     renderProgress()
