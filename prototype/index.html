@@ -19,22 +19,22 @@
         <div class="sidebar-inner">
           <div class="sb-head">
             <img src="assets/logo.svg" alt="Revolte" class="logo" />
-            <button class="icon-btn" id="sbClose" aria-label="Close sidebar"><i data-i="f-panel"></i></button>
+            <button class="icon-btn" id="sbClose" aria-label="Close sidebar"><i data-i="sidebar"></i></button>
           </div>
           <div class="sb-tabs" role="tablist">
             <button class="sb-tab on" role="tab" aria-selected="true">Chat</button>
             <button class="sb-tab" role="tab" aria-selected="false" data-soon="Workflows">Workflows <span class="try">Try</span></button>
           </div>
           <div class="sb-group">
-            <button class="nav" id="newChat"><i data-i="f-new"></i><span>New chat</span></button>
-            <button class="nav" data-soon="Search"><i data-i="f-search"></i><span>Search</span><kbd>⌘K</kbd></button>
-            <button class="nav" data-soon="Projects"><i data-i="f-projects"></i><span>Projects</span></button>
+            <button class="nav" id="newChat"><i data-i="newchat"></i><span>New chat</span></button>
+            <button class="nav" data-soon="Search"><i data-i="search"></i><span>Search</span><kbd>⌘K</kbd></button>
+            <button class="nav" data-soon="Projects"><i data-i="folder"></i><span>Projects</span></button>
           </div>
           <div class="sb-label">Workspace <i data-i="f-chev"></i></div>
           <div class="sb-group">
             <button class="nav" data-soon="Context"><i data-i="f-files"></i><span>Context</span></button>
             <button class="nav" data-soon="Integrations"><i data-i="f-gear"></i><span>Integrations</span></button>
-            <button class="nav" data-soon="Models"><i data-i="f-aichip"></i><span>Models</span></button>
+            <button class="nav" data-soon="Models"><i data-i="chip"></i><span>Models</span></button>
             <button class="nav" data-soon="Agents"><i data-i="f-agents"></i><span>Agents</span></button>
             <button class="nav" id="navEnv"><i data-i="f-environments"></i><span>Environments</span></button>
           </div>
@@ -48,34 +48,27 @@
             <span class="avatar">JH</span>
             <span class="sb-name">James Hall</span>
             <span class="sb-plan">Free</span>
-            <button class="icon-btn push" aria-label="Download CLI" data-soon="Download CLI"><i data-i="f-download"></i></button>
+            <button class="icon-btn push" aria-label="Download CLI" data-soon="Download CLI"><i data-i="download"></i></button>
           </div>
         </div>
       </nav>
 
       <!-- ================= Main ================= -->
       <div class="main">
-        <header class="topbar">
-          <button class="icon-btn" id="sbOpen" aria-label="Open sidebar"><i data-i="f-panel"></i></button>
-          <button class="title" id="chatTitle"><span></span><i data-i="f-down"></i></button>
-          <div class="speed" id="speed" role="group" aria-label="Prototype speed">
-            <span class="speed-tag">Prototype speed</span>
-            <button data-speed="1" class="on">1×</button>
-            <button data-speed="4">4×</button>
-            <button data-speed="10">10×</button>
-          </div>
-          <div class="ptabs" role="tablist" id="ptabs">
-            <button class="ptab on" data-tab="overview" role="tab" aria-label="Overview" title="Overview"><i data-i="f-overview"></i></button>
-            <button class="ptab" data-tab="sandbox" role="tab" aria-label="Sandbox preview" title="Sandbox preview"><i data-i="f-sandbox"></i></button>
-            <button class="ptab" data-tab="code" role="tab" aria-label="Code" title="Code"><i data-i="f-code"></i></button>
-            <button class="ptab" data-tab="files" role="tab" aria-label="Files" title="Files"><i data-i="f-tabfiles"></i></button>
-            <button class="ptab" data-tab="workflow" role="tab" aria-label="Workflow" title="Workflow"><i data-i="f-workflow"></i></button>
-          </div>
-          <button class="icon-btn boxed" id="deploy" aria-label="Deploy" data-soon="Deploy"><i data-i="f-deploy"></i></button>
-          <button class="icon-btn" id="paneToggle" aria-label="Toggle session pane"><i data-i="f-right"></i></button>
-        </header>
 
         <div class="body">
+          <div class="col">
+          <header class="topbar">
+            <button class="icon-btn" id="sbOpen" aria-label="Open sidebar"><i data-i="sidebar"></i></button>
+            <button class="title" id="chatTitle"><span></span><i data-i="f-down"></i></button>
+            <div class="speed" id="speed" role="group" aria-label="Prototype speed">
+              <span class="speed-tag">Prototype speed</span>
+              <button data-speed="1" class="on">1×</button>
+              <button data-speed="4">4×</button>
+              <button data-speed="10">10×</button>
+            </div>
+            <button class="icon-btn" id="paneToggle" aria-label="Toggle session pane"><i data-i="sidebar" class="flip"></i></button>
+          </header>
           <!-- ---------- Home ---------- -->
           <section class="home" id="home">
             <div class="home-stack">
@@ -183,27 +176,39 @@
             </div>
           </section>
 
+          </div>
+
           <!-- ---------- Right pane ---------- -->
           <aside class="pane" id="pane" aria-label="Session">
             <div class="pane-inner">
+              <div class="pane-head">
+                <div class="ptabs" role="tablist" id="ptabs">
+                  <button class="ptab on" data-tab="overview" role="tab" aria-label="Overview" title="Overview"><i data-i="f-overview"></i></button>
+                  <button class="ptab" data-tab="sandbox" role="tab" aria-label="Sandbox preview" title="Sandbox preview"><i data-i="f-sandbox"></i></button>
+                  <button class="ptab" data-tab="code" role="tab" aria-label="Code" title="Code"><i data-i="f-code"></i></button>
+                  <button class="ptab" data-tab="files" role="tab" aria-label="Files" title="Files"><i data-i="f-tabfiles"></i></button>
+                  <button class="ptab" data-tab="workflow" role="tab" aria-label="Workflow" title="Workflow"><i data-i="f-workflow"></i></button>
+                </div>
+                <button class="icon-btn boxed" id="deploy" aria-label="Deploy" data-soon="Deploy"><i data-i="f-deploy"></i></button>
+              </div>
               <div class="pane-body" id="paneBody">
                 <!-- Overview -->
                 <section class="pview on" data-view="overview">
                   <div class="ov-group">
-                    <div class="ov-row">
+                    <button class="ov-row" id="envOpen" aria-label="Environment settings">
                       <i data-i="f-environments"></i>
                       <span class="ov-name" id="envName">Default</span>
                       <span class="env-state" id="envState">Not started</span>
-                      <button class="icon-btn sm push" id="envOpen" aria-label="Environment settings"><i data-i="f-gear"></i></button>
-                    </div>
+                      <span class="ov-meta push" id="envMeta">US East · 2 vCPU</span>
+                      <i data-i="f-gear" data-s="14"></i>
+                    </button>
                     <div class="repo" id="repo"></div>
                   </div>
 
-                  <div class="pg-head"><span>Progress</span><span id="pgCount">0 of 5</span></div>
-                  <div class="pg-bar" id="pgBar"><i></i><i></i><i></i><i></i><i></i></div>
+                  <p class="plabel">Progress</p>
                   <ol class="progress" id="progress"></ol>
 
-                  <div class="changes" id="changes" hidden></div>
+                  <div class="pr-wrap" id="changes" hidden></div>
                 </section>
 
                 <!-- Sandbox -->
@@ -264,48 +269,69 @@
         <header class="modal-head">
           <div>
             <h2 id="envTitle">Environment</h2>
-            <p>What the cloud sandbox runs, knows and can reach.</p>
+            <p>Where Revolte builds and runs your app.</p>
           </div>
           <button type="button" class="icon-btn" data-close aria-label="Close"><i data-i="close"></i></button>
         </header>
         <div class="modal-body">
-          <label class="field">
-            <span class="flabel">Name</span>
-            <div class="name-row">
-              <input class="input" id="envNameInput" />
-              <span class="tag"><i data-i="f-environments" data-s="12"></i>Cloud · 2 vCPU · 4 GB</span>
-            </div>
-          </label>
-
-          <label class="field">
-            <span class="flabel">Start script <em>Runs each time the sandbox starts, before Revolte begins.</em></span>
-            <textarea class="input mono" id="envScript" rows="3" spellcheck="false"></textarea>
-          </label>
-
           <div class="field">
-            <span class="flabel">Environment variables <em>Plain text. Visible to anyone with access to this environment.</em></span>
-            <div class="kv" id="envVars"></div>
-            <button type="button" class="add-row" data-add="vars"><i data-i="add" data-s="14"></i>Add variable</button>
+            <label class="flabel" for="envNameInput">Name</label>
+            <input class="input" id="envNameInput" autocomplete="off" />
           </div>
 
           <div class="field">
-            <span class="flabel">Secrets <em>Encrypted. Revolte can use them but never shows the value.</em></span>
-            <div class="kv" id="envSecrets"></div>
-            <button type="button" class="add-row" data-add="secrets"><i data-i="add" data-s="14"></i>Add secret</button>
+            <span class="flabel">Cloud</span>
+            <label class="select">
+              <span>Region</span>
+              <select id="envRegion">
+                <option value="us-east">US East · Virginia</option>
+                <option value="us-west">US West · Oregon</option>
+                <option value="eu">Europe · Frankfurt</option>
+                <option value="ap">Asia Pacific · Mumbai</option>
+              </select>
+              <i data-i="down" data-s="12"></i>
+            </label>
+            <div class="sizes" id="envSize" role="radiogroup" aria-label="Machine size">
+              <button type="button" role="radio" data-size="small"><b>Small</b><span>2 vCPU · 4 GB</span></button>
+              <button type="button" role="radio" data-size="medium"><b>Medium</b><span>4 vCPU · 8 GB</span></button>
+              <button type="button" role="radio" data-size="large"><b>Large</b><span>8 vCPU · 16 GB</span></button>
+            </div>
           </div>
 
-          <div class="field">
-            <span class="flabel">Network access</span>
-            <div class="seg" id="envNet" role="radiogroup">
-              <button type="button" role="radio" data-net="limited">Allowed domains</button>
-              <button type="button" role="radio" data-net="open">Unrestricted</button>
-              <button type="button" role="radio" data-net="none">No network</button>
-            </div>
-            <div class="net-limited" id="netLimited">
-              <div class="domains" id="envDomains"><input id="domainInput" placeholder="Add a domain, then press Enter" aria-label="Add a domain" /></div>
-              <label class="check"><input type="checkbox" id="envRegistries" /><span>Also allow package registries (npm, PyPI, crates.io)</span></label>
-            </div>
-            <p class="net-note" id="netNote"></p>
+          <div class="accs">
+            <details class="acc">
+              <summary><span class="acc-t">Start script</span><span class="acc-s" id="sumScript"></span><i data-i="down" data-s="12"></i></summary>
+              <div class="acc-b">
+                <textarea class="input mono" id="envScript" rows="3" spellcheck="false" aria-label="Start script"></textarea>
+                <p class="hint">Runs each time the sandbox starts, before Revolte begins.</p>
+              </div>
+            </details>
+            <details class="acc">
+              <summary><span class="acc-t">Variables and secrets</span><span class="acc-s" id="sumVars"></span><i data-i="down" data-s="12"></i></summary>
+              <div class="acc-b">
+                <div class="kv" id="envVars"></div>
+                <button type="button" class="add-row" data-add><i data-i="add" data-s="14"></i>Add variable</button>
+                <p class="hint">Lock a value to keep it as a secret. Secrets are encrypted and never shown again.</p>
+              </div>
+            </details>
+            <details class="acc">
+              <summary><span class="acc-t">Network</span><span class="acc-s" id="sumNet"></span><i data-i="down" data-s="12"></i></summary>
+              <div class="acc-b">
+                <label class="select">
+                  <span>Access</span>
+                  <select id="envNet">
+                    <option value="limited">Only the domains below</option>
+                    <option value="open">Any domain</option>
+                    <option value="none">No network</option>
+                  </select>
+                  <i data-i="down" data-s="12"></i>
+                </label>
+                <div class="net-limited" id="netLimited">
+                  <div class="domains" id="envDomains"><input id="domainInput" placeholder="Add a domain, then press Enter" aria-label="Add a domain" /></div>
+                  <label class="check"><input type="checkbox" id="envRegistries" /><span>Also allow package registries (npm, PyPI, crates.io)</span></label>
+                </div>
+              </div>
+            </details>
           </div>
         </div>
         <footer class="modal-foot">

@@ -61,11 +61,13 @@
     env: {
       name: 'Default',
       script: 'pnpm install\npnpm db:seed',
+      region: 'us-east',
+      size: 'small',
       vars: [
         { k: 'NODE_ENV', v: 'development' },
         { k: 'DATABASE_URL', v: 'postgres://sandbox:5432/webhooks' },
+        { k: 'RESEND_API_KEY', v: '', secret: true, saved: true },
       ],
-      secrets: [{ k: 'RESEND_API_KEY', v: '', saved: true }],
       net: 'limited',
       domains: ['api.github.com', 'api.resend.com'],
       registries: true,
@@ -386,34 +388,41 @@
   // ======================================================================
   // Right pane
   // ======================================================================
-  // Progress: five plain steps, one line each.
+  // Progress follows the Figma stepper. One marker for "now"; the build lists the plan's own tasks.
   const STAGES = [
-    ['grill', 'Ask questions'],
-    ['plan', 'Make a plan'],
-    ['tasks', 'Split into tasks'],
-    ['build', 'Write the code'],
-    ['verify', 'Test and preview'],
+    ['grill', 'Grill', 'Questions that change the build'],
+    ['plan', 'Plan', 'Decisions and tasks'],
+    ['tasks', 'Tasks', 'Split from your request'],
+    ['build', 'Build', 'Works through the plan'],
+    ['verify', 'Verify', 'Tests, lint, Prettier'],
   ]
+  let planTasks = []
   function renderProgress() {
+    planTasks = []
     $('#progress').innerHTML = STAGES.map(
-      ([k, n]) => `<li data-stage="${k}"><span class="pg-ic">${ic('check', 12)}</span><span class="pg-name">${n}</span><span class="pg-note"></span></li>`
+      ([k, n, sub]) => `<li data-stage="${k}"><span class="pg-ic">${ic('check', 12)}</span><span class="pg-name">${n}</span><span class="pg-state"></span><span class="pg-sub">${sub}</span>${k === 'build' ? '<ol class="pg-tasks"></ol>' : ''}</li>`
     ).join('')
-    syncProgress()
-  }
-  function syncProgress() {
-    const lis = $$('#progress li')
-    const done = lis.filter((l) => l.classList.contains('done')).length
-    $('#pgCount').textContent = `${done} of ${lis.length}`
-    $$('#pgBar i').forEach((b, i) => (b.className = lis[i].className))
   }
   function stage(key, state, label, sub) {
     const li = $(`#progress [data-stage="${key}"]`)
     if (!li) return
     li.className = state
-    const note = state === 'now' ? 'Now' : sub && sub.length <= 16 ? sub : label || ''
-    $('.pg-note', li).textContent = note
-    syncProgress()
+    $('.pg-state', li).textContent = state === 'now' ? 'In progress' : label || ''
+    if (sub) $('.pg-sub', li).textContent = sub
     renderChanges()
+  }
+  function setPlanTasks(tasks) {
+    planTasks = tasks.map((t) => ({ ref: t, t: t.t, state: 'pending' }))
+    renderTasks()
+  }
+  function setTask(ref, state) {
+    if (state === 'now') planTasks.forEach((p) => p.state === 'now' && (p.state = 'pending'))
+    planTasks.forEach((p) => (p.ref === ref || (ref === 'extra' && p.ref.extra)) && (p.state = state))
+    renderTasks()
+  }
+  function renderTasks() {
+    const host = $('#progress .pg-tasks')
+    if (host) host.innerHTML = planTasks.map((p) => `<li class="${p.state}"><span class="pt-ic">${ic('check', 10)}</span><span>${esc(p.t)}</span></li>`).join('')
   }
   function envState(cls, text) {
     const el = $('#envState')
@@ -421,65 +430,70 @@
     el.textContent = text
   }
 
-  // GitHub: one row in the group, then a Changes list once a repository is connected.
+  // GitHub: the repository row opens a dropdown menu; once connected, a pull request card follows the run.
   const REPOS = ['acme/webhook-monitor', 'acme/payments-api', 'acme/storefront']
-  const PAST_PRS = [
-    { t: 'Verify Stripe signatures on incoming webhooks', n: 408 },
-    { t: 'Move the delivery queue to BullMQ', n: 401 },
-    { t: 'fix(deliveries): paginate the delivery log', n: 397 },
-    { t: 'Seed sample deliveries for local dev', n: 389 },
-    { t: 'Add Postgres indexes for delivery lookups', n: 382 },
-  ]
-  let showAllChanges = false
   function renderRepo(open) {
     const el = $('#repo')
+    el.innerHTML = `<button class="ov-row" data-repo-toggle aria-haspopup="menu" aria-expanded="${!!open}">${ic('f-github')}${
+      S.repo ? `<span class="ov-name">${S.repo}</span><span class="repo-branch">main</span>` : '<span class="ov-name muted">Connect repository</span>'
+    }<span class="push">${ic('down', 12, 'repo-chev')}</span></button>${
+      open
+        ? `<div class="menu" role="menu"><p class="menu-label">Your repositories</p>${REPOS.map(
+            (r) => `<button role="menuitemradio" aria-checked="${r === S.repo}" data-repo="${r}">${ic('f-github', 14)}<span>${r}</span>${r === S.repo ? ic('check', 14, 'push') : ''}</button>`
+          ).join('')}<div class="menu-sep"></div>${
+            S.repo ? '<button role="menuitem" data-repo-off>Disconnect</button>' : '<button role="menuitem" data-soon="GitHub settings">Manage GitHub access</button>'
+          }</div>`
+        : ''
+    }`
     el.classList.toggle('open', !!open)
-    el.innerHTML = S.repo
-      ? `<div class="ov-row">${ic('f-github')}<span class="ov-name">${S.repo}</span><span class="repo-branch">main</span><button class="icon-btn sm push" data-repo-toggle aria-label="Change repository">${ic(open ? 'up' : 'down', 12)}</button></div>`
-      : `<button class="ov-row" data-repo-toggle>${ic('f-github')}<span class="ov-name muted">Connect repository</span><span class="push">${ic(open ? 'up' : 'down', 12)}</span></button>`
-    if (open)
-      el.insertAdjacentHTML(
-        'beforeend',
-        `<div class="repo-list">${REPOS.map((r) => `<button data-repo="${r}">${r}${r === S.repo ? ic('check', 14, 'push') : ''}</button>`).join('')}</div>`
-      )
   }
   $('#repo').addEventListener('click', (e) => {
     const pick = e.target.closest('[data-repo]')
     if (pick) {
-      const first = !S.repo
       S.repo = pick.dataset.repo
       renderRepo(false)
-      renderChanges(first)
+      renderChanges(true)
       return toast('Repository connected')
     }
+    if (e.target.closest('[data-repo-off]')) {
+      S.repo = null
+      renderRepo(false)
+      return renderChanges()
+    }
     if (e.target.closest('[data-repo-toggle]')) renderRepo(!$('#repo').classList.contains('open'))
+  })
+  document.addEventListener('click', (e) => {
+    if ($('#repo').classList.contains('open') && !e.composedPath().includes($('#repo'))) renderRepo(false)
+  })
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $('#repo').classList.contains('open')) renderRepo(false)
   })
 
   function renderChanges(enter) {
     const el = $('#changes')
     if (!S.repo) return (el.hidden = true)
     el.hidden = false
-    const name = S.repo.split('/')[1]
     const files = Object.values(S.files || {}).filter((f) => f.lines && f.done)
     const add = files.reduce((n, f) => n + fileStat(f, f.done)[0], 0)
     const del = files.reduce((n, f) => n + fileStat(f, f.done)[1], 0)
-    const rows = []
-    if (S.previewReady)
-      rows.push(`<div class="chg mine">${ic('f-branch', 16, 'chg-ic open')}<span class="chg-text"><b>Add retry scheduler and deliveries dashboard</b><span>${name} #412 · <span class="add">+${add}</span> <span class="del">−${del}</span></span></span><button class="icon-btn sm" data-soon="Pull request actions" aria-label="More">${ic('dots', 14)}</button></div>`)
-    else if (S.building)
-      rows.push(`<div class="chg mine">${ic('f-branch', 16, 'chg-ic draft')}<span class="chg-text"><b>Add retry scheduler and deliveries dashboard</b><span>${name} · <span class="shimmer">Draft, opens after the tests pass</span></span></span></div>`)
-    const past = PAST_PRS.slice(0, showAllChanges ? PAST_PRS.length : 3)
-    past.forEach((p) =>
-      rows.push(`<div class="chg">${ic('f-branch', 16, 'chg-ic merged')}<span class="chg-text"><b>${esc(p.t)}</b><span>${name} #${p.n}</span></span><button class="icon-btn sm" data-soon="Pull request actions" aria-label="More">${ic('dots', 14)}</button></div>`)
-    )
+    const state = S.previewReady ? 'open' : S.building ? 'draft' : 'later'
     el.classList.toggle('enter', !!enter)
-    el.innerHTML = `<p class="pg-head"><span>Changes</span></p>${rows.join('')}${
-      showAllChanges ? '' : '<button class="show-more" id="showMore">Show more</button>'
-    }`
+    if (state === 'later') {
+      el.innerHTML = `<p class="plabel">Pull request</p><p class="pr-later">${ic('f-branch', 14)}Opens on <b>${S.repo}</b> when the build is verified.</p>`
+      return
+    }
+    el.innerHTML = `<p class="plabel">Pull request</p>
+      <div class="pr-card ${state}">
+        <div class="pr-top"><span class="pr-pill">${state === 'open' ? 'Open' : 'Draft'}</span><span class="pr-num">${state === 'open' ? '#412' : 'Not opened yet'}</span></div>
+        <p class="pr-title">Add retry scheduler and deliveries dashboard</p>
+        <p class="pr-branch">${ic('f-branch', 12)}revolte/webhook-dashboard <span>→</span> main</p>
+        <div class="pr-stats">
+          <span>${files.length} file${files.length === 1 ? '' : 's'}</span><span class="add">+${add}</span><span class="del">−${del}</span>
+          <span class="pr-checks">${state === 'open' ? `${ic('check', 12)}24 checks passed` : 'Checks run after the build'}</span>
+        </div>
+        ${state === 'open' ? `<button class="btn secondary pr-btn" data-soon="Opening GitHub">${ic('f-github', 14)}View on GitHub</button>` : ''}
+      </div>`
   }
-  $('#changes').addEventListener('click', (e) => {
-    if (e.target.id === 'showMore') (showAllChanges = true), renderChanges()
-  })
 
   const paneWidth = () => (S.planOpen ? (S.immersive ? 'wide' : 'split') : S.tab === 'sandbox' || S.tab === 'code' ? (S.immersive ? 'wide' : 'split') : 'narrow')
   function applyPane() {
@@ -885,18 +899,24 @@
     }
     if (S.planOpen) closePlan()
     stage('plan', 'done', 'Approved', `${tasks.length} tasks`)
+    setPlanTasks(tasks)
 
     // -- Build (about two minutes at 1×)
     S.building = true
     S.code.follow = true
     g = group(BUILD[0].label)
     const rows = BUILD.map((s) => g.step(stepHtml(s, 'pending'), 'pending'))
+    // Which plan task each build step belongs to (index into PLAN_TASKS).
+    const STEP_TASK = [null, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3]
+    const TASK_LAST = {}
+    STEP_TASK.forEach((k, n) => k != null && (TASK_LAST[k] = n))
     for (let i = 0; i < BUILD.length; i++) {
       const s = BUILD[i]
       g.setLabel(s.label)
       stage(s.stage, 'now')
       if (s.stage !== 'tasks') stage('tasks', 'done', '', `${Object.keys(FILES).length} file changes`)
       if (s.stage === 'verify') stage('build', 'done', '', `${Object.keys(FILES).length} files changed`)
+      if (STEP_TASK[i] != null && planTasks.find((p) => p.ref === PLAN_TASKS[STEP_TASK[i]]).state !== 'done') setTask(PLAN_TASKS[STEP_TASK[i]], 'now')
       rows[i].start(stepHtml(s, 'live'))
       const f = s.file && S.files[s.file]
       const t0 = clock.t
@@ -939,7 +959,14 @@
         renderTree()
       }
       rows[i].done(stepHtml(s, 'done'), s.fail ? 'fail' : 'done')
+      const k = STEP_TASK[i]
+      if (k != null && TASK_LAST[k] === i) {
+        setTask(PLAN_TASKS[k], 'done')
+        if (k === 2) setTask('extra', 'done')
+      }
     }
+    planTasks.forEach((p) => (p.state = 'done'))
+    renderTasks()
     steps += g.count
     worked += g.finish('Worked for')
     S.building = false
@@ -997,40 +1024,54 @@
   const modal = $('#envModal')
   let draft = null
   let opener = null
-  const NET_NOTE = {
-    limited: 'Requests to any other host are blocked.',
-    open: 'The sandbox can reach any public host. Use this only when you trust everything the start script installs.',
-    none: 'No outbound requests. Installs in the start script fail unless the dependencies are already cached.',
-  }
-  function kvRow(kind, item, i) {
-    const secret = kind === 'secrets'
-    return `<div class="kv-row ${secret ? 'secret' : ''}" data-kind="${kind}" data-i="${i}">
-      <input class="input mono" data-f="k" placeholder="${secret ? 'SECRET_NAME' : 'NAME'}" value="${esc(item.k)}" aria-label="Name" spellcheck="false" />
-      <input class="input mono" data-f="v" ${secret ? 'type="password"' : ''} placeholder="${secret ? (item.saved ? 'Saved. Type to replace' : 'Value') : 'Value'}" value="${esc(item.v)}" aria-label="Value" spellcheck="false" autocomplete="off" />
-      ${secret ? `<button type="button" class="icon-btn" data-eye aria-label="Show value while typing">${ic('eye')}</button>` : ''}
-      <button type="button" class="icon-btn" data-remove aria-label="Remove">${ic('trash')}</button>
+  const REGIONS = { 'us-east': 'US East', 'us-west': 'US West', eu: 'Europe', ap: 'Asia Pacific' }
+  const SIZES = { small: '2 vCPU · 4 GB', medium: '4 vCPU · 8 GB', large: '8 vCPU · 16 GB' }
+  const NET = { limited: 'Only listed domains', open: 'Any domain', none: 'No network' }
+  const envMeta = (e) => `${REGIONS[e.region]} · ${SIZES[e.size].split(' · ')[0]}`
+
+  function kvRow(item, i) {
+    const locked = item.secret
+    return `<div class="kv-row" data-i="${i}">
+      <input class="input mono" data-f="k" placeholder="NAME" value="${esc(item.k)}" aria-label="Name" spellcheck="false" />
+      <input class="input mono" data-f="v" type="${locked ? 'password' : 'text'}" placeholder="${locked && item.saved ? 'Saved secret · type to replace' : 'Value'}" value="${esc(item.v)}" aria-label="Value" spellcheck="false" autocomplete="off" />
+      <button type="button" class="icon-btn lock ${locked ? 'on' : ''}" data-lock aria-pressed="${!!locked}" aria-label="${locked ? 'Secret. Click to store as plain text' : 'Plain text. Click to store as a secret'}" title="${locked ? 'Secret' : 'Make secret'}">${ic('lock', 14)}</button>
+      <button type="button" class="icon-btn" data-remove aria-label="Remove">${ic('trash', 14)}</button>
     </div>`
   }
-  function renderEnv() {
-    $('#envNameInput').value = draft.name
-    $('#envScript').value = draft.script
-    ;['vars', 'secrets'].forEach((kind) => {
-      $(kind === 'vars' ? '#envVars' : '#envSecrets').innerHTML = draft[kind].length
-        ? draft[kind].map((it, i) => kvRow(kind, it, i)).join('')
-        : `<p class="kv-empty">${kind === 'vars' ? 'No variables yet.' : 'No secrets yet.'}</p>`
-    })
-    renderNet()
+  function summaries() {
+    const lines = draft.script.split('\n').map((l) => l.trim()).filter(Boolean)
+    $('#sumScript').textContent = lines.length ? lines.join(' · ') : 'None'
+    const sec = draft.vars.filter((v) => v.k && v.secret).length
+    const vars = draft.vars.filter((v) => v.k && !v.secret).length
+    $('#sumVars').textContent = `${vars} variable${vars === 1 ? '' : 's'} · ${sec} secret${sec === 1 ? '' : 's'}`
+    $('#sumNet').textContent = draft.net === 'limited' ? `${draft.domains.length} domain${draft.domains.length === 1 ? '' : 's'}` : NET[draft.net]
+  }
+  function renderVars() {
+    $('#envVars').innerHTML = draft.vars.length ? draft.vars.map(kvRow).join('') : '<p class="kv-empty">No variables yet.</p>'
+    summaries()
   }
   function renderNet() {
-    $$('#envNet button').forEach((b) => b.setAttribute('aria-checked', b.dataset.net === draft.net))
+    $('#envNet').value = draft.net
     $('#netLimited').hidden = draft.net !== 'limited'
-    $('#netNote').textContent = NET_NOTE[draft.net]
     $('#envRegistries').checked = draft.registries
     $$('#envDomains .domain').forEach((d) => d.remove())
     $('#domainInput').insertAdjacentHTML(
       'beforebegin',
       draft.domains.map((d, i) => `<span class="domain">${esc(d)}<button type="button" data-domain="${i}" aria-label="Remove ${esc(d)}">${svg('close', 10)}</button></span>`).join('')
     )
+    summaries()
+  }
+  function renderSize() {
+    $$('#envSize button').forEach((b) => b.setAttribute('aria-checked', b.dataset.size === draft.size))
+  }
+  function renderEnv() {
+    $('#envNameInput').value = draft.name
+    $('#envRegion').value = draft.region
+    $('#envScript').value = draft.script
+    $$('#envForm details').forEach((d) => (d.open = false))
+    renderSize()
+    renderVars()
+    renderNet()
   }
   function openEnv(from) {
     opener = from
@@ -1049,39 +1090,41 @@
   $('#navEnv').addEventListener('click', (e) => openEnv(e.currentTarget))
   modal.addEventListener('click', (e) => {
     if (e.target.closest('[data-close]')) return closeEnv()
-    const add = e.target.closest('[data-add]')
-    if (add) {
-      draft[add.dataset.add].push({ k: '', v: '' })
-      renderEnv()
-      const rows = $$(`.kv-row[data-kind="${add.dataset.add}"]`)
+    if (e.target.closest('[data-add]')) {
+      draft.vars.push({ k: '', v: '', secret: false })
+      renderVars()
+      const rows = $$('#envVars .kv-row')
       return $('input', rows[rows.length - 1]).focus()
     }
+    const size = e.target.closest('[data-size]')
+    if (size) return (draft.size = size.dataset.size), renderSize()
     const row = e.target.closest('.kv-row')
-    if (row && e.target.closest('[data-remove]')) {
-      draft[row.dataset.kind].splice(+row.dataset.i, 1)
-      return renderEnv()
+    if (row && e.target.closest('[data-remove]')) return draft.vars.splice(+row.dataset.i, 1), renderVars()
+    if (row && e.target.closest('[data-lock]')) {
+      const item = draft.vars[+row.dataset.i]
+      item.secret = !item.secret
+      if (!item.secret) item.saved = false
+      return renderVars()
     }
-    if (row && e.target.closest('[data-eye]')) {
-      const v = $('[data-f="v"]', row)
-      v.type = v.type === 'password' ? 'text' : 'password'
-      e.target.closest('[data-eye]').innerHTML = ic(v.type === 'password' ? 'eye' : 'eyeClosed')
-      return
-    }
-    const net = e.target.closest('[data-net]')
-    if (net) return (draft.net = net.dataset.net), renderNet()
     const dom = e.target.closest('[data-domain]')
     if (dom) return draft.domains.splice(+dom.dataset.domain, 1), renderNet()
   })
   modal.addEventListener('input', (e) => {
     const row = e.target.closest('.kv-row')
     if (row) {
-      const item = draft[row.dataset.kind][+row.dataset.i]
+      const item = draft.vars[+row.dataset.i]
       if (e.target.dataset.f === 'k') e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '_')
       item[e.target.dataset.f] = e.target.value
       if (e.target.dataset.f === 'v') item.saved = false
-    } else if (e.target.id === 'envNameInput') draft.name = e.target.value
-    else if (e.target.id === 'envScript') draft.script = e.target.value
+      return summaries()
+    }
+    if (e.target.id === 'envNameInput') draft.name = e.target.value
+    else if (e.target.id === 'envScript') (draft.script = e.target.value), summaries()
     else if (e.target.id === 'envRegistries') draft.registries = e.target.checked
+  })
+  modal.addEventListener('change', (e) => {
+    if (e.target.id === 'envRegion') draft.region = e.target.value
+    else if (e.target.id === 'envNet') (draft.net = e.target.value), renderNet()
   })
   $('#domainInput').addEventListener('keydown', (e) => {
     const input = e.target
@@ -1099,10 +1142,10 @@
   $('#envForm').addEventListener('submit', (e) => {
     e.preventDefault()
     draft.name = draft.name.trim() || 'Default'
-    draft.vars = draft.vars.filter((v) => v.k)
-    draft.secrets = draft.secrets.filter((v) => v.k).map((s) => ({ k: s.k, v: '', saved: true }))
+    draft.vars = draft.vars.filter((v) => v.k).map((v) => (v.secret ? { k: v.k, v: '', secret: true, saved: true } : v))
     S.env = draft
     $('#envName').textContent = S.env.name
+    $('#envMeta').textContent = envMeta(S.env)
     closeEnv()
     toast('Environment saved')
   })
@@ -1110,7 +1153,7 @@
     if (!modal.classList.contains('open')) return
     if (e.key === 'Escape') return closeEnv()
     if (e.key !== 'Tab') return
-    const items = $$('button, input, textarea', $('#envForm')).filter((el) => el.offsetParent)
+    const items = $$('button, input, textarea, select, summary', $('#envForm')).filter((el) => el.offsetParent)
     const first = items[0]
     const last = items[items.length - 1]
     if (e.shiftKey && document.activeElement === first) e.preventDefault(), last.focus()
