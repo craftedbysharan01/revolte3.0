@@ -403,6 +403,31 @@ i[data-i] svg {
   gap: 12px;
   transition: border-color 200ms ease;
 }
+/* A thin light that travels slowly around the home composer. */
+@property --trace {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+#homeComposer { position: relative; }
+#homeComposer::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  padding: 1px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--trace), transparent 0deg 270deg, rgba(160, 172, 255, 0.4) 320deg, rgba(255, 255, 255, 0.9) 350deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none;
+  animation: trace 7s linear infinite;
+  transition: opacity 300ms ease;
+}
+#homeComposer:focus-within::before { opacity: 0.45; }
+@keyframes trace {
+  to { --trace: 360deg; }
+}
 .composer:focus-within {
   border-color: rgba(255, 255, 255, 0.2);
 }
@@ -3247,7 +3272,7 @@ kbd.k {
     animation-name: fadeOnly;
   }
   .pview.enter, .pview.leave, .q-body.swap, .ecode.swap { animation: fadeOnly 200ms ease both; }
-  .glow, .trow.active::after, .ptab.live::after, .home-title { animation: none; }
+  .glow, .trow.active::after, .ptab.live::after, .home-title, #homeComposer::before { animation: none; }
   .flow .wnode, .flow .wedge, .flow .wport { animation: none; opacity: 1; }
   .flow .wcursor, .flow .wmenu { animation: none; opacity: 0; }
   .wf-title span { animation: none; color: var(--foreground); }
