@@ -209,13 +209,13 @@
   // "Waiting for you" is a nudge, not a status: it only appears once the
   // user has left a question unanswered for a while (real time, not the
   // prototype clock), and any activity puts it away and restarts the wait.
-  // It escalates gently while ignored: appears (20s), turns orange (40s), then hops every few seconds (60s+).
+  // It escalates gently while ignored: appears (20s), turns orange (40s), shimmers (60s), then hops every few seconds (80s+).
   const IDLE_NUDGE_MS = 20000
   let idleTimers = []
   function armIdleNudge() {
     idleTimers.forEach(clearTimeout)
     idleTimers = []
-    waitingEl.classList.remove('on', 'warn', 'hop')
+    waitingEl.classList.remove('on', 'warn', 'shine', 'hop')
     if (!S.awaiting) return
     const at = (ms, fn) => idleTimers.push(setTimeout(() => S.awaiting && fn(), ms))
     at(IDLE_NUDGE_MS, () => waitingEl.classList.add('on'))
@@ -226,7 +226,8 @@
       waitingEl.classList.add('hop')
       at(4000, hop)
     }
-    at(IDLE_NUDGE_MS * 3, hop)
+    at(IDLE_NUDGE_MS * 3, () => waitingEl.classList.add('shine'))
+    at(IDLE_NUDGE_MS * 4, hop)
   }
   ;['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((ev) =>
     document.addEventListener(ev, () => S.awaiting && armIdleNudge(), { passive: true, capture: true })
@@ -356,16 +357,10 @@
         const q = QUESTIONS[idx]
         const a = answers[idx]
         card.innerHTML = `
+          ${furthest > 0 ? `<div class="q-given">${QUESTIONS.map((qq, i) => (i <= furthest && i !== idx ? `<button type="button" data-step="${i}" data-tip="Change this answer">${ic('check', 12)}${esc(answers[i].own.trim() || qq.options[answers[i].pick])}</button>` : '')).join('')}</div>` : ''}
           <div class="q-head">
             <p class="q-title">${esc(q.q)}</p>
-            <span class="q-jump">
-              <button type="button" class="q-chip" data-act="jump" aria-haspopup="menu" aria-expanded="false">${idx + 1} of ${QUESTIONS.length}${ic('down', 12)}</button>
-              <span class="menu q-menu" role="menu" hidden>${QUESTIONS.map((qq, i) => {
-                const reached = i <= furthest
-                const ans = i === idx ? 'Answering now' : reached ? answers[i].own.trim() || qq.options[answers[i].pick] : 'Not reached yet'
-                return `<button type="button" role="menuitem" data-step="${i}" class="${i === idx ? 'cur' : ''}" ${reached ? '' : 'disabled'}><span class="qm-n">${i < idx || (reached && i !== idx) ? ic('check', 12) : i + 1}</span><span class="qm-t"><b>${esc(qq.q)}</b><small>${esc(ans)}</small></span></button>`
-              }).join('')}</span>
-            </span>
+            <span class="q-count">${idx + 1}/${QUESTIONS.length}</span>
           </div>
           <div class="q-body ${dir ? 'swap ' + dir : ''}">
             <div class="q-opts" role="radiogroup" aria-label="${esc(q.q)}">${q.options
@@ -407,25 +402,12 @@
         if (e.key === 'ArrowRight' && idx < furthest) return e.preventDefault(), go(idx + 1, 'fwd')
       }
       document.addEventListener('keydown', keys)
-      // "1 of 3" opens a list of every question with the answer given, so any of them can be changed.
-      function toggleJump(open) {
-        const menu = $('.q-menu', card)
-        const chip = $('.q-chip', card)
-        open = open ?? menu.hidden
-        menu.hidden = !open
-        chip.setAttribute('aria-expanded', open)
-      }
-      document.addEventListener('click', (e) => {
-        const menu = card.isConnected && $('.q-menu', card)
-        if (menu && !menu.hidden && !e.composedPath().includes($('.q-jump', card))) toggleJump(false)
-      })
       card.addEventListener('click', (e) => {
         const opt = e.target.closest('.opt')
         if (opt) return pick(+opt.dataset.i)
         const act = e.target.closest('[data-act]')
         const step = e.target.closest('[data-step]')
-        if (step && !step.disabled) return +step.dataset.step === idx ? toggleJump(false) : go(+step.dataset.step, +step.dataset.step < idx ? 'back' : 'fwd')
-        if (act && act.dataset.act === 'jump') return toggleJump()
+        if (step) return go(+step.dataset.step, +step.dataset.step < idx ? 'back' : 'fwd')
         if (!act || act.disabled) return
         if (act.dataset.act === 'skip') finish(true)
         else if (act.dataset.act === 'prev') go(idx - 1, 'back')
