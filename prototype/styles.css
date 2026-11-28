@@ -564,7 +564,7 @@ i[data-i] svg {
 }
 .promo {
   position: relative;
-  height: 184px;
+  height: 130px;
   display: flex;
   align-items: center;
   gap: 32px;
@@ -624,7 +624,7 @@ i[data-i] svg {
 }
 .promo-copy {
   position: relative;
-  width: 220px;
+  width: 160px;
   flex: none;
   display: flex;
   flex-direction: column;
