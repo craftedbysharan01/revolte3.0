@@ -19,26 +19,26 @@
         <div class="sidebar-inner">
           <div class="sb-head">
             <img src="assets/logo.svg" alt="Revolte" class="logo" />
-            <button class="icon-btn" id="sbClose" aria-label="Close sidebar"><i data-i="sidebar"></i></button>
+            <button class="icon-btn" id="sbClose" aria-label="Close sidebar"><i data-i="f-panel"></i></button>
           </div>
           <div class="sb-tabs" role="tablist">
             <button class="sb-tab on" role="tab" aria-selected="true">Chat</button>
             <button class="sb-tab" role="tab" aria-selected="false" data-soon="Workflows">Workflows <span class="try">Try</span></button>
           </div>
           <div class="sb-group">
-            <button class="nav" id="newChat"><i data-i="newchat"></i><span>New chat</span></button>
-            <button class="nav" data-soon="Search"><i data-i="search"></i><span>Search</span><kbd>⌘K</kbd></button>
-            <button class="nav" data-soon="Projects"><i data-i="folder"></i><span>Projects</span></button>
+            <button class="nav" id="newChat"><i data-i="f-new"></i><span>New chat</span></button>
+            <button class="nav" data-soon="Search"><i data-i="f-search"></i><span>Search</span><kbd>⌘K</kbd></button>
+            <button class="nav" data-soon="Projects"><i data-i="f-projects"></i><span>Projects</span></button>
           </div>
-          <div class="sb-label">Workspace <i data-i="down" data-s="10"></i></div>
+          <div class="sb-label">Workspace <i data-i="f-chev"></i></div>
           <div class="sb-group">
-            <button class="nav" data-soon="Context"><i data-i="context"></i><span>Context</span></button>
-            <button class="nav" data-soon="Integrations"><i data-i="gear"></i><span>Integrations</span></button>
-            <button class="nav" data-soon="Models"><i data-i="chip"></i><span>Models</span></button>
-            <button class="nav" data-soon="Agents"><i data-i="bot"></i><span>Agents</span></button>
-            <button class="nav" id="navEnv"><i data-i="cloud"></i><span>Environments</span></button>
+            <button class="nav" data-soon="Context"><i data-i="f-files"></i><span>Context</span></button>
+            <button class="nav" data-soon="Integrations"><i data-i="f-gear"></i><span>Integrations</span></button>
+            <button class="nav" data-soon="Models"><i data-i="f-aichip"></i><span>Models</span></button>
+            <button class="nav" data-soon="Agents"><i data-i="f-agents"></i><span>Agents</span></button>
+            <button class="nav" id="navEnv"><i data-i="f-environments"></i><span>Environments</span></button>
           </div>
-          <div class="sb-label">Recents <i data-i="down" data-s="10"></i></div>
+          <div class="sb-label">Recents <i data-i="f-chev"></i></div>
           <div class="sb-group" id="recents">
             <button class="nav recent" data-soon="This chat">Portfolio for a designer</button>
             <button class="nav recent" data-soon="This chat">Fix flaky checkout tests</button>
@@ -48,7 +48,7 @@
             <span class="avatar">JH</span>
             <span class="sb-name">James Hall</span>
             <span class="sb-plan">Free</span>
-            <button class="icon-btn push" aria-label="Download CLI" data-soon="Download CLI"><i data-i="download"></i></button>
+            <button class="icon-btn push" aria-label="Download CLI" data-soon="Download CLI"><i data-i="f-download"></i></button>
           </div>
         </div>
       </nav>
@@ -56,8 +56,8 @@
       <!-- ================= Main ================= -->
       <div class="main">
         <header class="topbar">
-          <button class="icon-btn" id="sbOpen" aria-label="Open sidebar"><i data-i="sidebar"></i></button>
-          <button class="title" id="chatTitle"><span></span><i data-i="down" data-s="12"></i></button>
+          <button class="icon-btn" id="sbOpen" aria-label="Open sidebar"><i data-i="f-panel"></i></button>
+          <button class="title" id="chatTitle"><span></span><i data-i="f-down"></i></button>
           <div class="speed" id="speed" role="group" aria-label="Prototype speed">
             <span class="speed-tag">Prototype speed</span>
             <button data-speed="1" class="on">1×</button>
@@ -65,14 +65,14 @@
             <button data-speed="10">10×</button>
           </div>
           <div class="ptabs" role="tablist" id="ptabs">
-            <button class="ptab on" data-tab="overview" role="tab" aria-label="Overview" title="Overview"><i data-i="overview"></i></button>
-            <button class="ptab" data-tab="sandbox" role="tab" aria-label="Sandbox preview" title="Sandbox preview"><i data-i="monitor"></i></button>
-            <button class="ptab" data-tab="code" role="tab" aria-label="Code" title="Code"><i data-i="code"></i></button>
-            <button class="ptab" data-tab="files" role="tab" aria-label="Files" title="Files"><i data-i="files"></i></button>
-            <button class="ptab" data-tab="workflow" role="tab" aria-label="Workflow" title="Workflow"><i data-i="routing"></i></button>
+            <button class="ptab on" data-tab="overview" role="tab" aria-label="Overview" title="Overview"><i data-i="f-overview"></i></button>
+            <button class="ptab" data-tab="sandbox" role="tab" aria-label="Sandbox preview" title="Sandbox preview"><i data-i="f-sandbox"></i></button>
+            <button class="ptab" data-tab="code" role="tab" aria-label="Code" title="Code"><i data-i="f-code"></i></button>
+            <button class="ptab" data-tab="files" role="tab" aria-label="Files" title="Files"><i data-i="f-tabfiles"></i></button>
+            <button class="ptab" data-tab="workflow" role="tab" aria-label="Workflow" title="Workflow"><i data-i="f-workflow"></i></button>
           </div>
-          <button class="icon-btn boxed" id="deploy" aria-label="Deploy" data-soon="Deploy"><i data-i="rocket"></i></button>
-          <button class="icon-btn" id="paneToggle" aria-label="Toggle session pane"><i data-i="sidebar" class="flip"></i></button>
+          <button class="icon-btn boxed" id="deploy" aria-label="Deploy" data-soon="Deploy"><i data-i="f-deploy"></i></button>
+          <button class="icon-btn" id="paneToggle" aria-label="Toggle session pane"><i data-i="f-right"></i></button>
         </header>
 
         <div class="body">
@@ -88,14 +88,14 @@
                   aria-label="Describe what to build or fix"
                 ></textarea>
                 <div class="composer-bar">
-                  <button type="button" class="icon-btn" aria-label="Add files" data-soon="Attachments"><i data-i="add"></i></button>
-                  <button type="button" class="icon-btn" aria-label="Agent" data-soon="Agents"><i data-i="bot"></i></button>
-                  <button type="button" class="chip" data-soon="Applications"><i data-i="box" data-s="14"></i>Application</button>
+                  <button type="button" class="icon-btn" aria-label="Add files" data-soon="Attachments"><i data-i="f-add"></i></button>
+                  <button type="button" class="icon-btn" aria-label="Agent" data-soon="Agents"><i data-i="f-agent"></i></button>
+                  <button type="button" class="chip" data-soon="Applications"><i data-i="f-app"></i>Application</button>
                   <span class="grow"></span>
-                  <button type="button" class="chip quiet" data-soon="Modes"><i data-i="forward" data-s="14"></i>Auto</button>
-                  <button type="button" class="chip quiet" data-soon="Models"><span class="spark"></span>Sonnet 5 <em>Medium</em></button>
-                  <button type="button" class="icon-btn" aria-label="Dictate" data-soon="Dictation"><i data-i="mic"></i></button>
-                  <button type="submit" class="send" id="homeSend" aria-label="Start chat" disabled><i data-i="arrowUp"></i></button>
+                  <button type="button" class="chip quiet" data-soon="Modes"><i data-i="f-auto"></i>Auto</button>
+                  <button type="button" class="chip quiet" data-soon="Models"><i data-i="f-claude"></i>Sonnet 5 <em>Medium</em></button>
+                  <button type="button" class="icon-btn" aria-label="Dictate" data-soon="Dictation"><i data-i="f-mic"></i></button>
+                  <button type="submit" class="send" id="homeSend" aria-label="Start chat" disabled><i data-i="f-send"></i></button>
                 </div>
               </form>
 
@@ -120,20 +120,20 @@
                         </div>
                       </div>
                       <div class="wnode n2">
-                        <div class="wcat"><span class="wcat-ic"><i data-i="bot" data-s="12"></i></span>Agent<i data-i="dots" data-s="14" class="wdots"></i></div>
+                        <div class="wcat"><span class="wcat-ic"><i data-i="f-agent" data-s="12"></i></span>Agent<i data-i="dots" data-s="14" class="wdots"></i></div>
                         <div class="wcard">
                           <div class="wtitle"><span class="wtile"><i data-i="code" data-s="16"></i></span><div><b>Developer</b><small>Builds the change</small></div></div>
                           <hr />
-                          <div class="wrow"><span>Model</span><b><span class="spark sm"></span>Sonnet 5</b></div>
+                          <div class="wrow"><span>Model</span><b><i data-i="f-claude" data-s="11" class="inl"></i>Sonnet 5</b></div>
                           <div class="wrow"><span>Effort</span><b>Medium</b></div>
                         </div>
                       </div>
                       <div class="wnode n3">
-                        <div class="wcat"><span class="wcat-ic"><i data-i="bot" data-s="12"></i></span>Agent<i data-i="dots" data-s="14" class="wdots"></i></div>
+                        <div class="wcat"><span class="wcat-ic"><i data-i="f-agent" data-s="12"></i></span>Agent<i data-i="dots" data-s="14" class="wdots"></i></div>
                         <div class="wcard">
                           <div class="wtitle"><span class="wtile"><i data-i="tube" data-s="16"></i></span><div><b>QA</b><small>Tests, lint and security scan</small></div></div>
                           <hr />
-                          <div class="wrow"><span>Model</span><b><span class="spark sm"></span>Sonnet 5</b></div>
+                          <div class="wrow"><span>Model</span><b><i data-i="f-claude" data-s="11" class="inl"></i>Sonnet 5</b></div>
                           <div class="wrow"><span>Effort</span><b>High</b></div>
                           <div class="wrow"><span>Output</span><b>Structured</b></div>
                         </div>
@@ -141,7 +141,7 @@
                       <div class="wnode n4">
                         <div class="wcat"><span class="wcat-ic green"><i data-i="plug" data-s="12"></i></span>Action<i data-i="dots" data-s="14" class="wdots"></i></div>
                         <div class="wcard">
-                          <div class="wtitle"><span class="wtile"><i data-i="branch" data-s="16"></i></span><div><b>Create draft PR</b><small>Opens a draft pull request</small></div></div>
+                          <div class="wtitle"><span class="wtile"><i data-i="f-github" data-s="16"></i></span><div><b>Create draft PR</b><small>Opens a draft pull request</small></div></div>
                           <hr />
                           <div class="wrow"><span>Repository</span><b>webhook-monitor</b></div>
                           <div class="wrow"><span>Base branch</span><b>main</b></div>
@@ -170,13 +170,15 @@
             <div class="chat-foot">
               <div class="waiting" id="waiting"><span class="waiting-dot"></span>Waiting for you</div>
               <form class="reply" id="reply">
-                <button type="button" class="icon-btn" aria-label="Add files" data-soon="Attachments"><i data-i="add"></i></button>
+                <button type="button" class="icon-btn" aria-label="Add files" data-soon="Attachments"><i data-i="f-add"></i></button>
                 <input id="replyInput" placeholder="Reply to Revolte" aria-label="Reply to Revolte" autocomplete="off" />
                 <button type="submit" class="icon-btn" aria-label="Send"><i data-i="enter"></i></button>
               </form>
               <div class="reply-meta">
-                <button class="chip quiet" data-soon="Modes"><i data-i="forward" data-s="14"></i>Auto</button>
-                <button class="chip quiet" data-soon="Models"><span class="spark"></span>Sonnet 5.5 <em>Medium</em></button>
+                <span class="branch-chip" title="Branch this chat commits to"><i data-i="f-branch" data-s="14"></i>revolte/webhook-dashboard</span>
+                <span class="grow"></span>
+                <button class="chip quiet" data-soon="Modes"><i data-i="f-auto"></i>Auto</button>
+                <button class="chip quiet" data-soon="Models"><i data-i="f-claude"></i>Sonnet 5.5 <em>Medium</em></button>
               </div>
             </div>
           </section>
@@ -189,10 +191,10 @@
                 <section class="pview on" data-view="overview">
                   <div class="ov-group">
                     <div class="ov-row">
-                      <i data-i="cloud"></i>
+                      <i data-i="f-environments"></i>
                       <span class="ov-name" id="envName">Default</span>
                       <span class="env-state" id="envState">Not started</span>
-                      <button class="icon-btn sm push" id="envOpen" aria-label="Environment settings"><i data-i="gear"></i></button>
+                      <button class="icon-btn sm push" id="envOpen" aria-label="Environment settings"><i data-i="f-gear"></i></button>
                     </div>
                     <div class="repo" id="repo"></div>
                   </div>
@@ -221,7 +223,7 @@
                 <!-- Code -->
                 <section class="pview" data-view="code">
                   <div class="code-top">
-                    <span class="code-branch"><i data-i="branch" data-s="14"></i>revolte/webhook-dashboard → main</span>
+                    <span class="code-branch"><i data-i="f-branch" data-s="14"></i>revolte/webhook-dashboard → main</span>
                     <span class="code-status" id="codeStatus"></span>
                     <button class="follow" id="follow">Follow Revolte</button>
                     <span class="code-total" id="codeTotal"></span>
@@ -271,7 +273,7 @@
             <span class="flabel">Name</span>
             <div class="name-row">
               <input class="input" id="envNameInput" />
-              <span class="tag"><i data-i="cloud" data-s="12"></i>Cloud · 2 vCPU · 4 GB</span>
+              <span class="tag"><i data-i="f-environments" data-s="12"></i>Cloud · 2 vCPU · 4 GB</span>
             </div>
           </label>
 
@@ -317,6 +319,7 @@
     <div class="toast" id="toast" role="status"></div>
 
     <script src="icons.js"></script>
+    <script src="figma-icons.js"></script>
     <script src="data.js"></script>
     <script src="app.js"></script>
   </body>

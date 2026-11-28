@@ -1254,12 +1254,28 @@ i[data-i] svg {
 }
 .reply-meta {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
   gap: 4px;
   margin-top: 6px;
   overflow: hidden;
 }
 .chip.quiet { color: var(--muted-foreground); }
+.branch-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  min-width: 0;
+  padding: 0 8px;
+  border-radius: 8px;
+  font: 400 12px var(--font-mono);
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.branch-chip i[data-i] { color: var(--foreground); }
+i.inl { margin-right: 5px; vertical-align: -1px; }
 
 /* ============ Right pane ============ */
 .pane {
@@ -1302,6 +1318,7 @@ i[data-i] svg {
 .ptab.on {
   background: var(--selected);
 }
+.ptab.on i { color: var(--foreground); }
 .ptab.on i { color: var(--foreground); }
 
 /* Live code tab: a soft ring breathes out of the icon while files are being written. */
