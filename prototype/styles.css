@@ -41,35 +41,35 @@
 
 /* ---- Light theme (default). Dark stays available from the theme switch in the sidebar. ---- */
 :root[data-theme='light'] {
-  /* A dimmed, paper-grey light theme rather than white, and every text colour checked to WCAG AA (4.5:1)
+  /* A low-glare, mid-grey light theme rather than white, and every text colour checked to WCAG AA (4.5:1)
      against the page, sidebar and card backgrounds. */
   color-scheme: light;
-  --background: #e4e4e0;
-  --sidebar: #dbdbd7;
-  --surface: #ebebe8;
-  --card: #ebebe8;
-  --muted: #d3d3cf;
-  --foreground: #202024;
-  --muted-foreground: #4a4a50;
-  --subtle-foreground: #58585e;
-  --disabled-foreground: #9a9aa0;
+  --background: #cdcdc8;
+  --sidebar: #c4c4bf;
+  --surface: #d4d4cf;
+  --card: #d4d4cf;
+  --muted: #bbbbb6;
+  --foreground: #18181b;
+  --muted-foreground: #38383d;
+  --subtle-foreground: #434348;
+  --disabled-foreground: #7c7c82;
   --ov: 28, 28, 34;
   --border: rgba(28, 28, 34, 0.13);
   --border-subtle: rgba(28, 28, 34, 0.085);
   --selected: rgba(28, 28, 34, 0.07);
   --hover: rgba(28, 28, 34, 0.045);
-  --on-fg: #ebebe8;
-  --shim-lo: #58585e;
-  --shim-hi: #a2a2a8;
-  --canvas: #dadae1;
-  --node: #ebebe8;
-  --node-in: #e4e4e0;
-  --success: #0f5f36;
-  --info: #324db0;
-  --link: #174fae;
-  --danger: #9e2820;
-  --amber: #7f450c;
-  --focus: #174fae;
+  --on-fg: #d4d4cf;
+  --shim-lo: #434348;
+  --shim-hi: #8a8a90;
+  --canvas: #c3c3ca;
+  --node: #d4d4cf;
+  --node-in: #cdcdc8;
+  --success: #0b4a2a;
+  --info: #283e8f;
+  --link: #123f8c;
+  --danger: #801f19;
+  --amber: #653609;
+  --focus: #123f8c;
 }
 :root[data-theme='light'] .logo { filter: invert(1) brightness(0.1); }
 
