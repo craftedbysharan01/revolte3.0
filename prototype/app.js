@@ -153,19 +153,20 @@
 
   // Home backdrop: the pointer carries a soft light across the dot grid.
   {
-    const home = $('#home')
+    // Lives on the whole centre column (top bar included) while the home view is showing.
+    const col = $('.col')
     let raf = 0
-    home.addEventListener('pointermove', (e) => {
+    col.addEventListener('pointermove', (e) => {
       if (raf) return
       raf = requestAnimationFrame(() => {
         raf = 0
-        const r = home.getBoundingClientRect()
-        home.style.setProperty('--mx', e.clientX - r.left + 'px')
-        home.style.setProperty('--my', e.clientY - r.top + home.scrollTop + 'px')
-        home.classList.add('lit')
+        const r = col.getBoundingClientRect()
+        col.style.setProperty('--mx', e.clientX - r.left + 'px')
+        col.style.setProperty('--my', e.clientY - r.top + 'px')
+        col.classList.add('lit')
       })
     })
-    home.addEventListener('pointerleave', () => home.classList.remove('lit'))
+    col.addEventListener('pointerleave', () => col.classList.remove('lit'))
   }
   const waitingEl = $('#waiting')
   const replyInput = $('#replyInput')

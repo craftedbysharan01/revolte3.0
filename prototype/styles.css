@@ -355,21 +355,17 @@ i[data-i] svg {
 
 /* ============ Home ============ */
 .home {
-  position: relative;
-  isolation: isolate;
   flex: 1;
   min-height: 0;
   display: flex;
   justify-content: center;
   padding: 0 24px;
   overflow: auto;
-  --mx: 50%;
-  --my: 40%;
 }
 /* Quiet interactive backdrop: a faint dot grid that fades out toward the edges,
    plus a soft light that follows the pointer and lifts the dots under it. */
-.home::before,
-.home::after {
+[data-view='home'] .col::before,
+[data-view='home'] .col::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -377,13 +373,12 @@ i[data-i] svg {
   pointer-events: none;
   background-image: radial-gradient(rgba(255, 255, 255, 0.09) 0.8px, transparent 1px);
   background-size: 22px 22px;
-  background-attachment: local;
 }
-.home::before {
-  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 38%, #000 10%, transparent 75%);
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 38%, #000 10%, transparent 75%);
+[data-view='home'] .col::before {
+  -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, #000 10%, transparent 75%);
+  mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, #000 10%, transparent 75%);
 }
-.home::after {
+[data-view='home'] .col::after {
   background-image:
     radial-gradient(rgba(180, 196, 255, 0.6) 1px, transparent 1.3px),
     radial-gradient(circle 260px at var(--mx) var(--my), rgba(120, 140, 255, 0.08), transparent 70%);
@@ -393,7 +388,7 @@ i[data-i] svg {
   opacity: 0;
   transition: opacity 400ms ease;
 }
-.home.lit::after { opacity: 1; }
+[data-view='home'] .col.lit::after { opacity: 1; }
 .shell:not([data-view='home']) .home,
 [data-view='home'] .chat,
 [data-view='home'] .pane {
@@ -1035,6 +1030,10 @@ i[data-i] svg {
 
 /* ============ Chat ============ */
 .col {
+  position: relative;
+  isolation: isolate;
+  --mx: 50%;
+  --my: 40%;
   flex: 1;
   min-width: 380px;
   container-type: inline-size;
