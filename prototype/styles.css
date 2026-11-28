@@ -3425,28 +3425,15 @@ kbd.k {
 
 .q-head { display: flex; align-items: flex-start; gap: 12px; padding: 14px 12px 0 16px; }
 .q-head .q-title { flex: 1; min-width: 0; padding-top: 3px; }
-.q-nav {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  height: 28px;
-  padding: 0 2px;
-  border-radius: 999px;
-  border: 1px solid var(--border-subtle);
-  background: var(--surface);
-}
-.q-nav button {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  color: var(--muted-foreground);
-  transition: background-color 150ms ease, color 150ms ease;
-}
-.q-nav button:hover:not(:disabled) { background: var(--hover); color: var(--foreground); }
-.q-nav button:disabled { color: var(--disabled-foreground); cursor: default; }
-.q-count { padding: 0 4px; font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; }
+/* Step bars: where you are, and which questions you can jump back to. */
+.q-steps { flex: none; display: inline-flex; align-items: center; gap: 2px; height: 26px; }
+.q-steps button { display: grid; place-items: center; width: 22px; height: 22px; }
+.q-steps button:disabled { cursor: default; }
+.q-steps i { display: block; width: 16px; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.1); transition: background-color 200ms ease, width 240ms var(--ease-out); }
+.q-steps .seen i { background: rgba(255, 255, 255, 0.32); }
+.q-steps .seen:hover i { background: rgba(255, 255, 255, 0.6); }
+.q-steps .cur i { width: 22px; background: var(--foreground); }
+.q-count { margin-left: 6px; font-size: 12px; color: var(--subtle-foreground); font-variant-numeric: tabular-nums; }
 .questions .q-body.swap.back { animation-name: qswapBack; }
 @keyframes qswapBack { from { opacity: 0; transform: translateX(-8px); filter: blur(2px); } }
 .questions .q-body { padding: 10px 16px 4px; gap: 10px; }
@@ -3486,3 +3473,45 @@ kbd.k {
 .q-foot .btn.primary { display: inline-flex; align-items: center; gap: 8px; }
 .q-foot .btn.primary kbd { font: 500 11px var(--font-mono); opacity: 0.55; }
 @media (prefers-reduced-motion: reduce) { .questions.docked, .questions .q-body.swap { animation: none; } }
+
+/* ---- Plan card: no fill, at most three tasks until "View more" ---- */
+.card.plan { background: none; }
+.plan-list.clipped li:nth-child(n + 4):not(.plan-more) { display: none; }
+.plan-list li.plan-more { padding-top: 6px; padding-bottom: 6px; }
+.plan-more button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  color: var(--muted-foreground);
+  transition: color 150ms ease;
+}
+.plan-more button:hover { color: var(--foreground); }
+
+/* ---- Machine size: one quiet row: core dots, the spec, and an S / M / L switch ---- */
+.mrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+  padding: 10px 8px 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+}
+.mcores { display: grid; grid-template-columns: repeat(4, 6px); gap: 3px; flex: none; }
+.mcores i { width: 6px; height: 6px; border-radius: 2px; background: rgba(255, 255, 255, 0.1); transition: background-color 220ms ease; }
+.mcores i.on { background: var(--foreground); }
+.mcopy { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.mcopy b { font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.mcopy span { font-size: 12px; color: var(--subtle-foreground); }
+.msz { display: flex; gap: 2px; padding: 2px; border-radius: 8px; background: var(--background); border: 1px solid var(--border-subtle); }
+.msz button {
+  width: 26px;
+  height: 24px;
+  border-radius: 6px;
+  font: 500 12px var(--font-mono);
+  color: var(--subtle-foreground);
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.msz button:hover { color: var(--foreground); }
+.msz button[aria-checked='true'] { background: var(--muted); color: var(--foreground); }

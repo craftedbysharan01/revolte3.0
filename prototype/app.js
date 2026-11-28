@@ -349,11 +349,10 @@
         card.innerHTML = `
           <div class="q-head">
             <p class="q-title">${esc(q.q)}</p>
-            <span class="q-nav" role="group" aria-label="Questions">
-              <button type="button" data-act="prev" aria-label="Previous question" ${idx === 0 ? 'disabled' : ''}>${ic('left', 14)}</button>
-              <span class="q-count">${idx + 1} of ${QUESTIONS.length}</span>
-              <button type="button" data-act="fwd" aria-label="Next question" ${idx >= furthest ? 'disabled' : ''}>${ic('right', 14)}</button>
-            </span>
+            <span class="q-steps" role="tablist" aria-label="Questions">${QUESTIONS.map(
+              (_, i) =>
+                `<button type="button" role="tab" data-step="${i}" class="${i === idx ? 'cur' : i <= furthest ? 'seen' : ''}" aria-selected="${i === idx}" aria-label="Question ${i + 1}" ${i > furthest ? 'disabled' : ''}><i></i></button>`
+            ).join('')}<span class="q-count">${idx + 1}/${QUESTIONS.length}</span></span>
           </div>
           <div class="q-body ${dir ? 'swap ' + dir : ''}">
             <div class="q-opts" role="radiogroup" aria-label="${esc(q.q)}">${q.options
@@ -399,6 +398,8 @@
         const opt = e.target.closest('.opt')
         if (opt) return pick(+opt.dataset.i)
         const act = e.target.closest('[data-act]')
+        const step = e.target.closest('[data-step]')
+        if (step && !step.disabled && +step.dataset.step !== idx) return go(+step.dataset.step, +step.dataset.step < idx ? 'back' : 'fwd')
         if (!act || act.disabled) return
         if (act.dataset.act === 'skip') finish(true)
         else if (act.dataset.act === 'prev') go(idx - 1, 'back')
@@ -1220,8 +1221,16 @@
     )
     summaries()
   }
+  const SIZE_NOTE = { small: 'Good for most apps', medium: 'Faster builds and tests', large: 'Heavy builds and monorepos' }
   function renderSize() {
     $$('#envSizes [data-size]').forEach((b) => b.setAttribute('aria-checked', b.dataset.size === draft.size))
+    const cpu = +SIZES[draft.size].split(' ')[0]
+    $$('#envCores i').forEach((c, i) => {
+      c.style.transitionDelay = i * 30 + 'ms'
+      c.classList.toggle('on', i < cpu)
+    })
+    $('#envSpec').textContent = SIZES[draft.size]
+    $('#envSizeNote').textContent = SIZE_NOTE[draft.size]
   }
   const rselBtn = $('#envRegion [data-rsel]')
   const rselMenu = $('#envRegion .rsel-menu')

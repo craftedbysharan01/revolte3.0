@@ -302,10 +302,14 @@
                 <button type="button" role="option" data-region="ap"><b>Asia Pacific</b><span>Mumbai · 140 ms</span><i data-i="check" data-s="14"></i></button>
               </div>
             </div>
-            <div class="mseg" id="envSizes" role="radiogroup" aria-label="Machine size">
-              <button type="button" role="radio" data-size="small"><b>Small</b><span>2 vCPU · 4 GB</span></button>
-              <button type="button" role="radio" data-size="medium"><b>Medium</b><span>4 vCPU · 8 GB</span></button>
-              <button type="button" role="radio" data-size="large"><b>Large</b><span>8 vCPU · 16 GB</span></button>
+            <div class="mrow">
+              <div class="mcores" id="envCores" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="mcopy"><b id="envSpec">2 vCPU · 4 GB</b><span id="envSizeNote">Good for most apps</span></div>
+              <div class="msz" id="envSizes" role="radiogroup" aria-label="Machine size">
+                <button type="button" role="radio" data-size="small" aria-label="Small">S</button>
+                <button type="button" role="radio" data-size="medium" aria-label="Medium">M</button>
+                <button type="button" role="radio" data-size="large" aria-label="Large">L</button>
+              </div>
             </div>
           </div>
 
