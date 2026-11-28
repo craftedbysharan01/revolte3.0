@@ -208,8 +208,8 @@
   // "Waiting for you" is a nudge, not a status: it only appears once the
   // user has left a question unanswered for a while (real time, not the
   // prototype clock), and any activity puts it away and restarts the wait.
-  // It escalates gently while ignored: appears (8s), turns orange (16s), then hops every few seconds (24s+).
-  const IDLE_NUDGE_MS = 8000
+  // It escalates gently while ignored: appears (20s), turns orange (40s), then hops every few seconds (60s+).
+  const IDLE_NUDGE_MS = 20000
   let idleTimers = []
   function armIdleNudge() {
     idleTimers.forEach(clearTimeout)
@@ -341,8 +341,7 @@
         card.innerHTML = `
           <div class="q-bar" aria-hidden="true"><i style="width:${((idx + 1) / QUESTIONS.length) * 100}%"></i></div>
           <div class="q-head">
-            <span class="q-eyebrow">${ic('f-agent', 13)}Revolte needs one detail</span>
-            <span class="q-count">${idx + 1}<em>/${QUESTIONS.length}</em></span>
+            <span class="q-eyebrow">${ic('f-agent', 13)}Revolte needs a few details<span class="q-count">${idx + 1} of ${QUESTIONS.length}</span></span>
           </div>
           <div class="q-body ${swap ? 'swap' : ''}">
             <p class="q-title">${esc(q.q)}</p>

@@ -3422,13 +3422,22 @@ kbd.k {
   border-top: 1px solid var(--border-subtle);
   background: var(--card);
 }
-.q-bar { height: 2px; background: rgba(255, 255, 255, 0.06); }
-.q-bar i { display: block; height: 100%; background: linear-gradient(90deg, #8ea2ff, #f7f6f3); border-radius: 0 2px 2px 0; transition: width 420ms var(--ease-out); }
+/* A quiet grey hairline that never stops moving, like a conveyor: the work is waiting, not stopped. */
+.q-bar { position: relative; height: 1px; overflow: hidden; background: rgba(255, 255, 255, 0.05); }
+.q-bar i {
+  display: block;
+  height: 100%;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.28) 0 10px, rgba(255, 255, 255, 0.08) 10px 16px);
+  background-size: 32px 100%;
+  animation: conveyor 900ms linear infinite;
+  transition: width 420ms var(--ease-out);
+}
+@keyframes conveyor { to { background-position: 32px 0; } }
 .q-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px 0; }
 .q-eyebrow { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted-foreground); }
 .q-eyebrow i[data-i] { color: #8ea2ff; }
-.q-count { margin-left: auto; font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; }
-.q-count em { font-style: normal; font-weight: 400; color: var(--subtle-foreground); }
+.q-count { font-variant-numeric: tabular-nums; color: var(--subtle-foreground); }
+.q-count::before { content: '·'; margin: 0 6px 0 2px; }
 .questions .q-body { padding: 8px 16px 6px; gap: 10px; }
 .questions .q-title { font-size: 15px; line-height: 22px; margin: 0; }
 .q-opts { display: flex; flex-direction: column; gap: 2px; margin: 0 -8px; }
@@ -3465,4 +3474,4 @@ kbd.k {
 .q-link:hover { color: var(--foreground); }
 .q-foot .btn.primary { display: inline-flex; align-items: center; gap: 8px; }
 .q-foot .btn.primary kbd { font: 500 11px var(--font-mono); opacity: 0.55; }
-@media (prefers-reduced-motion: reduce) { .questions.docked { animation: none; } .q-bar i { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .questions.docked { animation: none; } .q-bar i { transition: none; animation: none; } }
