@@ -3649,3 +3649,5 @@ kbd.k {
 /* Question footer: skip-all link on the left, Skip and Next on the right. */
 .q-foot { padding: 8px 12px 12px 16px; }
 .q-foot .btn { height: 30px; }
+/* Plan card: the header strip gets a soft grey fill so it reads as the card's title bar. */
+.card.plan:not(.compact) .card-head { background: rgba(var(--ov), 0.05); }
