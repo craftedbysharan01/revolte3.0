@@ -333,18 +333,29 @@
         say(d)
         resolve({ answers: out, skipped: all })
       }
-      const next = () => (idx < QUESTIONS.length - 1 ? (idx++, render(true)) : finish(false))
-      function render(swap) {
+      // One click answers and moves on. The chip at the top right steps back (and forward again,
+      // up to the furthest question reached) so any answer can be changed before the last one.
+      let furthest = 0
+      let advancing = 0
+      const go = (to, dir) => {
+        idx = to
+        furthest = Math.max(furthest, idx)
+        render(dir)
+      }
+      const next = () => (idx < QUESTIONS.length - 1 ? go(idx + 1, 'fwd') : finish(false))
+      function render(dir) {
         const q = QUESTIONS[idx]
         const a = answers[idx]
-        const last = idx === QUESTIONS.length - 1
         card.innerHTML = `
-          <div class="q-bar" aria-hidden="true"><i style="width:${((idx + 1) / QUESTIONS.length) * 100}%"></i></div>
           <div class="q-head">
-            <span class="q-eyebrow">${ic('f-agent', 13)}Revolte needs your input<span class="q-count">${idx + 1} of ${QUESTIONS.length}</span></span>
-          </div>
-          <div class="q-body ${swap ? 'swap' : ''}">
             <p class="q-title">${esc(q.q)}</p>
+            <span class="q-nav" role="group" aria-label="Questions">
+              <button type="button" data-act="prev" aria-label="Previous question" ${idx === 0 ? 'disabled' : ''}>${ic('left', 14)}</button>
+              <span class="q-count">${idx + 1} of ${QUESTIONS.length}</span>
+              <button type="button" data-act="fwd" aria-label="Next question" ${idx >= furthest ? 'disabled' : ''}>${ic('right', 14)}</button>
+            </span>
+          </div>
+          <div class="q-body ${dir ? 'swap ' + dir : ''}">
             <div class="q-opts" role="radiogroup" aria-label="${esc(q.q)}">${q.options
               .map(
                 (o, i) => `<button class="opt ${!a.own && a.pick === i ? 'on' : ''}" data-i="${i}" role="radio" aria-checked="${!a.own && a.pick === i}">
@@ -353,10 +364,7 @@
               .join('')}</div>
           </div>
           <div class="q-foot">
-            <button class="q-link" data-act="skip">Skip, use recommended</button>
-            <span class="grow"></span>
-            ${idx > 0 ? '<button class="btn ghost" data-act="back">Back</button>' : ''}
-            <button class="btn primary" data-act="next">${last ? 'Submit' : 'Continue'}<kbd>↵</kbd></button>
+            <button class="q-link" data-act="skip">${idx === 0 ? 'Skip, use recommended' : 'Use recommended for the rest'}</button>
           </div>`
         setAwaiting({
           placeholder: 'Or answer in your own words',
@@ -368,6 +376,7 @@
         })
       }
       const pick = (i) => {
+        if (advancing) return
         answers[idx].pick = i
         answers[idx].own = ''
         $$('.opt', card).forEach((o) => {
@@ -375,24 +384,27 @@
           o.classList.toggle('on', on)
           o.setAttribute('aria-checked', on)
         })
+        // Let the choice register for a beat, then move on.
+        advancing = setTimeout(() => ((advancing = 0), next()), 220)
       }
       function keys(e) {
         if (e.metaKey || e.ctrlKey || e.altKey || e.target.closest('input, textarea, [contenteditable]')) return
         const n = +e.key
         if (n >= 1 && n <= QUESTIONS[idx].options.length) return e.preventDefault(), pick(n - 1)
-        if (e.key === 'Enter' && !e.target.closest('button')) e.preventDefault(), next()
+        if (e.key === 'ArrowLeft' && idx > 0) return e.preventDefault(), go(idx - 1, 'back')
+        if (e.key === 'ArrowRight' && idx < furthest) return e.preventDefault(), go(idx + 1, 'fwd')
       }
       document.addEventListener('keydown', keys)
       card.addEventListener('click', (e) => {
         const opt = e.target.closest('.opt')
         if (opt) return pick(+opt.dataset.i)
         const act = e.target.closest('[data-act]')
-        if (!act) return
+        if (!act || act.disabled) return
         if (act.dataset.act === 'skip') finish(true)
-        else if (act.dataset.act === 'back') idx--, render(true)
-        else next()
+        else if (act.dataset.act === 'prev') go(idx - 1, 'back')
+        else if (act.dataset.act === 'fwd') go(idx + 1, 'fwd')
       })
-      render(false)
+      render('')
     })
   }
 
