@@ -126,7 +126,7 @@ i[data-i] svg {
   /* Logo lines up with the nav icons; the collapse button's edge lines up with the Chat/Workflows switch. */
   padding: 0 0 0 8px;
 }
-.sb-head #sbClose { margin-right: -8px;
+.sb-head #sbClose { margin-right: -5px;
 }
 .logo {
   height: 12px;
@@ -154,22 +154,23 @@ i[data-i] svg {
 .icon-btn:active {
   transform: scale(0.94);
 }
-/* Chat / Workflows: same language as the nav below. No boxed card; the active tab uses the
-   nav's selected fill and white text, the other one sits back in grey. */
+/* Chat / Workflows: a segmented tab. A hairline track with no fill holds both tabs; the active tab
+   takes the same fill and white text as the selected nav row ("New chat"), the other sits back in grey. */
 .sb-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2px;
-  margin: 0 0 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border-subtle);
+  padding: 3px;
+  margin: 0 0 12px;
+  border-radius: 11px;
+  border: 1px solid var(--border-subtle);
 }
 .sb-tab {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 30px;
+  height: 26px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
@@ -180,6 +181,7 @@ i[data-i] svg {
 .sb-tab.on {
   background: var(--selected);
   color: var(--foreground);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 .try {
   flex: none;
