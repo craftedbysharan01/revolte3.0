@@ -3643,3 +3643,6 @@ svg[data-l] .fk { transition: stroke-opacity 160ms ease; }
 .ov-static i[data-i] { color: var(--muted-foreground); }/* The Free plan card only shows on the home page; inside a chat it gets out of the way. */
 .shell:not([data-view='home']) .upsell { display: none; }
 .shell:not([data-view='home']) .upsell + .sb-foot { margin-top: auto; }
+/* plan.md header: the file name sits in a tab-like pill so it reads as the open document. */
+.doc-name { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px 0 8px; border-radius: 8px; background: var(--muted); font-size: 13px; }
+.doc-name i[data-i] { color: var(--muted-foreground); }

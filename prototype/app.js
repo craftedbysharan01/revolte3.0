@@ -574,7 +574,7 @@
   function renderPlanDoc(answers, tasks, version) {
     const files = Object.keys(FILES)
     $('#planDoc').innerHTML = `
-      <div class="doc-head">${ic('doc')}plan.md <em>v${version}</em><span class="grow"></span>
+      <div class="doc-head"><span class="doc-name">${ic('doc', 14)}plan.md <em>v${version}</em></span><span class="grow"></span>
         <button class="icon-btn" id="planCopy" aria-label="Copy plan">${ic('copy')}</button>
         <button class="icon-btn" id="planClose" aria-label="Close plan">${ic('close')}</button></div>
       <h3>Summary</h3>
