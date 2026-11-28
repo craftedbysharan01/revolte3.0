@@ -213,6 +213,7 @@ i[data-i] svg {
   text-overflow: ellipsis;
 }
 .nav kbd:empty { display: none; }
+.nav kbd[data-k='mod+k'] { opacity: 1 !important; }
 .nav kbd {
   opacity: 0;
   transition: opacity 150ms ease;
