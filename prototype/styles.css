@@ -462,15 +462,15 @@ i[data-i] svg {
   inset: -1px;
   padding: 1px;
   border-radius: inherit;
-  background: conic-gradient(from var(--trace), transparent 0deg 270deg, rgba(160, 172, 255, 0.4) 320deg, rgba(var(--ov), 0.9) 350deg, transparent 360deg);
+  background: conic-gradient(from var(--trace), transparent 0deg 300deg, rgba(160, 172, 255, 0.14) 335deg, rgba(var(--ov), 0.38) 354deg, transparent 360deg);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
   pointer-events: none;
-  animation: trace 7s linear infinite;
+  animation: trace 10s linear infinite;
   transition: opacity 300ms ease;
 }
-#homeComposer:focus-within::before { opacity: 0.45; }
+#homeComposer:focus-within::before { opacity: 0.3; }
 @keyframes trace {
   to { --trace: 360deg; }
 }
