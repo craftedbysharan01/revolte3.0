@@ -126,7 +126,7 @@ i[data-i] svg {
   padding: 0 8px;
 }
 .logo {
-  height: 14px;
+  height: 12px;
   width: auto;
 }
 .icon-btn {
@@ -154,27 +154,40 @@ i[data-i] svg {
 .sb-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  padding: 2px;
+  gap: 2px;
+  padding: 3px;
   margin: 0 0 12px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.35);
+  border-radius: 10px;
+  background: var(--surface);
   border: 1px solid var(--border-subtle);
 }
 .sb-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   height: 26px;
-  border-radius: 6px;
+  border-radius: 7px;
   font-size: 13px;
   font-weight: 500;
   color: var(--muted-foreground);
+  transition: color 150ms ease, background-color 150ms ease, transform 140ms var(--ease-out);
 }
+.sb-tab:active { transform: scale(0.97); }
 .sb-tab.on {
   background: var(--muted);
   color: var(--foreground);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 .try {
-  margin-left: 4px;
-  font-size: 11px;
-  color: var(--info);
+  height: 16px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 16px;
+  color: #c3cfff;
+  background: rgba(111, 143, 255, 0.16);
 }
 .sb-group {
   display: flex;
@@ -3172,6 +3185,7 @@ kbd.k {
   .s-table tbody tr:hover td { background: #fafbfc; }
   .s-nav nav a:hover { color: var(--s-ink); }
   .menu button:hover { background: var(--hover); }
+  .sb-tab:not(.on):hover { color: var(--foreground); }
   .nav:hover kbd { opacity: 1; }
   .plan-row:hover { background: var(--hover); }
   .regions button:not([aria-checked='true']):hover { border-color: var(--border); }
