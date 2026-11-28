@@ -175,6 +175,7 @@
   function renderCredits(bump) {
     const used = CREDITS.earlier + CREDITS.chat
     $('#creditsChat').textContent = CREDITS.chat
+    $('#creditsBtn em').textContent = CREDITS.chat === 1 ? 'credit' : 'credits'
     $('#cpChat').textContent = CREDITS.chat
     $('#cpMonth').textContent = used
     $('#cpBar').style.width = (CREDITS.earlier / CREDITS.plan) * 100 + '%'
@@ -466,11 +467,14 @@
         const q = QUESTIONS[idx]
         const a = answers[idx]
         card.innerHTML = `
-          ${furthest > 0 ? `<div class="q-given">${QUESTIONS.map((qq, i) => (i <= furthest && i !== idx ? `<button type="button" data-step="${i}" data-tip="Change this answer">${ic('check', 12)}${esc(answers[i].own.trim() || qq.options[answers[i].pick])}</button>` : '')).join('')}</div>` : ''}
-          <div class="q-head">
-            <p class="q-title">${esc(q.q)}</p>
-            <span class="q-count">${idx + 1}/${QUESTIONS.length}</span>
+          <div class="q-top">
+            <span class="q-step">Question ${idx + 1} of ${QUESTIONS.length}</span>
+            <span class="q-arrows">
+              <button type="button" class="icon-btn sm" data-act="prev" aria-label="Previous question" data-tip="Previous question" ${idx === 0 ? 'disabled' : ''}>${ic('left', 14)}</button>
+              <button type="button" class="icon-btn sm" data-act="fwd" aria-label="Next question" data-tip="Next question" ${idx >= furthest ? 'disabled' : ''}>${ic('right', 14)}</button>
+            </span>
           </div>
+          <p class="q-title">${esc(q.q)}</p>
           <div class="q-body ${dir ? 'swap ' + dir : ''}">
             <div class="q-opts" role="radiogroup" aria-label="${esc(q.q)}">${q.options
               .map(
@@ -480,7 +484,7 @@
               .join('')}</div>
           </div>
           <div class="q-foot">
-            <button class="q-link" data-act="skip">${idx === 0 ? 'Skip, use recommended' : 'Use recommended for the rest'}</button>
+            <button class="q-link" data-act="skip">Skip all, use recommended</button>
           </div>`
         setAwaiting({
           placeholder: 'Or answer in your own words',

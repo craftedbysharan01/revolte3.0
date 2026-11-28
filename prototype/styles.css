@@ -3644,3 +3644,12 @@ svg[data-l] .fk { transition: stroke-opacity 160ms ease; }
 /* plan.md header: the file name sits in a tab-like pill so it reads as the open document. */
 .doc-name { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px 0 8px; border-radius: 8px; background: var(--muted); font-size: 13px; }
 .doc-name i[data-i] { color: var(--muted-foreground); }
+
+/* Questions: "Question 1 of 3" from the first step, plain back / forward arrows on the right. */
+.q-top { display: flex; align-items: center; gap: 8px; padding: 10px 10px 0 16px; }
+.q-step { font-size: 12px; font-weight: 500; color: var(--subtle-foreground); font-variant-numeric: tabular-nums; }
+.q-arrows { margin-left: auto; display: inline-flex; gap: 2px; }
+.q-arrows .icon-btn { color: var(--muted-foreground); }
+.q-arrows .icon-btn:disabled { color: var(--disabled-foreground); background: none; cursor: default; }
+.questions > .q-title { margin: 4px 16px 0; font-size: 15px; line-height: 22px; font-weight: 500; }
+.q-arrows .icon-btn:disabled, .q-arrows .icon-btn:disabled i[data-i] { color: var(--disabled-foreground) !important; opacity: 0.6; }
