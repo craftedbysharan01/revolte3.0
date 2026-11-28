@@ -1245,6 +1245,7 @@
         </div>
       </div>
     </div>`)
+    holdAfterOnePlay(card)
     const stage = $('.wf-stage', card)
     const flow = $('.promo-visual .flow').cloneNode(true)
     stage.appendChild(flow)
@@ -1622,7 +1623,15 @@
   // Dark only: clear any theme a previous version of the prototype remembered.
   try { localStorage.removeItem('revolte-theme') } catch (_) {}
 
+  // The workflow animation plays once and then holds on its finished frame (all nodes placed,
+  // every word lit) instead of looping. 10.3s is just before the 11s timeline starts fading out.
+  function holdAfterOnePlay(el) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    setTimeout(() => el.classList.add('held'), 10300)
+  }
+
   // ---------- Boot ----------
+  holdAfterOnePlay($('#promo'))
   hydrate(document)
   opticalIcons(document)
   renderRepo(false)
