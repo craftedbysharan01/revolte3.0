@@ -386,7 +386,9 @@
       const card = say(
         h(`<div class="card plan">
           <div class="card-head">${ic('doc')}Plan${version > 1 ? ` <em style="font-style:normal;color:var(--subtle-foreground);font-weight:400">v${version}</em>` : ''}<span class="meta">~ 2 mins</span></div>
-          <ol class="plan-list">${tasks.map((t, i) => `<li><span class="num">${i + 1}</span>${esc(t.t)}</li>`).join('')}</ol>
+          <ol class="plan-list${tasks.length > 3 ? ' clipped' : ''}">${tasks.map((t, i) => `<li><span class="num">${i + 1}</span>${esc(t.t)}</li>`).join('')}${
+            tasks.length > 3 ? `<li class="plan-more"><button type="button" data-act="more" aria-expanded="false">View ${tasks.length - 3} more${ic('down', 12)}</button></li>` : ''
+          }</ol>
           <div class="card-foot">
             <button class="btn primary" data-act="approve" data-tip="Approve plan" data-kbd="mod+enter">Approve plan</button>
             <button class="btn secondary" data-act="change">Ask for changes</button>
@@ -409,6 +411,13 @@
       card.addEventListener('click', (e) => {
         const act = e.target.closest('[data-act]')
         if (!act) return
+        if (act.dataset.act === 'more') {
+          const list = $('.plan-list', card)
+          const open = list.classList.toggle('clipped') === false
+          act.setAttribute('aria-expanded', open)
+          act.innerHTML = (open ? 'Show less' : `View ${tasks.length - 3} more`) + ic(open ? 'up' : 'down', 12)
+          return
+        }
         if (act.dataset.act === 'approve') settle('Approved', { approved: true })
         else if (act.dataset.act === 'change') replyInput.focus()
         else openPlan()
