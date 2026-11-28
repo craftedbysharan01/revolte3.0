@@ -310,19 +310,10 @@
                 <button type="button" role="option" data-region="ap"><b>Asia Pacific</b><span>Mumbai · 140 ms</span><i data-i="check" data-s="14"></i></button>
               </div>
             </div>
-            <div class="machine">
-              <div class="machine-viz" aria-hidden="true">
-                <div class="cores" id="envCores"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-                <div class="memtrack"><span id="envMem"></span></div>
-              </div>
-              <div class="machine-copy">
-                <b id="envSpec">2 vCPU · 4 GB</b>
-                <span id="envSizeNote">Small · good for most apps</span>
-              </div>
-            </div>
-            <div class="size-slider">
-              <input type="range" id="envSize" min="0" max="2" step="1" aria-label="Machine size" aria-valuetext="Small" />
-              <div class="size-ticks"><span>Small</span><span>Medium</span><span>Large</span></div>
+            <div class="mseg" id="envSizes" role="radiogroup" aria-label="Machine size">
+              <button type="button" role="radio" data-size="small"><b>Small</b><span>2 vCPU · 4 GB</span></button>
+              <button type="button" role="radio" data-size="medium"><b>Medium</b><span>4 vCPU · 8 GB</span></button>
+              <button type="button" role="radio" data-size="large"><b>Large</b><span>8 vCPU · 16 GB</span></button>
             </div>
           </div>
 

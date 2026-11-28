@@ -1151,8 +1151,6 @@
   const SIZES = { small: '2 vCPU · 4 GB', medium: '4 vCPU · 8 GB', large: '8 vCPU · 16 GB' }
   const NET = { limited: 'Only listed domains', open: 'Any domain', none: 'No network' }
   const envMeta = (e) => `${REGIONS[e.region]} · ${SIZES[e.size].split(' · ')[0]}`
-  const SIZE_KEYS = ['small', 'medium', 'large']
-  const SIZE_INFO = { small: [2, 4, 'Small · good for most apps'], medium: [4, 8, 'Medium · faster builds and tests'], large: [8, 16, 'Large · heavy builds and monorepos'] }
 
   function kvRow(item, i) {
     const locked = item.secret
@@ -1187,19 +1185,7 @@
     summaries()
   }
   function renderSize() {
-    const [cpu, mem, note] = SIZE_INFO[draft.size]
-    const idx = SIZE_KEYS.indexOf(draft.size)
-    const range = $('#envSize')
-    range.value = idx
-    range.style.setProperty('--p', idx * 50 + '%')
-    range.setAttribute('aria-valuetext', note.split(' · ')[0])
-    $$('#envCores i').forEach((c, i) => {
-      c.style.transitionDelay = i * 35 + 'ms'
-      c.classList.toggle('on', i < cpu)
-    })
-    $('#envMem').style.width = (mem / 16) * 100 + '%'
-    $('#envSpec').textContent = SIZES[draft.size]
-    $('#envSizeNote').textContent = note
+    $$('#envSizes [data-size]').forEach((b) => b.setAttribute('aria-checked', b.dataset.size === draft.size))
   }
   const rselBtn = $('#envRegion [data-rsel]')
   const rselMenu = $('#envRegion .rsel-menu')
@@ -1296,6 +1282,8 @@
       return $('input', rows[rows.length - 1]).focus()
     }
     if (e.target.closest('[data-rsel]')) return setRegionMenu(rselMenu.hidden)
+    const size = e.target.closest('[data-size]')
+    if (size) return (draft.size = size.dataset.size), renderSize()
     const region = e.target.closest('[data-region]')
     if (region) return (draft.region = region.dataset.region), renderRegion(), setRegionMenu(false), rselBtn.focus()
     const row = e.target.closest('.kv-row')
@@ -1310,7 +1298,6 @@
     if (dom) return draft.domains.splice(+dom.dataset.domain, 1), renderNet()
   })
   modal.addEventListener('input', (e) => {
-    if (e.target.id === 'envSize') return (draft.size = SIZE_KEYS[+e.target.value]), renderSize()
     const row = e.target.closest('.kv-row')
     if (row) {
       const item = draft.vars[+row.dataset.i]

@@ -3400,3 +3400,30 @@ kbd.k {
 }
 @keyframes dockIn { from { opacity: 0; transform: translateY(10px); } }
 @media (prefers-reduced-motion: reduce) { .questions.docked { animation: none; } }
+
+/* ---- Machine size: one simple segmented choice under the region ---- */
+.mseg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  margin-top: 8px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--background);
+  border: 1px solid var(--border-subtle);
+}
+.mseg button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 7px 6px;
+  border-radius: 7px;
+  color: var(--muted-foreground);
+  transition: background-color 150ms ease, color 150ms ease, transform 140ms var(--ease-out);
+}
+.mseg button:hover { color: var(--foreground); }
+.mseg button:active { transform: scale(0.98); }
+.mseg b { font-size: 13px; font-weight: 500; }
+.mseg span { font-size: 11.5px; color: var(--subtle-foreground); font-variant-numeric: tabular-nums; }
+.mseg button[aria-checked='true'] { background: var(--muted); color: var(--foreground); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
