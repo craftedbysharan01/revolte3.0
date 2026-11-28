@@ -1470,28 +1470,34 @@
   })
 
   // ---------- Optical icon sizing ----------
-  // Icons in the composers are drawn to the same visible size, whatever their shape: each glyph is
-  // measured once off-screen and its box is scaled so its longest side comes out at OPTICAL px.
-  // The stroke stays the same weight because svg() rescales it with the box.
-  const OPTICAL = 12
+  // Icons in the composers are drawn to the same visual weight, whatever their shape. Each glyph is
+  // measured once off-screen; its box is then scaled so the glyph's area matches (geometric mean of
+  // width and height = OPTICAL px), so a squat icon like the bot isn't drawn smaller than a tall cube.
+  // A cap keeps long, flat glyphs from getting too wide. svg() keeps the stroke weight constant.
+  const OPTICAL = 11.5
+  const OPTICAL_MAX = 13.5
+  // Hand-tuned nudges for shapes that still read light after area matching (the bot's open head).
+  const OPTICAL_ADJ = { 'f-agent': 1.07 }
   const glyphCache = {}
   const meter = document.createElement('div')
   meter.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden'
   document.body.appendChild(meter)
-  function glyphExtent(n) {
-    if (glyphCache[n] == null) {
+  function glyphBox(n) {
+    if (!glyphCache[n]) {
       meter.innerHTML = svg(n, 24)
       const g = meter.firstChild.getBBox()
-      glyphCache[n] = Math.max(g.width, g.height) || 24
+      glyphCache[n] = g.width && g.height ? [g.width, g.height] : [24, 24]
     }
     return glyphCache[n]
   }
   function opticalIcons(root) {
-    $$('.composer-bar i[data-i], .reply i[data-i], .reply-meta i[data-i], .credits-btn i[data-i]', root).forEach((i) => {
+    $$('.composer-bar i[data-i], .reply i[data-i], .reply-meta i[data-i]', root).forEach((i) => {
       const n = i.dataset.i
       if (n === 'down' || n === 'f-claude' || !ICONS[n]) return
-      const size = Math.round(((OPTICAL * 24) / glyphExtent(n)) * 2) / 2
-      i.innerHTML = svg(n, size)
+      const [w, h] = glyphBox(n)
+      let size = (OPTICAL * 24) / Math.sqrt(w * h)
+      size = Math.min(size, (OPTICAL_MAX * 24) / Math.max(w, h)) * (OPTICAL_ADJ[n] || 1)
+      i.innerHTML = svg(n, Math.round(size * 2) / 2)
     })
   }
 
