@@ -3034,6 +3034,7 @@ textarea.input {
   border-top: 1px solid var(--border-subtle);
 }
 .acc { border-bottom: 1px solid var(--border-subtle); }
+.acc:last-child { border-bottom: 0; }
 .acc summary {
   display: flex;
   align-items: center;
