@@ -632,19 +632,19 @@ i[data-i] svg {
   gap: 8px;
 }
 .promo-title {
-  font-size: 20px;
-  line-height: 20px;
+  font-size: 18px;
+  line-height: 23px;
   font-weight: 500;
-  background: linear-gradient(var(--foreground) 61%, var(--shim-lo) 94%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  letter-spacing: -0.01em;
+  color: var(--foreground);
 }
 .promo-link {
-  font-size: 10px;
-  line-height: 14px;
-  color: var(--link);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted-foreground);
+  transition: color 150ms ease;
 }
+.promo-link:hover { color: var(--foreground); }
 .promo-x {
   position: absolute;
   right: 14px;
