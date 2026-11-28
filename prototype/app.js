@@ -118,6 +118,7 @@
   function goHome() {
     if (S.run) S.run.cancelled = true
     S.run = null
+    undock()
     S.awaiting = null
     clock.tickers.clear()
     shell.dataset.view = 'home'
@@ -310,15 +311,26 @@
   }
 
   // ---------- Clarifying questions ----------
+  // The docked card lives outside the thread, so a new chat has to take it down explicitly.
+  let undock = () => {}
   function askQuestions() {
     return new Promise((resolve) => {
       const answers = QUESTIONS.map((q) => ({ pick: 0, own: '' }))
       let idx = 0
+      let advancing = 0
       // The questions dock at the bottom of the chat, right above the reply box, like a composer
       // takeover. Once answered, a compact summary is left in the thread.
       const card = h(`<div class="card questions docked" tabindex="-1"></div>`)
+      undock()
       $('#reply').before(card)
       $('.chat-foot').classList.add('asking')
+      undock = () => {
+        clearTimeout(advancing)
+        card.remove()
+        $('.chat-foot').classList.remove('asking')
+        document.removeEventListener('keydown', keys)
+        undock = () => {}
+      }
       const finish = (skipped) => {
         setAwaiting(null)
         const out = QUESTIONS.map((q, i) => (skipped && i >= idx ? q.options[0] : answers[i].own.trim() || q.options[answers[i].pick]))
@@ -327,16 +339,13 @@
           <summary>${ic('checkCircle')}${all ? 'Used the recommended answers' : `Answered ${QUESTIONS.length} questions`}${ic('right', 12, 'act-chev')}</summary>
           <dl>${QUESTIONS.map((q, i) => `<div><dt>${esc(q.q)}</dt><dd>${esc(out[i])}</dd></div>`).join('')}</dl>
         </details>`)
-        card.remove()
-        $('.chat-foot').classList.remove('asking')
-        document.removeEventListener('keydown', keys)
+        undock()
         say(d)
         resolve({ answers: out, skipped: all })
       }
       // One click answers and moves on. The chip at the top right steps back (and forward again,
       // up to the furthest question reached) so any answer can be changed before the last one.
       let furthest = 0
-      let advancing = 0
       const go = (to, dir) => {
         idx = to
         furthest = Math.max(furthest, idx)
@@ -1153,6 +1162,7 @@
     $('#recents').prepend(h(`<button class="nav recent on mine">${esc(title[0].toUpperCase() + title.slice(1))}</button>`))
 
     threadInner.innerHTML = ''
+    undock()
     atBottom = true
     setAwaiting(null)
     CREDITS.earlier += CREDITS.chat
