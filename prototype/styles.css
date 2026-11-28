@@ -355,13 +355,45 @@ i[data-i] svg {
 
 /* ============ Home ============ */
 .home {
+  position: relative;
+  isolation: isolate;
   flex: 1;
   min-height: 0;
   display: flex;
   justify-content: center;
   padding: 0 24px;
   overflow: auto;
+  --mx: 50%;
+  --my: 40%;
 }
+/* Quiet interactive backdrop: a faint dot grid that fades out toward the edges,
+   plus a soft light that follows the pointer and lifts the dots under it. */
+.home::before,
+.home::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.09) 0.8px, transparent 1px);
+  background-size: 22px 22px;
+  background-attachment: local;
+}
+.home::before {
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 38%, #000 10%, transparent 75%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 38%, #000 10%, transparent 75%);
+}
+.home::after {
+  background-image:
+    radial-gradient(rgba(180, 196, 255, 0.6) 1px, transparent 1.3px),
+    radial-gradient(circle 260px at var(--mx) var(--my), rgba(120, 140, 255, 0.08), transparent 70%);
+  background-size: 22px 22px, 100% 100%;
+  -webkit-mask-image: radial-gradient(circle 180px at var(--mx) var(--my), #000, transparent 75%);
+  mask-image: radial-gradient(circle 180px at var(--mx) var(--my), #000, transparent 75%);
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+.home.lit::after { opacity: 1; }
 .shell:not([data-view='home']) .home,
 [data-view='home'] .chat,
 [data-view='home'] .pane {
@@ -900,6 +932,7 @@ i[data-i] svg {
 
 /* ---- Workflow studio card (shown in the chat after the preview) ---- */
 .wf-card {
+  container-type: inline-size;
   border-radius: 16px;
   border: 1px solid var(--border-subtle);
   background: var(--surface);
@@ -955,10 +988,6 @@ i[data-i] svg {
   top: calc(50% - 100px * var(--k));
   transform: scale(var(--k));
 }
-@container (max-width: 760px) { .wf-stage .flow { --k: 0.5; } }
-@container (max-width: 640px) { .wf-stage .flow { --k: 0.44; } }
-@container (max-width: 560px) { .wf-stage .flow { --k: 0.39; } }
-@container (max-width: 470px) { .wf-stage .flow { --k: 0.32; } }
 .wf-body {
   display: flex;
   align-items: center;
@@ -996,6 +1025,13 @@ i[data-i] svg {
 }
 .wf-actions .btn { display: inline-flex; align-items: center; gap: 8px; height: 32px; }
 .wf-actions .btn.primary i[data-i] { color: #0f0f10; }
+/* Narrow chat column: title on its own line, the two buttons share the row below. */
+@container (max-width: 440px) {
+  .wf-body { flex-direction: column; align-items: stretch; padding: 12px 14px 14px; }
+  .wf-actions { width: 100%; }
+  .wf-actions .btn { flex: 1; justify-content: center; }
+  .wf-actions .btn.ghost { background: var(--muted); color: var(--foreground); }
+}
 
 /* ============ Chat ============ */
 .col {

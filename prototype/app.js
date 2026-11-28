@@ -151,6 +151,22 @@
   const bubble = (text) => say(`<div class="bubble">${esc(text)}</div>`)
   const msg = (text, cls = '') => say(`<p class="msg ${cls}">${text}</p>`)
 
+  // Home backdrop: the pointer carries a soft light across the dot grid.
+  {
+    const home = $('#home')
+    let raf = 0
+    home.addEventListener('pointermove', (e) => {
+      if (raf) return
+      raf = requestAnimationFrame(() => {
+        raf = 0
+        const r = home.getBoundingClientRect()
+        home.style.setProperty('--mx', e.clientX - r.left + 'px')
+        home.style.setProperty('--my', e.clientY - r.top + home.scrollTop + 'px')
+        home.classList.add('lit')
+      })
+    })
+    home.addEventListener('pointerleave', () => home.classList.remove('lit'))
+  }
   const waitingEl = $('#waiting')
   const replyInput = $('#replyInput')
   // "Waiting for you" is a nudge, not a status: it only appears once the
@@ -1023,7 +1039,15 @@
         </div>
       </div>
     </div>`)
-    $('.wf-stage', card).appendChild($('.promo-visual .flow').cloneNode(true))
+    const stage = $('.wf-stage', card)
+    const flow = $('.promo-visual .flow').cloneNode(true)
+    stage.appendChild(flow)
+    // Scale the whole flow to fit the card at any width, so no node is ever cut off.
+    const fit = () => {
+      const k = Math.min(0.56, (stage.clientWidth - 24) / 1208, (stage.clientHeight - 8) / 192)
+      if (k > 0) flow.style.setProperty('--k', k.toFixed(4))
+    }
+    new ResizeObserver(fit).observe(stage)
     card.addEventListener('click', (e) => {
       if (!e.target.closest('[data-wf-close]')) return
       card.classList.add('gone')
