@@ -253,9 +253,24 @@
     { id: 'qa', name: 'QA', sub: 'Tests it and reports what breaks' },
   ]
   S.agent = null
+  // Once a chat starts, its agent is fixed: the reply row shows it as a plain label (or nothing if
+  // no agent was picked) and the Overview pane names it. Only the home composer can change it.
+  S.chatAgent = null
+  function renderChatAgent() {
+    const a = AGENTS.find((x) => x.id === S.chatAgent)
+    const b = $('.reply-meta [data-agent-btn]')
+    b.hidden = !a
+    b.disabled = true
+    b.classList.add('locked', 'picked')
+    $('.agent-l', b).textContent = a ? a.name : ''
+    b.setAttribute('aria-label', a ? `Agent for this chat: ${a.name}` : 'No agent')
+    b.dataset.tip = a ? `${a.name} agent · set when the chat started` : ''
+    $('#agentRow').hidden = !a
+    if (a) $('#agentRowName').textContent = a.name
+  }
   function renderAgents() {
     const a = AGENTS.find((x) => x.id === S.agent)
-    $$('[data-agent-btn]').forEach((b) => {
+    $$('#homeComposer [data-agent-btn]').forEach((b) => {
       b.classList.toggle('picked', !!a)
       $('.agent-l', b).textContent = a ? a.name : ''
       b.setAttribute('aria-label', a ? `Agent: ${a.name}` : 'Choose agent')
@@ -278,7 +293,7 @@
   }
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-agent-btn]')
-    if (btn) return agentMenu(btn)
+    if (btn) return btn.disabled ? undefined : agentMenu(btn)
     const pick = e.target.closest('[data-agent]')
     if (pick) {
       S.agent = pick.dataset.agent || null
@@ -1247,6 +1262,8 @@
     clock.tickers.clear()
     const run = (S.run = { cancelled: false })
     Object.assign(S, { tab: 'overview', immersive: false, building: false, previewReady: false, planOpen: false, awaiting: null })
+    S.chatAgent = S.agent
+    renderChatAgent()
     S.deliveries = DELIVERIES.map((d) => ({ ...d }))
     const first = prompt.split(/[.\n]/)[0].trim() || prompt
     const title = first.length > 40 ? first.slice(0, 38).trimEnd() + '…' : first

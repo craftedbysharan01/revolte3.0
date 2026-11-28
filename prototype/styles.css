@@ -3684,3 +3684,10 @@ svg[data-l] .fk { transition: stroke-opacity 160ms ease; }
 :root[data-theme='light'] .tk-f { color: #2563eb; }
 :root[data-theme='light'] .tk-t { color: #0e7490; }
 :root[data-theme='light'] .badge.retrying { color: #3b5bdb; }
+
+/* Agent locked for the running chat */
+.reply-meta .agent-btn.locked { cursor: default; opacity: 1; }
+.reply-meta .agent-btn.locked:hover { background: var(--muted); }
+.reply-meta .agent-btn.locked[hidden] { display: none; }
+.ov-static { cursor: default; }
+.ov-static i[data-i] { color: var(--muted-foreground); }
