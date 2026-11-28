@@ -1557,7 +1557,7 @@ i.inl { margin-right: 5px; vertical-align: -1px; }
   padding: 0 12px;
   border-bottom: 1px solid var(--border-subtle);
 }
-.pane-head #ptabs { margin-left: auto; }
+.pane-head #deploy { margin-left: auto; }
 #paneOpen { display: none; margin-left: auto; }
 [data-pane='closed'] #paneOpen { display: inline-flex; }
 .pane-body {
