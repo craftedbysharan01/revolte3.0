@@ -1284,7 +1284,6 @@
   const epMenu = $('#envPickMenu')
   function applyEnv() {
     $('#envName').textContent = S.env.name
-    $('#envMeta').textContent = envMeta(S.env)
     $('#envPickName').textContent = S.env.name
   }
   function renderEnvPick() {
